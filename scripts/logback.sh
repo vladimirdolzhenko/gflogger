@@ -7,7 +7,7 @@ do
 done
 
 JAVA_OPTS="
--Dlog4j.configuration=test-log4j.xml
+-Dlogback.configurationFile=logback.xml
 
 -Xss2m
 -Xms512m
@@ -18,7 +18,7 @@ JAVA_OPTS="
 -XX:PermSize=128m
 -XX:MaxPermSize=128m
 
--Xloggc:""logs/log4j-gc.log""
+-Xloggc:""logs/logback-gc.log""
 -XX:+PrintGCTimeStamps
 -XX:+PrintGCDetails
 -XX:+PrintGCApplicationStoppedTime
@@ -39,13 +39,13 @@ JAVA_OPTS="
 -Dsun.rmi.dgc.client.gcInterval=0x7FFFFFFFFFFFFFFE
 -XX:+HeapDumpOnOutOfMemoryError"
 
-echo log4j number of threads: "$1" messages: $2
-java -cp $CLASSPATH $JAVA_OPTS logger.Log4JLogger $1 $2 1>/dev/null 2>&1
+echo logback number of threads: "$1" messages: $2
+java -cp $CLASSPATH $JAVA_OPTS logger.LogBackLogger $1 $2 1>/dev/null 2>&1
 
-grep "final" logs/log4j.log | awk '{t+=$5;c++}END{print "log4j avg time:" t/c;}'
-scripts/gc-count.sh logs/log4j-gc.log
+grep "final" logs/logback.log | awk '{t+=$5;c++}END{print "logback avg time:" t/c;}'
+scripts/gc-count.sh logs/logback-gc.log
 
-for f in log4j.log log4j-gc.log;
+for f in logback.log logback-gc.log;
 do
 	if [ -f logs/$f ]; then	
 		mv logs/$f logs/$1-$2-$f	

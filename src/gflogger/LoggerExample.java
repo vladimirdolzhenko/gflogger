@@ -111,7 +111,7 @@ public class LoggerExample {
 //        logger.info().append("warmed up after ").append(System.currentTimeMillis() - LogEntry.startTime).commit();
 
         final long start = System.currentTimeMillis();
-        final int n = args.length > 1 ? Integer.parseInt(args[1]) : 1 << 1;
+        final int n = args.length > 1 ? Integer.parseInt(args[1]) : 1 << 10;
 
         final CountDownLatch latch = new CountDownLatch(1);
         final CountDownLatch finalLatch = new CountDownLatch(threadCount);

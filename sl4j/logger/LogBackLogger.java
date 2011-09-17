@@ -2,17 +2,13 @@ package logger;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Log4JLogger {
 
-    static {
-        BasicConfigurator.configure();
-    }
-    
-    private static final Log log = LogFactory.getLog("com.db.fxpricing.Logger");
+public class LogBackLogger {
+
+    private static final Logger log = LoggerFactory.getLogger("com.db.fxpricing.Logger");
     
     public static void main(String[] args) throws Throwable {
         final long start = System.currentTimeMillis();
@@ -45,15 +41,15 @@ public class Log4JLogger {
                         return;
                     }
                     for(int j = 0; j < (n << 1); j++){
-                        log.info("warmup" + j);
+                        log.info("warmup{}", j);
                     }
                     final long s = System.nanoTime(); 
                     //System.out.println(Thread.currentThread().getName() + " is started.");
                     for(int j = 0; j < n; j++){
-                        log.info("test" + j);
+                        log.info("test{}", j);
                         //System.out.println("info:" + i);
                     }
-                    log.info("final: " + ((System.nanoTime() - s) / 1000) / 1e3);
+                    log.info("final: {}", ((System.nanoTime() - s) / 1000) / 1e3);
                     finalLatch.countDown();
                     
                     //System.out.println(Thread.currentThread().getName() + " is finished.");
@@ -64,12 +60,12 @@ public class Log4JLogger {
         
         //*/
         for(int i = 0; i < 10; i++){
-            log.debug("test" + i);
+            log.debug("test{}", i);
         }
         
         latch.countDown();
         finalLatch.await();
-        log.info("total time:" + (System.currentTimeMillis() - start) + " ms.");
+        log.info("total time: {} ms", System.currentTimeMillis() - start);
         Thread.sleep(5000);
         System.out.println("---");
     }

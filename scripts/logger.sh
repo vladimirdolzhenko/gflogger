@@ -36,7 +36,7 @@ JAVA_OPTS="
 "
 
 #echo java -cp out $JAVA_OPTS gflogger.LoggerExample $1 $2
-java -cp libs/gflogger.jar $JAVA_OPTS gflogger.LoggerExample $1 $2 1>/dev/null 2>&1
+java -cp out:libs/gflogger.jar $JAVA_OPTS gflogger.LoggerExample $1 $2 1>/dev/null 2>&1
 
 grep "final" logs/logger.log | awk '{t+=$5;c++}END{print "logger avg time:" t/c;}'
 scripts/gc-count.sh logs/logger-gc.log
