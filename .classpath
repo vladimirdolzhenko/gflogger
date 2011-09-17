@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="log4j"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="/usr/share/log4j/lib/log4j.jar" sourcepath="/usr/share/log4j/sources/log4j-src.zip"/>
+	<classpathentry kind="lib" path="/usr/share/commons-logging/lib/commons-logging.jar" sourcepath="/usr/share/commons-logging/sources/commons-logging-src.zip"/>
+	<classpathentry kind="lib" path="libs/allocation.jar"/>
+	<classpathentry kind="output" path="out"/>
+</classpath>
