@@ -14,6 +14,8 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
 
     // inter thread counter
     protected final AtomicInteger changes;
+    
+    protected int index;
 
     protected final Object lock;
     // inner thread buffer
@@ -26,8 +28,6 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     protected long awaitTimeout = 100;
     protected volatile boolean running = false;
 
-    // inner thread previous handled entry id
-    protected long oldEntryId;
     // inner thread current entry
     protected LogEntryItem entry;
 
@@ -75,8 +75,8 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
         do{
             // handle all available changes in a row
             while (changes.get() > 0){
-                while (entry.getId() > oldEntryId &&     // do not handle tail again
-                        entry.getCounter() > 0){        // do not handle empty entries
+                // handle if entry has not been processed yet. 
+                while(entry.testCounterBit(index)){
                     // handle entry that has a log level equals or higher than required
                     final boolean hasProperLevel =
                         logLevel.compareTo(entry.getLogLevel()) >= 0;
@@ -155,13 +155,12 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     protected void releaseEntry() {
         final LogEntryItem oldEntry = entry;
 
-        oldEntryId = oldEntry.getId();
-        final int decCounter = oldEntry.decCounter();
+        oldEntry.resetCounterBit(index);
 
         entry = entry.getNext();
         final int andDecrement = changes.getAndDecrement();
 
-        if (decCounter == 0){
+        if (oldEntry.getCounter() == 0){
             final Object entyLock = oldEntry.getLock();
             synchronized (entyLock) {
                 entyLock.notifyAll();
@@ -171,6 +170,13 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
 
     protected abstract String name();
 
+    @Override
+    public void setIndex(int index) {
+        // just fence
+        synchronized(lock){
+            this.index = index;
+        }
+    }
 
     @Override
     public void start(final LogEntryItem entryItem) {
@@ -186,7 +192,6 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
             }
 
             entry = entryItem;
-            oldEntryId = Long.MIN_VALUE;
         }
 
         final Thread thread = new Thread(this, name() + "-logger");

@@ -14,13 +14,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class LogEntryItem implements LogEntry {
 
-    // inter thread id
-    private volatile long id;
-
     // inter thread fence
     private final Object lock = new Object();
     private final CharBuffer buffer;
+    
+    // inter thread marker
     private final AtomicInteger counter;
+    
     private final LoggerImpl loggerImpl;
 
     private String name;
@@ -48,21 +48,22 @@ public final class LogEntryItem implements LogEntry {
     public LogEntryItem getNext() {
         return next;
     }
-
-    public void incCounter(){
-        counter.incrementAndGet();
+    
+    public boolean testCounterBit(int bit){
+        return (counter.get() & (1 << bit)) != 0;
     }
-
-    public int decCounter(){
-        return counter.decrementAndGet();
+    
+    public void resetCounterBit(int bit){
+        int mask = ~(1 << bit);
+        // similar to getAndIncrement
+        for(;;){
+            final int value = counter.get();
+            if (counter.compareAndSet(value, value & mask)) break;
+        }
     }
 
     public int getCounter() {
         return counter.get();
-    }
-
-    public long getId() {
-        return id;
     }
 
     public LogLevel getLogLevel() {
@@ -155,11 +156,16 @@ public final class LogEntryItem implements LogEntry {
     }
 
     boolean tryToAcquire(){
-        return counter.compareAndSet(0, -1);
+        // the 0th bit is reserved for logger
+        // 1 - 32 for appenders
+        return counter.compareAndSet(0, 1);
     }
     
     boolean tryToFlush(final int numberOfAppenders){
-        return counter.compareAndSet(-1, numberOfAppenders);
+        // mask like 11110
+        // there are numberOfAppenders ones 
+        int mask = ((1 << numberOfAppenders ) - 1) << 1; 
+        return counter.compareAndSet(1, mask);
     }
 
     void acquire(final String name, final String className) {
@@ -173,17 +179,13 @@ public final class LogEntryItem implements LogEntry {
         this.threadName = threadName;
     }
 
-    public void setId(final long id) {
-        this.id = id;
-    }
-
     public Object getLock() {
         return lock;
     }
 
     @Override
     public String toString() {
-        return "[#" + id + "@" + counter.get()
+        return "[" + counter.get()
         + " pos:" + buffer.position() + " limit:" + buffer.limit() + " capacity:" + buffer.capacity() + "]";
     }
 

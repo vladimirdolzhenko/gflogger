@@ -3,7 +3,6 @@ package gflogger;
 import gflogger.appender.Appender;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -18,8 +17,6 @@ class LoggerImpl {
     private volatile LogEntryItem entry;
     
     public long q1, q2, q3, q4, q5, q6, q7; // cache line padding
-
-    private final AtomicLong entryIdGenerator;
 
     private final Appender[] appenders;
     
@@ -40,14 +37,17 @@ class LoggerImpl {
      * @param appenders
      */
     public LoggerImpl(final int count, final int bufferSize, final Appender ... appenders) {
+        if (appenders.length == 0){
+            throw new IllegalArgumentException("Expected at least one appender");
+        }
+        if (appenders.length > (Integer.SIZE - 1)){
+            throw new IllegalArgumentException("Expected less than " + (Integer.SIZE - 1) + " appenders");
+        }
         this.appenders = appenders;
 
         final ByteBuffer buffer = ByteBuffer.allocateDirect(count * bufferSize);
 
         final LogEntryItem[] entries = new LogEntryItem[count];
-        // limited to (2^64 - 1) calls
-        // it is enough to cover case when the log entry enquires each ns during 292 years 
-        entryIdGenerator = new AtomicLong(Long.MIN_VALUE + 1);
         for (int i = 0; i < count; i++) {
             buffer.limit((i + 1) * bufferSize - 1);
             buffer.position(i * bufferSize);
@@ -56,7 +56,6 @@ class LoggerImpl {
             if (i > 0){
                 entries[i - 1].setNext(entries[i]);
             }
-            entries[i].setId(entryIdGenerator.getAndIncrement());
         }
         entries[count - 1].setNext(entries[0]);
 
@@ -69,6 +68,7 @@ class LoggerImpl {
         }
         this.level = level;
         for (int i = 0; i < appenders.length; i++) {
+            appenders[i].setIndex(i + 1);
             appenders[i].start(entries[0]);
         }
     }
@@ -77,24 +77,18 @@ class LoggerImpl {
         for(;;){
             final LogEntryItem actualEntry = entry;
             
-            // do not mind the gap !
-            final long nextId = entryIdGenerator.getAndIncrement();
-            
-            final boolean acq = actualEntry.tryToAcquire();
-            
-            if (acq){
-                entry = actualEntry.getNext();
+            if (actualEntry.tryToAcquire()){
                 actualEntry.acquire(name, className);
                 actualEntry.setLogLevel(level);
                 actualEntry.setThreadName(threadName.get());
-                // id is a fence
-                actualEntry.setId(nextId);
+                // entry is a fence
+                entry = actualEntry.getNext();
                 return actualEntry;
             }
 
             final Object lock = actualEntry.getLock();
             synchronized (lock) {
-                if(actualEntry.getCounter() > 0){
+                if(actualEntry.getCounter() > 1){
                     try {
                         lock.wait();
                     } catch (final InterruptedException e) {
