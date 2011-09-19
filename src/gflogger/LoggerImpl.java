@@ -78,11 +78,10 @@ class LoggerImpl {
             final LogEntryItem actualEntry = entry;
             
             if (actualEntry.tryToAcquire()){
+                entry = actualEntry.getNext();
                 actualEntry.acquire(name, className);
                 actualEntry.setLogLevel(level);
                 actualEntry.setThreadName(threadName.get());
-                // entry is a fence
-                entry = actualEntry.getNext();
                 return actualEntry;
             }
 
@@ -99,6 +98,7 @@ class LoggerImpl {
     }
 
     void entryFlushed(final LogEntryItem entry){
+        // inner entry counter (atomic integer) is a fence
         if (!entry.tryToFlush(appenders.length))
             throw new IllegalStateException();
         for (int i = 0; i < appenders.length; i++) {

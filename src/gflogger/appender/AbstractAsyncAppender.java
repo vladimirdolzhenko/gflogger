@@ -74,7 +74,8 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
         int loopCounter = 0;
         do{
             // handle all available changes in a row
-            while (changes.get() > 0){
+            int changesLocal = 0;
+            while (changesLocal > 0 || ((changesLocal = changes.get()) > 0)){
                 // handle if entry has not been processed yet. 
                 while(entry.testCounterBit(index)){
                     // handle entry that has a log level equals or higher than required
@@ -86,6 +87,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
 
                         // release entry anyway
                         releaseEntry();
+                        changesLocal--;
 
                         if (hasProperLevel){
                             processCharBuffer();
@@ -111,7 +113,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                     // nothing
                 }
             }
-        } while((running || changes.get() > 0) && !Thread.interrupted());
+       } while((running || changes.get() > 0) && !Thread.interrupted());
         workerIsAboutFinish();
         //System.out.println(Thread.currentThread().getName() + " is finished.");
     }
@@ -155,12 +157,12 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     protected void releaseEntry() {
         final LogEntryItem oldEntry = entry;
 
-        oldEntry.resetCounterBit(index);
+        final int counter = oldEntry.resetCounterBit(index);
 
         entry = entry.getNext();
         final int andDecrement = changes.getAndDecrement();
 
-        if (oldEntry.getCounter() == 0){
+        if (counter == 0){
             final Object entyLock = oldEntry.getLock();
             synchronized (entyLock) {
                 entyLock.notifyAll();

@@ -53,12 +53,15 @@ public final class LogEntryItem implements LogEntry {
         return (counter.get() & (1 << bit)) != 0;
     }
     
-    public void resetCounterBit(int bit){
+    public int resetCounterBit(int bit){
         int mask = ~(1 << bit);
         // similar to getAndIncrement
         for(;;){
             final int value = counter.get();
-            if (counter.compareAndSet(value, value & mask)) break;
+            final int newValue = value & mask;
+            if (counter.compareAndSet(value, newValue)) {
+                return newValue;
+            }
         }
     }
 
