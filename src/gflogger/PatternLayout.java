@@ -486,7 +486,7 @@ public class PatternLayout extends Layout {
      * Produces a formatted string as specified by the conversion pattern.
      */
     @Override
-    public CharBuffer format(final CharBuffer buffer, final LogEntryItem entryImpl) {
+    public CharBuffer format(final CharBuffer buffer, final LogEntry entryImpl) {
         PatternConverter c = head;
 
         while (c != null) {

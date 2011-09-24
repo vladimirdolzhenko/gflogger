@@ -35,7 +35,7 @@ public abstract class Layout {
     /**
      * Implement this method to create your own layout format.
      */
-    abstract public CharBuffer format(CharBuffer buffer, LogEntryItem entryImpl);
+    abstract public CharBuffer format(CharBuffer buffer, LogEntry entryImpl);
 
     /**
      * Returns the content type output by this layout. The base class returns

@@ -1,6 +1,6 @@
 package gflogger.appender;
 
-import gflogger.LogEntryItem;
+import gflogger.LogEntry;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,7 +12,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 
 
-public class FileAppender extends AbstractAsyncAppender implements Runnable {
+public class FileAppender extends AbstractAsyncAppender {
 
     private final ByteBuffer buffer;
 
@@ -86,7 +86,7 @@ public class FileAppender extends AbstractAsyncAppender implements Runnable {
     }
 
     @Override
-    public synchronized void start(final LogEntryItem entryItem) {
+    public synchronized void start(final LogEntry entryItem) {
         try {
             encoder = Charset.forName(codepage).newEncoder();
             final FileOutputStream fout = new FileOutputStream(fileName, append);

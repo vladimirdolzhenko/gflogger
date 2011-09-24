@@ -1,5 +1,7 @@
 package gflogger;
 
+import java.nio.CharBuffer;
+
 /**
  * LogEntry
  * 
@@ -35,5 +37,17 @@ public interface LogEntry {
      * commit an entry
      */
     void commit();
+    
+    LogLevel getLogLevel();
+    
+    String getName();
+
+    String getThreadName();
+
+    String getClassName();
+
+    long getTimestamp();
+
+    CharBuffer getBuffer();
 
 }

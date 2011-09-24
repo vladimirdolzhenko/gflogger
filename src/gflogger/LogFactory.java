@@ -100,7 +100,7 @@ public class LogFactory {
         }
     }
 
-    static void init(final Map<String, LoggerImpl> impls){
+    public static void init(final Map<String, LoggerImpl> impls){
         Helper.FACTORY.impls.clear();
         if (impls != null){
             Helper.FACTORY.impls.putAll(impls);

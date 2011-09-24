@@ -1,6 +1,6 @@
 package gflogger.appender;
 
-import gflogger.LogEntryItem;
+import gflogger.LogEntry;
 import gflogger.LogLevel;
 
 public interface Appender {
@@ -9,9 +9,9 @@ public interface Appender {
     
     void setIndex(int index);
 
-    void start(LogEntryItem entryItem);
+    void start(LogEntry entryItem);
 
-    void entryFlushed(LogEntryItem entryItem);
+    void entryFlushed(LogEntry entryItem);
 
     void stop();
 }

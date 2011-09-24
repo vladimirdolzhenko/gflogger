@@ -21,7 +21,7 @@ public final class LogEntryItem implements LogEntry {
     // inter thread marker
     private final AtomicInteger counter;
     
-    private final LoggerImpl loggerImpl;
+    private final DefaultLoggerImpl loggerImpl;
 
     private String name;
     private LogLevel logLevel;
@@ -31,11 +31,11 @@ public final class LogEntryItem implements LogEntry {
 
     private LogEntryItem next;
 
-    public LogEntryItem(final int size, final LoggerImpl loggerImpl) {
+    public LogEntryItem(final int size, final DefaultLoggerImpl loggerImpl) {
         this(ByteBuffer.allocateDirect(size).asCharBuffer(), loggerImpl);
     }
 
-    public LogEntryItem(final CharBuffer buffer, final LoggerImpl loggerImpl) {
+    public LogEntryItem(final CharBuffer buffer, final DefaultLoggerImpl loggerImpl) {
         this.buffer = buffer;
         this.loggerImpl = loggerImpl;
         this.counter = new AtomicInteger();
@@ -69,6 +69,7 @@ public final class LogEntryItem implements LogEntry {
         return counter.get();
     }
 
+    @Override
     public LogLevel getLogLevel() {
         return logLevel;
     }
@@ -77,22 +78,27 @@ public final class LogEntryItem implements LogEntry {
         this.logLevel = logLevel;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getThreadName() {
         return threadName;
     }
 
+    @Override
     public String getClassName() {
         return className;
     }
 
+    @Override
     public long getTimestamp() {
         return timestamp;
     }
 
+    @Override
     public CharBuffer getBuffer() {
         return buffer;
     }
@@ -164,10 +170,10 @@ public final class LogEntryItem implements LogEntry {
         return counter.compareAndSet(0, 1);
     }
     
-    boolean tryToFlush(final int numberOfAppenders){
+    boolean tryToFlush(final int consumers){
         // mask like 11110
         // there are numberOfAppenders ones 
-        int mask = ((1 << numberOfAppenders ) - 1) << 1; 
+        int mask = ((1 << consumers ) - 1) << 1; 
         return counter.compareAndSet(1, mask);
     }
 
@@ -185,7 +191,7 @@ public final class LogEntryItem implements LogEntry {
     public Object getLock() {
         return lock;
     }
-
+    
     @Override
     public String toString() {
         return "[" + counter.get()

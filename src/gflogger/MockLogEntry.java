@@ -1,5 +1,7 @@
 package gflogger;
 
+import java.nio.CharBuffer;
+
 /**
  * MockLogEntry
  * 
@@ -55,4 +57,42 @@ public class MockLogEntry implements LogEntry {
     @Override
     public void commit() {
     }
+    
+    @Override
+    public LogLevel getLogLevel() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getThreadName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getClassName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public long getTimestamp() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public CharBuffer getBuffer() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    
 }

@@ -360,7 +360,7 @@ public class PatternParser {
         }
 
         @Override
-        public void format(CharBuffer buffer, LogEntryItem entryImpl) {
+        public void format(CharBuffer buffer, LogEntry entryImpl) {
             switch (type) {
             case RELATIVE_TIME_CONVERTER:
                 BufferFormatter.append(buffer, entryImpl.getTimestamp() - LogEntry.startTime);
@@ -390,7 +390,7 @@ public class PatternParser {
         }
 
         @Override
-        public void format(CharBuffer buffer, LogEntryItem entryImpl) {
+        public void format(CharBuffer buffer, LogEntry entryImpl) {
             buffer.append(literal);
         }
     }
@@ -404,7 +404,7 @@ public class PatternParser {
         }
 
         @Override
-        public void format(CharBuffer buffer, LogEntryItem entryImpl) {
+        public void format(CharBuffer buffer, LogEntry entryImpl) {
             df.format(entryImpl.getTimestamp(), buffer);
         }
     }
@@ -442,10 +442,10 @@ public class PatternParser {
             this.precision = precision;
         }
 
-        abstract String getFullyQualifiedName(LogEntryItem item);
+        abstract String getFullyQualifiedName(LogEntry item);
 
         @Override
-        public void format(CharBuffer buffer, LogEntryItem item) {
+        public void format(CharBuffer buffer, LogEntry item) {
             String n = getFullyQualifiedName(item);
             if (precision <= 0) {
                 buffer.append(n);
@@ -478,7 +478,7 @@ public class PatternParser {
         }
 
         @Override
-        String getFullyQualifiedName(LogEntryItem item) {
+        String getFullyQualifiedName(LogEntry item) {
             return item.getClassName();
         }
     }
@@ -490,7 +490,7 @@ public class PatternParser {
         }
 
         @Override
-        String getFullyQualifiedName(LogEntryItem item) {
+        String getFullyQualifiedName(LogEntry item) {
             return item.getName();
         }
     }

@@ -44,7 +44,7 @@ public class LoggerExample {
 
         //final LoggerImpl impl = new LoggerImpl(1 << 10, 1 << 8, fileAppender);
         //final LoggerImpl impl = new LoggerImpl(1 << 2, 1 << 8, fileAppender, consoleAppender);
-        final LoggerImpl impl = new LoggerImpl(1 << 10, 1 << 8, fileAppender
+        final LoggerImpl impl = new DefaultLoggerImpl(1 << 10, 1 << 8, fileAppender
                 //, consoleAppender
         );
 
@@ -123,15 +123,29 @@ public class LoggerExample {
                 @Override
                 public void run() {
                     try {
-                        latch.await();
-                    } catch (final InterruptedException e) {
+                        doSmth();
+                    } catch (Throwable e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
-                        return;
                     }
+                }
+                
+                public void doSmth() throws Throwable{
+                    latch.await();
                     for(int j = 0; j < (n << 1); j++){
-                        logger.info().append("warmup").append(j).commit();
+                        logger.info().
+                            append("warmup").
+                            append(j).
+                            commit();
                     }
+                    System.gc();
+                    System.gc();
+                    System.gc();
+                    Thread.sleep(2000);
+                    
+                    System.out.println("--- warmed up ---");
+                    System.out.println("--- warmed up ---");
+                    System.out.println("--- warmed up ---");
                     
                     final long t = System.nanoTime();
                     long acq = 0;
@@ -189,5 +203,6 @@ public class LoggerExample {
         finalLatch.await();
         logger.info().append("total time:").append(System.currentTimeMillis() - start).append(" ms.").commit();
         LogFactory.stop();
+        System.out.println("stop.");
     }
 }

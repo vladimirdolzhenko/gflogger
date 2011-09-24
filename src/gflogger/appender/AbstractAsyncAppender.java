@@ -1,6 +1,7 @@
 package gflogger.appender;
 
 import gflogger.Layout;
+import gflogger.LogEntry;
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
@@ -70,7 +71,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
 
     @Override
     public void run() {
-        //System.out.println(Thread.currentThread().getName() + " is started.");
+        System.out.println(Thread.currentThread().getName() + " is started.");
         int loopCounter = 0;
         do{
             // handle all available changes in a row
@@ -98,6 +99,15 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                             }
                         }
                 }
+                // on shutdown - find the last unprocessed items in the ring
+                if (changesLocal > 0 && entry.getCounter() == 0 && !running){
+                    for(LogEntryItem i = entry.getNext(); i != entry; i = i.getNext()){
+                        if (i.testCounterBit(index)) {
+                            entry = i;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (autoFlush || loopCounter > autoFlushThreshold){
@@ -115,7 +125,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
             }
        } while((running || changes.get() > 0) && !Thread.interrupted());
         workerIsAboutFinish();
-        //System.out.println(Thread.currentThread().getName() + " is finished.");
+        System.out.println(Thread.currentThread().getName() + " is finished.");
     }
 
     protected void processCharBuffer(){
@@ -131,7 +141,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     }
 
     @Override
-    public void entryFlushed(final LogEntryItem entryItem) {
+    public void entryFlushed(final LogEntry entryItem) {
         if (changes.getAndIncrement() == 0){
         // awaitTimeout (100 ms) later on async wake up
         // synchronized (lock) {
@@ -181,7 +191,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     }
 
     @Override
-    public void start(final LogEntryItem entryItem) {
+    public void start(final LogEntry entryItem) {
         if (running)
             throw new IllegalStateException();
         
@@ -193,7 +203,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                 layout = new PatternLayout();
             }
 
-            entry = entryItem;
+            entry = (LogEntryItem) entryItem;
         }
 
         final Thread thread = new Thread(this, name() + "-logger");
@@ -204,6 +214,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
     public void stop(){
         if (!running)
             throw new IllegalStateException();
+        System.out.println(name() + " stop ");
         running = false;
         synchronized (lock) {
             lock.notifyAll();

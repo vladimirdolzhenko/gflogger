@@ -17,7 +17,7 @@
 
 package gflogger.helpers;
 
-import gflogger.LogEntryItem;
+import gflogger.LogEntry;
 
 import java.nio.CharBuffer;
 
@@ -51,7 +51,7 @@ public abstract class PatternConverter {
         leftAlign = fi.leftAlign;
     }
 
-    abstract public void format(CharBuffer buffer, LogEntryItem entryImpl);
+    abstract public void format(CharBuffer buffer, LogEntry entryImpl);
 
     static String[] SPACES = { 
             " ",                // 1 space 

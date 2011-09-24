@@ -38,15 +38,25 @@ public class Log4JLogger {
                 @Override
                 public void run() {
                     try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
+                        doSmth();
+                    } catch (Throwable e) {
                         e.printStackTrace();
-                        return;
                     }
+                }
+                
+                public void doSmth() throws Throwable {
+                    latch.await();
                     for(int j = 0; j < (n << 1); j++){
                         log.info("warmup" + j);
                     }
+                    System.gc();
+                    System.gc();
+                    System.gc();
+                    Thread.sleep(2000);
+                    
+                    System.out.println("--- warmed up ---");
+                    System.out.println("--- warmed up ---");
+                    System.out.println("--- warmed up ---");
                     final long s = System.nanoTime(); 
                     //System.out.println(Thread.currentThread().getName() + " is started.");
                     for(int j = 0; j < n; j++){
