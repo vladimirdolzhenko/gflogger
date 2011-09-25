@@ -99,15 +99,6 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                             }
                         }
                 }
-                // on shutdown - find the last unprocessed items in the ring
-                if (changesLocal > 0 && entry.getCounter() == 0 && !running){
-                    for(LogEntryItem i = entry.getNext(); i != entry; i = i.getNext()){
-                        if (i.testCounterBit(index)) {
-                            entry = i;
-                            break;
-                        }
-                    }
-                }
             }
 
             if (autoFlush || loopCounter > autoFlushThreshold){

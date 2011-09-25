@@ -3,6 +3,7 @@ package gflogger;
 import gflogger.appender.Appender;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -13,12 +14,9 @@ import java.nio.ByteBuffer;
 class DefaultLoggerImpl implements LoggerImpl {
 
     private final LogLevel level;
-
-    private volatile LogEntryItem entry;
-    
-    public long q1, q2, q3, q4, q5, q6, q7; // cache line padding
-
     private final Appender[] appenders;
+    private final AtomicLong cursor;
+    private final LogEntryItem[] entries;
     
     /*
      * It worth to cache thread name at thread local variable cause
@@ -31,8 +29,10 @@ class DefaultLoggerImpl implements LoggerImpl {
         }
     };
 
+    private final int mask;
+
     /**
-     * @param count a number of items in the ring
+     * @param count a number of items in the ring, could be rounded up to the next power of 2
      * @param bufferSize buffer size of each item in the ring 
      * @param appenders
      */
@@ -40,11 +40,37 @@ class DefaultLoggerImpl implements LoggerImpl {
         if (appenders.length == 0){
             throw new IllegalArgumentException("Expected at least one appender");
         }
+        // flag size restriction
         if (appenders.length > (Integer.SIZE - 1)){
             throw new IllegalArgumentException("Expected less than " + (Integer.SIZE - 1) + " appenders");
         }
         this.appenders = appenders;
+        
+        this.cursor = new AtomicLong();
+        
+        int c = count;
+        if (Integer.bitCount(c) != 1){
+            c = roundUpNextPower2(c);
+        }
 
+        this.entries = initEnties(c, bufferSize);
+        // mask is like 000111111 
+        this.mask = (entries.length - 1);
+        this.level = initLogLevel(appenders);
+        
+        start(appenders);
+    }
+    
+    private LogLevel initLogLevel(final Appender... appenders) {
+        LogLevel level = LogLevel.ERROR;
+        for (int i = 0; i < appenders.length; i++) {
+            final LogLevel l = appenders[i].getLogLevel();
+            level = level.compareTo(l) <= 0 ? level : l;
+        }
+        return level;
+    }
+
+    private LogEntryItem[] initEnties(int count, final int bufferSize) {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(count * bufferSize);
 
         final LogEntryItem[] entries = new LogEntryItem[count];
@@ -58,15 +84,10 @@ class DefaultLoggerImpl implements LoggerImpl {
             }
         }
         entries[count - 1].setNext(entries[0]);
+        return entries;
+    }
 
-        entry = entries[0];
-
-        LogLevel level = LogLevel.ERROR;
-        for (int i = 0; i < appenders.length; i++) {
-            final LogLevel l = appenders[i].getLogLevel();
-            level = level.compareTo(l) <= 0 ? level : l;
-        }
-        this.level = level;
+    private void start(final Appender... appenders) {
         for (int i = 0; i < appenders.length; i++) {
             appenders[i].setIndex(i + 1);
             appenders[i].start(entries[0]);
@@ -75,14 +96,15 @@ class DefaultLoggerImpl implements LoggerImpl {
 
     @Override
     public LogEntry log(final LogLevel level, final String name, final String className){
+        final int idx = (int) (cursor.getAndIncrement() & mask);
+        final LogEntryItem entry = entries[idx];
+        // each thread will be await for its preacquired (consecutive) entry
         for(int i = 0; ; i++){
-            final LogEntryItem actualEntry = entry;
-            if (actualEntry.tryToAcquire()){
-                entry = actualEntry.getNext();
-                actualEntry.acquire(name, className);
-                actualEntry.setLogLevel(level);
-                actualEntry.setThreadName(threadName.get());
-                return actualEntry;
+            if (entry.tryToAcquire()){
+                entry.acquire(name, className);
+                entry.setLogLevel(level);
+                entry.setThreadName(threadName.get());
+                return entry;
             }
 
             /*/
@@ -122,6 +144,17 @@ class DefaultLoggerImpl implements LoggerImpl {
         for(int i = 0; i < appenders.length; i++){
             appenders[i].stop();
         }
+    }
+    
+    private int roundUpNextPower2(int x) {
+        // HD, Figure 3-3
+        x = x - 1; 
+        x = x | (x >> 1); 
+        x = x | (x >> 2); 
+        x = x | (x >> 4); 
+        x = x | (x >> 8); 
+        x = x | (x >>16); 
+        return x + 1; 
     }
 
 }

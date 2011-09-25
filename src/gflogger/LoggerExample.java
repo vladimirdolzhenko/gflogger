@@ -33,7 +33,7 @@ public class LoggerExample {
 
         final FileAppender fileAppender = new FileAppender();
         fileAppender.setLogLevel(LogLevel.INFO);
-        fileAppender.setFileName("./logs/logger.log");
+        fileAppender.setFileName("./logs/gflogger.log");
         fileAppender.setAppend(false);
         fileAppender.setAutoFlush(false);
         fileAppender.setLayout(new PatternLayout("%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"));
@@ -44,7 +44,7 @@ public class LoggerExample {
 
         //final LoggerImpl impl = new LoggerImpl(1 << 10, 1 << 8, fileAppender);
         //final LoggerImpl impl = new LoggerImpl(1 << 2, 1 << 8, fileAppender, consoleAppender);
-        final LoggerImpl impl = new DefaultLoggerImpl(1 << 10, 1 << 8, fileAppender
+        final LoggerImpl impl = new DefaultLoggerImpl((1 << 10) - 2, 1 << 8, fileAppender
                 //, consoleAppender
         );
 
