@@ -29,6 +29,7 @@ class DefaultLoggerImpl implements LoggerImpl {
         }
     };
 
+    // to provide quick mod - mask is like 000111111 
     private final int mask;
 
     /**
@@ -49,12 +50,12 @@ class DefaultLoggerImpl implements LoggerImpl {
         this.cursor = new AtomicLong();
         
         int c = count;
-        if (Integer.bitCount(c) != 1){
+        // quick check is count = 2^k ?
+        if ((count & (count - 1)) != 0){
             c = roundUpNextPower2(c);
         }
 
         this.entries = initEnties(c, bufferSize);
-        // mask is like 000111111 
         this.mask = (entries.length - 1);
         this.level = initLogLevel(appenders);
         
@@ -98,8 +99,9 @@ class DefaultLoggerImpl implements LoggerImpl {
     public LogEntry log(final LogLevel level, final String name, final String className){
         final int idx = (int) (cursor.getAndIncrement() & mask);
         final LogEntryItem entry = entries[idx];
-        // each thread will be await for its preacquired (consecutive) entry
+        // each thread will wait for its preacquired (consecutive) entry
         for(int i = 0; ; i++){
+            // kinda busy-spin
             if (entry.tryToAcquire()){
                 entry.acquire(name, className);
                 entry.setLogLevel(level);

@@ -1,13 +1,19 @@
-package gflogger;
+package gflogger.disruptor;
 
-import gflogger.appender.ConsoleAppender;
-import gflogger.appender.FileAppender;
+import gflogger.LogEntry;
+import gflogger.LogFactory;
+import gflogger.LogLevel;
+import gflogger.Logger;
+import gflogger.LoggerImpl;
+import gflogger.PatternLayout;
+import gflogger.disruptor.appender.ConsoleAppender;
+import gflogger.disruptor.appender.FileAppender;
 
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
-//import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-//import com.google.monitoring.runtime.instrumentation.Sampler;
+import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
+import com.google.monitoring.runtime.instrumentation.Sampler;
 
 
 /**
@@ -15,10 +21,9 @@ import java.util.concurrent.CountDownLatch;
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class LoggerExample {
+public class DLoggerExample {
 
     public static void main(final String[] args) throws Exception {
-        final long t = LogEntry.startTime;
         final int threadCount = args.length > 0 ? Integer.parseInt(args[0]) : 1;
 
         // 1024 items per 256 bytes each
@@ -33,7 +38,7 @@ public class LoggerExample {
 
         final FileAppender fileAppender = new FileAppender();
         fileAppender.setLogLevel(LogLevel.INFO);
-        fileAppender.setFileName("./logs/gflogger.log");
+        fileAppender.setFileName("./logs/dgflogger.log");
         fileAppender.setAppend(false);
         fileAppender.setAutoFlush(false);
         fileAppender.setLayout(new PatternLayout("%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"));
@@ -44,7 +49,8 @@ public class LoggerExample {
 
         //final LoggerImpl impl = new LoggerImpl(1 << 10, 1 << 8, fileAppender);
         //final LoggerImpl impl = new LoggerImpl(1 << 2, 1 << 8, fileAppender, consoleAppender);
-        final LoggerImpl impl = new DefaultLoggerImpl(1 << 10, 1 << 8, fileAppender
+        final LoggerImpl impl = new DLoggerImpl(1 << 10, 1 << 8, 
+                 fileAppender
                 //, consoleAppender
         );
 
@@ -66,7 +72,7 @@ public class LoggerExample {
             }
         };
         
-        /*/
+        //*/
         AllocationRecorder.addSampler(new Sampler() {
             
             @Override
@@ -103,7 +109,7 @@ public class LoggerExample {
         final Thread[] threads = new Thread[threadCount];
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(new Runnable() {
-
+                
                 @Override
                 public void run() {
                     try {
@@ -113,19 +119,17 @@ public class LoggerExample {
                         e.printStackTrace();
                     }
                 }
-                
+
                 public void doSmth() throws Throwable{
                     latch.await();
                     for(int j = 0; j < (n << 1); j++){
-                        logger.info().
-                            append("warmup").
-                            append(j).
-                            commit();
+                        logger.info().append("warmup").append(j).commit();
                     }
+                    
                     System.gc();
                     System.gc();
                     System.gc();
-                    Thread.sleep(2000);
+                    Thread.sleep(5000);
                     
                     System.out.println("--- warmed up ---");
                     System.out.println("--- warmed up ---");
@@ -186,7 +190,7 @@ public class LoggerExample {
         System.out.println("---");
         finalLatch.await();
         logger.info().append("total time:").append(System.currentTimeMillis() - start).append(" ms.").commit();
+        Thread.sleep(5000);
         LogFactory.stop();
-        System.out.println("stop.");
     }
 }
