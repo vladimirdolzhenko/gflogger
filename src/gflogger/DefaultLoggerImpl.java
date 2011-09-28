@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-class DefaultLoggerImpl implements LoggerImpl {
+public class DefaultLoggerImpl implements LoggerImpl {
 
     private final LogLevel level;
     private final Appender[] appenders;

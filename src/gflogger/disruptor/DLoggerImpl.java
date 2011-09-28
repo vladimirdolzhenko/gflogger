@@ -22,7 +22,7 @@ import com.lmax.disruptor.dsl.Disruptor;
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-class DLoggerImpl implements LoggerImpl {
+public class DLoggerImpl implements LoggerImpl {
 
     private final LogLevel level;
 

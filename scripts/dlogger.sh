@@ -3,4 +3,4 @@
 DIR="$(dirname "$(readlink -f $0})")"
 . ${DIR}/common.sh
 
-run dgflogger "$1" "$2" gflogger.disruptor.DLoggerExample
+run dgflogger "$1" "$2" perftest.DLoggerExample

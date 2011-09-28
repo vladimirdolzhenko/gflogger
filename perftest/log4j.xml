@@ -7,6 +7,7 @@
         <param name="file" value="./logs/log4j.log"/>
         <param name="threshold" value="INFO"/>
         <param name="append" value="false"/>
+        <param name="bufferedIO" value="true"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="conversionPattern" value="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"/>
         </layout>

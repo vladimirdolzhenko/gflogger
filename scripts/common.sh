@@ -61,7 +61,9 @@ function run(){
     grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print "logger avg time:" t/c;}'
     
     WARMED_LINE=`sed = logs/${OUT} | sed 'N;s/\n/\t/' | grep "warmed up ---" | tail -1 | cut -f1`
-    tail -n +${WARMED_LINE} logs/${OUT} | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
+    STOPPING_LINE=`sed = logs/${OUT} | sed 'N;s/\n/\t/' | grep "stopping" | head -1 | cut -f1`
+
+    head -n +${STOPPING_LINE} logs/${OUT} | tail -n +${WARMED_LINE} | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
     
     for f in ${NAME}.log ${OUT};
     do
