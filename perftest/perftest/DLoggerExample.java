@@ -21,7 +21,7 @@ public class DLoggerExample extends AbstractLoggerExample {
         fileAppender.setLogLevel(LogLevel.INFO);
         fileAppender.setFileName("./logs/dgflogger.log");
         fileAppender.setAppend(false);
-        fileAppender.setAutoFlush(false);
+        fileAppender.setBufferedIO(false);
         fileAppender.setLayout(new PatternLayout("%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"));
 
         final ConsoleAppender consoleAppender = new ConsoleAppender();

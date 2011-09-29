@@ -1,5 +1,7 @@
 package gflogger.disruptor.appender;
 
+import gflogger.Layout;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,22 +14,28 @@ import java.nio.charset.CoderResult;
 
 public class FileAppender extends AbstractAsyncAppender {
 
-    private final ByteBuffer buffer;
+    protected final ByteBuffer buffer;
 
-    private String fileName;
-    private String codepage = "UTF-8";
+    protected String fileName;
+    protected String codepage = "UTF-8";
 
-    private CharsetEncoder encoder;
-    private FileChannel channel;
+    protected CharsetEncoder encoder;
+    protected FileChannel channel;
 
-    private boolean append = true;
+    protected boolean append = true;
 
-    private int maxBytesPerChar;
+    protected int maxBytesPerChar;
 
     public FileAppender() {
         // 4M
         buffer = ByteBuffer.allocateDirect(1 << 22);
-        autoFlush = false;
+        bufferedIO = false;
+    }
+
+    public FileAppender(Layout layout, String filename) {
+        this();
+        this.layout = layout;
+        this.fileName = filename;
     }
 
     public synchronized void setCodepage(final String codepage) {
@@ -96,29 +104,39 @@ public class FileAppender extends AbstractAsyncAppender {
         return "file";
     }
     
+    protected void createFileChannel() throws FileNotFoundException {
+        final FileOutputStream fout = new FileOutputStream(fileName, append);
+        channel = fout.getChannel();
+    }
+    
+    protected void closeFile() {
+        try {
+            channel.force(true);
+            channel.close();
+            
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
     @Override
     public void onStart() {
         try {
             encoder = Charset.forName(codepage).newEncoder();
-            final FileOutputStream fout = new FileOutputStream(fileName, append);
-            channel = fout.getChannel();
+            createFileChannel();
         } catch (final FileNotFoundException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
 
         maxBytesPerChar = (int) Math.floor(encoder.maxBytesPerChar());
+
         super.onStart();
     }
     
     @Override
     public void onShutdown() {
         store("onShutdown");
-        try {
-            channel.force(true);
-            channel.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        closeFile();
     }
 }
