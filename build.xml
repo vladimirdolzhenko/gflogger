@@ -2,37 +2,56 @@
 <project name="gflogger" default="jar">
 	
 	<property name="build.dir" value="build"/>
+	<property name="perftest.dir" value="build2"/>
 	<path id="jars">
 		<fileset dir="libs" includes="**/*.jar"/>
 	</path>
 	
 	<target name="clear">
 		<delete dir="${build.dir}"/>
+		<delete dir="${perftest.dir}"/>
 	</target>
 
 	<target name="compile">
 		<mkdir dir="${build.dir}"/>
-		
-		<javac destdir="${build.dir}"
-			includeantruntime="false">
-			<src path="src"/>
-		</javac>
+		<mkdir dir="${perftest.dir}"/>
 		
 		<javac destdir="${build.dir}"
 			classpathref="jars"
 			includeantruntime="false">
-			<src path="log4j"/>	
+			<src path="src"/>
+		</javac>
+		
+		<javac destdir="${perftest.dir}"
+			classpathref="jars"
+			includeantruntime="false">
+			<classpath>
+				<fileset dir="libs" includes="**/*.jar"/>
+				<dirset dir="${build.dir}"/>
+			</classpath>
+			<src path="perftest"/>	
 		</javac>
 
-		<copy todir="${build.dir}">
-			<fileset dir="src" includes="**/*.xml"/>
-			<fileset dir="log4j" includes="**/*.xml"/>
+		<copy todir="${perftest.dir}">
+			<fileset dir="perftest" includes="**/*.xml"/>
 		</copy>
 	</target>
 	
 	<target name="jar" depends="clear, compile">
 		<jar destfile="libs/gflogger.jar">
 			<fileset dir="${build.dir}">
+				<include name="**/*.class"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</jar>
+		<zip destfile="libs/gflogger-src.zip">
+			<fileset dir="src">
+				<include name="**/*.java"/>
+				<include name="**/*.xml"/>
+			</fileset>
+		</zip>
+		<jar destfile="libs/logger-perftests.jar">
+			<fileset dir="${perftest.dir}">
 				<include name="**/*.class"/>
 				<include name="**/*.xml"/>
 			</fileset>
