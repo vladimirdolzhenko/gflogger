@@ -3,6 +3,7 @@ package perftest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.LogManager;
 
 /**
  * Log4JExample
@@ -21,7 +22,7 @@ public class Log4JExample extends AbstractExample {
     
     @Override
     protected void stop() {
-        // TODO Auto-generated method stub
+        LogManager.shutdown();
     }
     
     @Override

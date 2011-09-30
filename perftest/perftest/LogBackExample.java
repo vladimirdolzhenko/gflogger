@@ -3,6 +3,9 @@ package perftest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
+
+
 /**
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
@@ -17,7 +20,8 @@ public class LogBackExample extends AbstractExample {
     
     @Override
     protected void stop() {
-        // TODO Auto-generated method stub
+        LoggerContext ctx = ((LoggerContext)LoggerFactory.getILoggerFactory());
+        ctx.stop();
     }
     
     @Override
