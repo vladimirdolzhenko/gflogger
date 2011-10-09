@@ -24,7 +24,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
 
     protected LogLevel logLevel = LogLevel.ERROR;
     protected Layout layout;
-    protected boolean bufferedIO = true;
+    protected boolean immediateFlush = false;
     protected int bufferedIOThreshold = 50;
     protected long awaitTimeout = 100;
     protected volatile boolean running = false;
@@ -57,8 +57,8 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
         this.layout = layout;
     }
 
-    public void setBufferedIO(final boolean bufferedIO) {
-        this.bufferedIO = bufferedIO;
+    public void setImmediateFlush(final boolean immediateFlush) {
+        this.immediateFlush = immediateFlush;
     }
 
     public void setBufferedIOThreshold(final int bufferedIOThreshold) {
@@ -93,7 +93,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                         if (hasProperLevel){
                             processCharBuffer();
 
-                            if (bufferedIO){
+                            if (immediateFlush){
                                 flushCharBuffer();
                                 loopCounter = 0;
                             }
@@ -101,7 +101,7 @@ public abstract class AbstractAsyncAppender implements Appender, Runnable {
                 }
             }
 
-            if (bufferedIO || loopCounter > bufferedIOThreshold){
+            if (immediateFlush || loopCounter > bufferedIOThreshold){
                 flushCharBuffer();
                 loopCounter = 0;
             }

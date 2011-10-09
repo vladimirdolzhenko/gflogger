@@ -29,7 +29,7 @@ public class FileAppender extends AbstractAsyncAppender {
     public FileAppender() {
         // 4M
         buffer = ByteBuffer.allocateDirect(1 << 22);
-        bufferedIO = false;
+        immediateFlush = false;
     }
 
     public FileAppender(Layout layout, String filename) {

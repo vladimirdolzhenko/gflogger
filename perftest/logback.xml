@@ -1,7 +1,19 @@
 <configuration>
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <!--appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>./logs/logback.log</file>
     <append>false</append>
+    <bufferedIO>true</bufferedIO>
+    <immediateFlush>false</immediateFlush>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{HH:mm:ss.SSS zzz} %p %m [%c{2}] [%t]%n</pattern>
+    </layout>
+  </appender-->
+  
+  <appender name="FILE" class="com.oms.logback.AsynchFileAppender">
+    <file>./logs/logback.log</file>
+    <append>false</append>
+    <bufferedIO>true</bufferedIO>
+    <immediateFlush>false</immediateFlush>
     <layout class="ch.qos.logback.classic.PatternLayout">
       <pattern>%d{HH:mm:ss.SSS zzz} %p %m [%c{2}] [%t]%n</pattern>
     </layout>

@@ -2,7 +2,7 @@
 
 REPORT=report-`date +%y%m%d-%H%M`.txt
 
-function run(){
+run(){
     SCRIPT=$1
     THREADS=$2
     MESSAGES=$3

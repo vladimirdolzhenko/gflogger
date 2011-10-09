@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function run(){
+run(){
     NAME=$1
     THREADS=$2
     MESSAGES=$3
@@ -60,10 +60,10 @@ function run(){
     
     grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print "logger avg time:" t/c;}'
     
-    WARMED_LINE=`sed = logs/${OUT} | sed 'N;s/\n/\t/' | grep "warmed up ---" | tail -1 | cut -f1`
-    STOPPING_LINE=`sed = logs/${OUT} | sed 'N;s/\n/\t/' | grep "stopping" | head -1 | cut -f1`
+    WARMED_LINE=`nl logs/${OUT} | grep "warmed up ---" | tail -1 | cut -f1 | sed "s/ //g"`
+    STOPPING_LINE=`nl logs/${OUT} | grep "stopping" | head -1 | cut -f1 | sed "s/ //g"`
 
-    head -n +${STOPPING_LINE} logs/${OUT} | tail -n +${WARMED_LINE} | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
+    cat logs/${OUT} | sed -n "${WARMED_LINE},${STOPPING_LINE}p" | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
     
     for f in ${NAME}.log ${OUT};
     do

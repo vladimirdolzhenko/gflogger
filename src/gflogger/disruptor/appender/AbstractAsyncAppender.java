@@ -16,7 +16,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 
     protected LogLevel logLevel = LogLevel.ERROR;
     protected Layout layout;
-    protected boolean bufferedIO = true;
+    protected boolean immediateFlush = false;
     protected int bufferedIOThreshold = 50;
     protected long awaitTimeout = 100;
 
@@ -42,8 +42,8 @@ public abstract class AbstractAsyncAppender implements DAppender {
         this.layout = layout;
     }
 
-    public void setBufferedIO(final boolean bufferedIO) {
-        this.bufferedIO = bufferedIO;
+    public void setImmediateFlush(final boolean immediateFlush) {
+        this.immediateFlush = immediateFlush;
     }
 
     public void setBufferedIOThreshold(final int bufferedIOThreshold) {
@@ -69,7 +69,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
         if (hasProperLevel) {
             processCharBuffer();
 
-            if (bufferedIO) {
+            if (immediateFlush) {
                 flushCharBuffer();
             }
         }
@@ -108,7 +108,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 
     @Override
     public void onShutdown() {
-        bufferedIO = true;
+        immediateFlush = true;
         flushCharBuffer();
     }
 }
