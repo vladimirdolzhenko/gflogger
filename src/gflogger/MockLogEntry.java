@@ -53,6 +53,11 @@ public class MockLogEntry implements LogEntry {
     public LogEntry append(final double i, final int precision) {
         return this;
     }
+    
+    @Override
+    public LogEntry append(Object o) {
+        return this;
+    }
 
     @Override
     public void commit() {

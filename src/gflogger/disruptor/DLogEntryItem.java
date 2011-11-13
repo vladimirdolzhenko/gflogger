@@ -124,6 +124,16 @@ public final class DLogEntryItem implements LogEntry {
         return this;
     }
     
+    @Override
+    public LogEntry append(Object o) {
+        if (o != null){
+            buffer.append(o.toString());
+        } else {
+            buffer.put('n').put('u').put('l').put('l');
+        }
+        return this;
+    }
+    
     public void setSequenceId(long sequenceId) {
         this.sequenceId = sequenceId;
     }

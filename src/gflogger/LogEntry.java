@@ -32,6 +32,16 @@ public interface LogEntry {
     LogEntry append(long i);
 
     LogEntry append(double i, int precision);
+    
+    /**
+     * append string representation of an object using <code>o.toString()</code> method
+     * 
+     * Lead to garbage footprint !
+     * 
+     * @param o
+     * @return
+     */
+    LogEntry append(Object o);
 
     /**
      * commit an entry

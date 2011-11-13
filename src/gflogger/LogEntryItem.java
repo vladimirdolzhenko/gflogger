@@ -157,6 +157,16 @@ public final class LogEntryItem implements LogEntry {
         BufferFormatter.append(buffer, i, precision);
         return this;
     }
+    
+    @Override
+    public LogEntry append(Object o) {
+        if (o != null){
+            buffer.append(o.toString());
+        } else {
+            buffer.put('n').put('u').put('l').put('l');
+        }
+        return this;
+    }
 
     @Override
     public void commit() {
