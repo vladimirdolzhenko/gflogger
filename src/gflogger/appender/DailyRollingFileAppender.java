@@ -184,6 +184,10 @@ public class DailyRollingFileAppender extends FileAppender {
      */
     public DailyRollingFileAppender() {
     }
+    
+    public DailyRollingFileAppender(int bufferSize) {
+        super(bufferSize);
+    }
 
     /**
      * Instantiate a <code>DailyRollingFileAppender</code> and open the file
@@ -193,6 +197,12 @@ public class DailyRollingFileAppender extends FileAppender {
     public DailyRollingFileAppender(Layout layout, String filename,
             String datePattern) {
         super(layout, filename);
+        this.datePattern = datePattern;
+    }
+    
+    public DailyRollingFileAppender(int bufferSize, Layout layout, String filename,
+            String datePattern) {
+        super(bufferSize, layout, filename);
         this.datePattern = datePattern;
     }
 

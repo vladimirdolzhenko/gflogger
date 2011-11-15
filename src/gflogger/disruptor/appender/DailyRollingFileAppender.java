@@ -183,6 +183,10 @@ public class DailyRollingFileAppender extends FileAppender {
      */
     public DailyRollingFileAppender() {
     }
+    
+    public DailyRollingFileAppender(int bufferSize) {
+        super(bufferSize);
+    }
 
     /**
      * Instantiate a <code>DailyRollingFileAppender</code> and open the file

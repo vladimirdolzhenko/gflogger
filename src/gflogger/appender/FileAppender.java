@@ -28,13 +28,23 @@ public class FileAppender extends AbstractAsyncAppender {
     protected int maxBytesPerChar;
 
     public FileAppender() {
-        // 4M
-        buffer = ByteBuffer.allocateDirect(1 << 22);
+        // 1M
+        this(1 << 20);
+    }
+    
+    public FileAppender(int bufferSize) {
+        // unicode char is 4 bytes 
+        super(bufferSize << 2);
+        buffer = ByteBuffer.allocateDirect(bufferSize);
         immediateFlush = false;
     }
 
     public FileAppender(Layout layout, String filename) {
-        this();
+        this(1 << 20, layout, filename);
+    }
+    
+    public FileAppender(int bufferSize, Layout layout, String filename) {
+        this(bufferSize);
         this.layout = layout;
         this.fileName = filename;
     }

@@ -73,6 +73,10 @@ public abstract class AbstractAsyncAppender implements DAppender {
                 flushCharBuffer();
             }
         }
+        
+        if (endOfBatch){
+            flushCharBuffer();
+        }
     }
 
     protected void processCharBuffer(){
