@@ -77,7 +77,7 @@ public class BufferFormatter {
         return buffer;
     }
 
-    final static int[] INT_SIZE_TABLE = {
+    public final static int[] INT_SIZE_TABLE = {
         10,
         100,
         1000,
@@ -89,7 +89,7 @@ public class BufferFormatter {
         1000000000,
         Integer.MAX_VALUE };
     
-    final static long[] LONG_SIZE_TABLE = { 
+    public final static long[] LONG_SIZE_TABLE = { 
         10L,
         100L,
         1000L,
@@ -110,7 +110,7 @@ public class BufferFormatter {
         1000000000000000000L,
         Long.MAX_VALUE};
     
-    final static char [] DIGIT_TENS = {
+    public final static char [] DIGIT_TENS = {
         '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
         '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
         '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
@@ -123,7 +123,7 @@ public class BufferFormatter {
         '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
     } ; 
 
-    final static char [] DIGIT_ONES = { 
+    public final static char [] DIGIT_ONES = { 
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -139,7 +139,7 @@ public class BufferFormatter {
     /**
      * All possible chars for representing a number as a String
      */
-    final static char[] DIGITS = {
+    public final static char[] DIGITS = {
         '0' , '1' , '2' , '3' , '4' , '5' ,
         '6' , '7' , '8' , '9' , 'a' , 'b' ,
         'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
