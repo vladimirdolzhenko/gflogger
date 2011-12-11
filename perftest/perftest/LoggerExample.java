@@ -1,11 +1,11 @@
 package perftest;
 
-import gflogger.DefaultLoggerImpl;
 import gflogger.LogLevel;
-import gflogger.LoggerImpl;
+import gflogger.LoggerService;
 import gflogger.PatternLayout;
-import gflogger.appender.ConsoleAppender;
-import gflogger.appender.FileAppender;
+import gflogger.base.DefaultLoggerServiceImpl;
+import gflogger.base.appender.ConsoleAppender;
+import gflogger.base.appender.FileAppender;
 
 
 /**
@@ -16,7 +16,7 @@ import gflogger.appender.FileAppender;
 public class LoggerExample extends AbstractLoggerExample {
     
     @Override
-    protected LoggerImpl createLoggerImpl() {
+    protected LoggerService createLoggerImpl() {
         final FileAppender fileAppender = new FileAppender();
         fileAppender.setLogLevel(LogLevel.INFO);
         fileAppender.setFileName("./logs/gflogger.log");
@@ -30,10 +30,21 @@ public class LoggerExample extends AbstractLoggerExample {
 
         //final LoggerImpl impl = new LoggerImpl(1 << 10, 1 << 8, fileAppender);
         //final LoggerImpl impl = new LoggerImpl(1 << 2, 1 << 8, fileAppender, consoleAppender);
-        final LoggerImpl impl = new DefaultLoggerImpl(1 << 10, 1 << 8, fileAppender
+        final LoggerService impl = new DefaultLoggerServiceImpl(1 << 10, 1 << 8, fileAppender
+        //final LoggerImpl impl = new DefaultLoggerImpl(8, 1 << 8, fileAppender
                 //, consoleAppender
         );
         return impl;
+    }
+    
+    @Override
+    protected void logFinalMessage(long t, long e) {
+        final DefaultLoggerServiceImpl impl2 = (DefaultLoggerServiceImpl) impl;
+        logMessage("__ park:" + impl2.park.get().get(), 0);
+        logMessage("__ miss:" + impl2.miss.get().get(), 0);
+        logMessage("__ acq:" + ((impl2.acq.get().get() / 1000) / 1e3) + " ms", 0);
+        logMessage("__ commit:" + ((impl2.commit.get().get() / 1000) / 1e3) + " ms", 0);
+        super.logFinalMessage(t, e);
     }
 
     public static void main(final String[] args) throws Throwable {

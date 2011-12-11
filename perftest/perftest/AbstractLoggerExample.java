@@ -2,10 +2,9 @@ package perftest;
 
 import gflogger.LogFactory;
 import gflogger.Logger;
-import gflogger.LoggerImpl;
+import gflogger.LoggerService;
 
 import java.util.Collections;
-
 
 /**
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
@@ -13,17 +12,18 @@ import java.util.Collections;
 public abstract class AbstractLoggerExample extends AbstractExample {
     
     private Logger logger;
+    LoggerService impl;
     
     @Override
     protected void initLogger() {
-        final LoggerImpl impl = createLoggerImpl();
+        impl = createLoggerImpl();
 
         LogFactory.init(Collections.singletonMap("com.db", impl));
 
         this.logger = LogFactory.getLog("com.db.fxpricing.Logger");
     }
     
-    protected abstract LoggerImpl createLoggerImpl();
+    protected abstract LoggerService createLoggerImpl();
     
     @Override
     protected void stop() {
@@ -36,18 +36,13 @@ public abstract class AbstractLoggerExample extends AbstractExample {
     }
     
     @Override
-    protected void logTestMessage(int j) {
-        logger.info().append("test").append(j).commit();
-    }
-
-    @Override
-    protected void logWarmup(int j) {
-        logger.info().append("warmup").append(j).commit();
+    protected void logMessage(String msg, int j) {
+        logger.info().append(msg).append(j).commit();
     }
     
     @Override
     protected void logFinalMessage(final long t, final long e) {
-        logger.info().append("final: ").append((e - t) / 1e6, 3).commit();
+        logger.info().append("final: ").append((e - t) / 1e6, 3).append(" ms").commit();
     }
     
     @Override

@@ -41,7 +41,7 @@ if __name__ == '__main__':
 			messagesMap[int(messages)] = True
 
 		if idx == 1 :
-			time = float(a[2].split(':')[1])
+			time = float(a[3])
 			key = name + '_' + threads + '_' + messages
 			if key not in timeMap:
 				timeMap[key] = 0.0	

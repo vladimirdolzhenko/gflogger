@@ -1,4 +1,4 @@
-package gflogger.disruptor;
+package gflogger.base;
 
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
@@ -7,11 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
- * LogEntryItem
+ * LogEntryItemImpl
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class DLogEntryItem implements LogEntryItem {
+public final class LogEntryItemImpl implements LogEntryItem {
 
 	private final CharBuffer buffer;
 	
@@ -21,16 +21,24 @@ public final class DLogEntryItem implements LogEntryItem {
 	private String threadName;
 	private String className;
 
-	private long sequenceId;
+	private volatile long id;
 
-	public DLogEntryItem(final int size) {
-		this(ByteBuffer.allocateDirect(size).asCharBuffer());
+	public LogEntryItemImpl(final int sizeInBytes) {
+		this(ByteBuffer.allocateDirect(sizeInBytes).asCharBuffer());
 	}
 
-	public DLogEntryItem(final CharBuffer buffer) {
+	public LogEntryItemImpl(final CharBuffer buffer) {
 		this.buffer = buffer;
 	}
 	
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	public long getId() {
+		return this.id;
+	}
+
 	@Override
 	public LogLevel getLogLevel() {
 		return logLevel;
@@ -65,18 +73,6 @@ public final class DLogEntryItem implements LogEntryItem {
 		return buffer;
 	}
 
-	public void setSequenceId(long sequenceId) {
-		this.sequenceId = sequenceId;
-	}
-	
-	public long getSequenceId() {
-		return this.sequenceId;
-	}
-
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
-	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -84,17 +80,20 @@ public final class DLogEntryItem implements LogEntryItem {
 	public void setClassName(String className) {
 		this.className = className;
 	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
 	
 	public void setThreadName(String threadName) {
 		this.threadName = threadName;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "[" 
-			+ " pos:" + buffer.position() 
-			+ " limit:" + buffer.limit() 
-			+ " capacity:" + buffer.capacity() + "]";
+		return "[" + 
+		id + " , " + logLevel
+		+ " pos:" + buffer.position() + " limit:" + buffer.limit() + " capacity:" + buffer.capacity() + "]";
 	}
 
 }

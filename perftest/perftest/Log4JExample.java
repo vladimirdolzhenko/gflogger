@@ -31,13 +31,8 @@ public class Log4JExample extends AbstractExample {
     }
     
     @Override
-    protected void logTestMessage(int j) {
-        log.info("test" + j);
-    }
-
-    @Override
-    protected void logWarmup(int j) {
-        log.info("warmup" + j);
+    protected void logMessage(String msg, int j) {
+        log.info(msg + j);
     }
     
     @Override

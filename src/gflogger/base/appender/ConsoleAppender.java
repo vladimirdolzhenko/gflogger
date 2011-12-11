@@ -1,6 +1,6 @@
-package gflogger.disruptor.appender;
+package gflogger.base.appender;
 
-public class ConsoleAppender extends AbstractAsyncAppender {
+public class ConsoleAppender extends AbstractAsyncAppender implements Runnable {
 
 	@Override
 	protected void processCharBuffer() {
@@ -21,7 +21,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 			charBuffer.clear();
 		}
 	}
-	
+
 	@Override
 	protected String name() {
 		return "console";

@@ -7,16 +7,16 @@ package gflogger;
  */
 public interface Logger {
 
-    boolean isDebugEnabled();
+	boolean isDebugEnabled();
 
-    LogEntry debug();
+	LogEntry debug();
 
-    boolean isInfoEnabled();
+	boolean isInfoEnabled();
 
-    LogEntry info();
+	LogEntry info();
 
-    boolean isErrorEnabled();
+	boolean isErrorEnabled();
 
-    LogEntry error();
+	LogEntry error();
 
 }

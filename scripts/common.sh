@@ -14,9 +14,11 @@ run(){
     -Xss2m
     -Xms512m
     -Xmx512m
+
+	-XX:CompileThreshold=5000
     
     -XX:-UseBiasedLocking
-    
+
     -XX:NewSize=256m
     -XX:MaxNewSize=256m
     -XX:PermSize=128m
@@ -57,9 +59,11 @@ run(){
     done
     
     java -cp ${CLASSPATH} ${JAVA_OPTS} ${MAINCLASS} ${THREADS} ${MESSAGES} 1>logs/${OUT} 2>&1
-    
-    grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print "logger avg time:" t/c;}'
-    
+   
+    LOG_ENTRIES=`grep -c "test" logs/${NAME}.log`
+	AVG_TIME=`grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print t/c;}'`
+ 
+    echo "${LOG_ENTRIES} avg time ${AVG_TIME}"     
     WARMED_LINE=`nl logs/${OUT} | grep "warmed up ---" | tail -1 | cut -f1 | sed "s/ //g"`
     STOPPING_LINE=`nl logs/${OUT} | grep "stopping" | head -1 | cut -f1 | sed "s/ //g"`
 

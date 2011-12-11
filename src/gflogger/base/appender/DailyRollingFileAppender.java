@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-package gflogger.disruptor.appender;
+package gflogger.base.appender;
 
 import gflogger.Layout;
+import gflogger.LogEntry;
+import gflogger.base.LogEntryItemImpl;
+import gflogger.base.RingBuffer;
 import gflogger.helpers.LogLog;
 
 import java.io.FileNotFoundException;
@@ -198,6 +201,12 @@ public class DailyRollingFileAppender extends FileAppender {
 		super(layout, filename);
 		this.datePattern = datePattern;
 	}
+	
+	public DailyRollingFileAppender(int bufferSize, Layout layout, String filename,
+			String datePattern) {
+		super(bufferSize, layout, filename);
+		this.datePattern = datePattern;
+	}
 
 	/**
 	 * The <b>DatePattern</b> takes a string in the same format as expected by
@@ -333,7 +342,7 @@ public class DailyRollingFileAppender extends FileAppender {
 	 * rollover.
 	 * */
 	@Override
-	protected void formatMessage(gflogger.disruptor.DLogEntryItem entry) {
+	protected void formatMessage(LogEntryItemImpl entry) {
 		long n = entry.getTimestamp();
 		if (n >= nextCheck) {
 			now.setTime(n);
@@ -347,18 +356,18 @@ public class DailyRollingFileAppender extends FileAppender {
 				LogLog.error("rollOver() failed.", ioe);
 			}
 		}
-		super.processCharBuffer();
+		super.formatMessage(entry);
 	}
 
 	@Override
-	public void onStart() {
+	public void start(RingBuffer<LogEntryItemImpl> ringBuffer) {
 		now.setTime(System.currentTimeMillis());
 		sdf = new SimpleDateFormat(datePattern);
 		int type = computeCheckPeriod();
 		printPeriodicity(type);
 		rc.setType(type);
-		
-		super.onStart();
+
+		super.start(ringBuffer);
 	}
 
 	/**

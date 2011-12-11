@@ -1,6 +1,9 @@
-package gflogger.disruptor.appender;
+package gflogger.base.appender;
 
 import gflogger.Layout;
+import gflogger.LogEntry;
+import gflogger.base.LogEntryItemImpl;
+import gflogger.base.RingBuffer;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -90,30 +93,26 @@ public class FileAppender extends AbstractAsyncAppender {
 		store("flushCharBuffer");
 	}
 
-	protected boolean store(final String cause) {
-		if (buffer.position() == 0) return false;
-		buffer.flip();
-		try {
-//			final int limit = buffer.limit();
-//			final long start = System.nanoTime();
-			channel.write(buffer);
-//			final long end = System.nanoTime();
-
-			//LogLog.debug(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			buffer.clear();
-		}
-		return true;
+	@Override
+	protected void workerIsAboutToFinish() {
+		store("workerIsAboutFinish");
+		closeFile();
 	}
 
 	@Override
-	protected String name() {
-		return "file";
+	public void start(RingBuffer<LogEntryItemImpl> ringBuffer) {
+		try {
+			encoder = Charset.forName(codepage).newEncoder();
+			createFileChannel();
+		} catch (final FileNotFoundException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+
+		maxBytesPerChar = (int) Math.floor(encoder.maxBytesPerChar());
+
+		super.start(ringBuffer);
 	}
-	
+
 	protected void createFileChannel() throws FileNotFoundException {
 		final FileOutputStream fout = new FileOutputStream(fileName, append);
 		channel = fout.getChannel();
@@ -129,24 +128,29 @@ public class FileAppender extends AbstractAsyncAppender {
 			e.printStackTrace();
 		}
 	}
-	
-	@Override
-	public void onStart() {
+
+	protected boolean store(final String cause) {
+		if (buffer.position() == 0) return false;
+		buffer.flip();
 		try {
-			encoder = Charset.forName(codepage).newEncoder();
-			createFileChannel();
-		} catch (final FileNotFoundException e) {
-			throw new RuntimeException(e.getMessage(), e);
+//			final int limit = buffer.limit();
+//			final long start = System.nanoTime();
+			channel.write(buffer);
+//			final long end = System.nanoTime();
+
+			//LogLog.debug(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
+			//System.out.println(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			buffer.clear();
 		}
-
-		maxBytesPerChar = (int) Math.floor(encoder.maxBytesPerChar());
-
-		super.onStart();
+		return true;
 	}
-	
+
 	@Override
-	public void onShutdown() {
-		store("onShutdown");
-		closeFile();
+	protected String name() {
+		return "file";
 	}
 }

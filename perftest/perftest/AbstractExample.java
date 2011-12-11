@@ -91,35 +91,51 @@ public abstract class AbstractExample {
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(new Runnable() {
 
+                private String name;
+                private String startUpMessage;
+                private String warmedUpMessage;
+                private String finishedMessage;
+
                 @Override
                 public void run() {
+                    this.name = Thread.currentThread().getName();
+                    this.startUpMessage = name + "--- start up ---";
+                    this.warmedUpMessage = name + "--- warmed up ---";
+                    this.finishedMessage = name + "--- finished ---";
+                    
+                    System.out.println(startUpMessage);
                     try {
                         doSmth();
                     } catch (Throwable e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
+                    System.out.println(finishedMessage);
                 }
                 
                 public void doSmth() throws Throwable{
-                    latch.await();
-                    for(int j = 0; j < (n << 1); j++){
-                        logWarmup(j);
+                    for(int k = 0; k < 5; k++){
+                        for(int j = 0; j < 10000; j++){
+                            logMessage("warm", j);
+                        }
                     }
+                    
+                    latch.await();
                     System.gc();
                     System.gc();
                     System.gc();
                     Thread.sleep(2000);
-                    
-                    System.out.println("--- warmed up ---");
-                    System.out.println("--- warmed up ---");
-                    System.out.println("--- warmed up ---");
+
+                    System.out.println(warmedUpMessage);
+                    System.out.println(warmedUpMessage);
+                    System.out.println(warmedUpMessage);
+
                     objectCounting.set(true);
                     
                     final long t = System.nanoTime();
                     //System.out.println(Thread.currentThread().getName() + " is started.");
                     for(int j = 0; j < n; j++){
-                        logTestMessage(j);
+                        logMessage("test", j);
                     }
                     final long e = System.nanoTime();
                     logFinalMessage(t, e);
@@ -146,10 +162,12 @@ public abstract class AbstractExample {
         logTotalMessage(start);
         System.out.println("--- stopping ---");
         System.out.println("--- stopping ---");
-        Thread.sleep(5000);
+        Thread.sleep(500);
         System.out.println("--- stopping ---");
         stop();
         System.out.println("stopped.");
+        
+        //System.exit(0);
     }
 
     protected abstract void stop();
@@ -158,9 +176,7 @@ public abstract class AbstractExample {
     
     protected abstract void logDebugTestMessage(int i);
     
-    protected abstract void logTestMessage(int j) ;
-
-    protected abstract void logWarmup(int j);
+    protected abstract void logMessage(final String msg, int j) ;
     
     protected abstract void logFinalMessage(final long t, final long e);
     

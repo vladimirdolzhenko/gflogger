@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
 
 package gflogger.helpers;
 
-import gflogger.LogEntry;
+import gflogger.LogEntryItem;
 
 import java.nio.CharBuffer;
 
@@ -37,43 +37,43 @@ import java.nio.CharBuffer;
  * @since 0.8.2
  */
 public abstract class PatternConverter {
-    public PatternConverter next;
-    int                     min       = -1;
-    int                     max       = 0x7FFFFFFF;
-    boolean                 leftAlign = false;
+	public PatternConverter next;
+	int					 min	   = -1;
+	int					 max	   = 0x7FFFFFFF;
+	boolean				 leftAlign = false;
 
-    protected PatternConverter() {
-    }
+	protected PatternConverter() {
+	}
 
-    protected PatternConverter(FormattingInfo fi) {
-        min = fi.min;
-        max = fi.max;
-        leftAlign = fi.leftAlign;
-    }
+	protected PatternConverter(FormattingInfo fi) {
+		min = fi.min;
+		max = fi.max;
+		leftAlign = fi.leftAlign;
+	}
 
-    abstract public void format(CharBuffer buffer, LogEntry entryImpl);
+	abstract public void format(CharBuffer buffer, LogEntryItem entryImpl);
 
-    static String[] SPACES = { 
-            " ",                // 1 space 
-            "  ",               // 2 spaces
-            "    ",             // 4 spaces
-            "        ",         // 8 spaces
-            "                ", // 16 spaces
-            "                                " }; // 32 spaces
+	static String[] SPACES = { 
+			" ",				// 1 space 
+			"  ",			   // 2 spaces
+			"	",			 // 4 spaces
+			"		",		 // 8 spaces
+			"				", // 16 spaces
+			"								" }; // 32 spaces
 
-    /**
-     * Fast space padding method.
-     */
-    public void spacePad(CharBuffer buffer, int length) {
-        while (length >= 32) {
-            buffer.append(SPACES[5]);
-            length -= 32;
-        }
+	/**
+	 * Fast space padding method.
+	 */
+	public void spacePad(CharBuffer buffer, int length) {
+		while (length >= 32) {
+			buffer.append(SPACES[5]);
+			length -= 32;
+		}
 
-        for (int i = 4; i >= 0; i--) {
-            if ((length & (1 << i)) != 0) {
-                buffer.append(SPACES[i]);
-            }
-        }
-    }
+		for (int i = 4; i >= 0; i--) {
+			if ((length & (1 << i)) != 0) {
+				buffer.append(SPACES[i]);
+			}
+		}
+	}
 }

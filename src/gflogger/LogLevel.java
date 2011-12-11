@@ -7,5 +7,5 @@ package gflogger;
  */
 public enum LogLevel {
 
-    DEBUG, INFO, ERROR
+	DEBUG, INFO, ERROR
 }

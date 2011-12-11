@@ -13,6 +13,7 @@ import gflogger.disruptor.DLogEntryItem;
  */
 public interface DAppender extends EventHandler<DLogEntryItem>, LifecycleAware {
 
-    LogLevel getLogLevel();
-    
+	LogLevel getLogLevel();
+	
+	void flush();
 }
