@@ -46,7 +46,7 @@
 				<include name="**/*.xml" />
 			</fileset>
 		</zip>
-		<jar destfile="libs/logger-perftests.jar">
+		<jar destfile="libs/gflogger-perftests.jar">
 			<fileset dir="${perftest.dir}">
 				<include name="**/*.class" />
 				<include name="**/*.xml" />
