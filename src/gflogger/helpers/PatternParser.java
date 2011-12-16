@@ -373,6 +373,30 @@ public class PatternParser {
 			default:
 			}
 		}
+		
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			switch (type) {
+			case RELATIVE_TIME_CONVERTER:
+				builder.append("%time");
+				break;
+			case THREAD_CONVERTER:
+				builder.append("%thread");
+				break;
+			case LEVEL_CONVERTER:
+				builder.append("%level");
+				break;
+			case MESSAGE_CONVERTER: 
+				builder.append("%msg");
+				break;
+			default:
+				builder.append("%unkown");
+				break;
+			}
+			if (next != null) builder.append(" ").append(next);
+			return builder.toString();
+		}
 	}
 
 	private static class LiteralPatternConverter extends PatternConverter {
@@ -385,6 +409,13 @@ public class PatternParser {
 		@Override
 		public void format(CharBuffer buffer, LogEntryItem logEntryItem) {
 			buffer.append(literal);
+		}
+		
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder().append(literal);
+			if (next != null) builder.append(" ").append(next);
+			return builder.toString();
 		}
 	}
 
@@ -399,6 +430,13 @@ public class PatternParser {
 		@Override
 		public void format(CharBuffer buffer, LogEntryItem logEntryItem) {
 			df.format(logEntryItem.getTimestamp(), buffer);
+		}
+		
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder().append("%date");
+			if (next != null) builder.append(" ").append(next);
+			return builder.toString();
 		}
 	}
 
@@ -462,6 +500,7 @@ public class PatternParser {
 				}
 			}
 		}
+		
 	}
 
 	private class CategoryPatternConverter extends NamedPatternConverter {
@@ -473,6 +512,13 @@ public class PatternParser {
 		@Override
 		String getFullyQualifiedName(LogEntryItem item) {
 			return item.getCategoryName();
+		}
+		
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder().append("%category");
+			if (next != null) builder.append(" ").append(next);
+			return builder.toString();
 		}
 	}
 }
