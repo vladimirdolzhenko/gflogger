@@ -192,11 +192,10 @@ public class DLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public LogEntry log(final LogLevel level, final String name, final String className){
+	public LogEntry log(final LogLevel level, final String categoryName){
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 		entry.setLogLevel(level);
-		entry.setName(name);
-		entry.setClassName(className);
+		entry.setCategoryName(categoryName);
 		entry.getBuffer().clear();
 		return entry;
 	}
@@ -209,8 +208,7 @@ public class DLoggerServiceImpl implements LoggerService {
 		final DLogEntryItem entry = ringBuffer.get(sequence);
 		//final long time1 = System.nanoTime();
 		
-		entry.setName(localEntry.getName());
-		entry.setClassName(localEntry.getClassName());
+		entry.setCategoryName(localEntry.getCategoryName());
 		entry.setLogLevel(localEntry.getLogLevel());
 		entry.setThreadName(localEntry.getThreadName());
 		entry.setTimestamp(System.currentTimeMillis());

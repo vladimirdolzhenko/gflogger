@@ -6,7 +6,6 @@ import gflogger.LogLevel;
 import gflogger.LoggerService;
 import gflogger.base.appender.Appender;
 import gflogger.util.MutableLong;
-import gflogger.util.PaddedAtomicLong;
 import gflogger.util.Sequence;
 
 import java.nio.ByteBuffer;
@@ -116,11 +115,10 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public LogEntry log(final LogLevel level, final String name, final String className){
+	public LogEntry log(final LogLevel level, final String categoryName){
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 		entry.setLogLevel(level);
-		entry.setName(name);
-		entry.setClassName(className);
+		entry.setCategoryName(categoryName);
 		entry.getBuffer().clear();
 		return entry;
 	}
@@ -179,8 +177,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
     public void entryFlushed(final LocalLogEntry localEntry){
 		//final long time0 = System.nanoTime();
 		final LogEntryItemImpl entry = log0();
-		entry.setName(localEntry.getName());
-		entry.setClassName(localEntry.getClassName());
+		entry.setCategoryName(localEntry.getCategoryName());
 		entry.setLogLevel(localEntry.getLogLevel());
 		entry.setThreadName(localEntry.getThreadName());
 		entry.setTimestamp(System.currentTimeMillis());

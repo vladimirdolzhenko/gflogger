@@ -17,18 +17,16 @@ public final class LocalLogEntry implements LogEntry {
 	private final CharBuffer buffer;
 	private final LoggerService loggerService;
 
-	private String name;
+	private String categoryName;
 	private LogLevel logLevel;
 	
-	private String className;
-
 	public LocalLogEntry(final Thread owner, final int size, final LoggerService loggerService) {
 		this(owner, ByteBuffer.allocateDirect(size).asCharBuffer(), loggerService);
 	}
 
 	public LocalLogEntry(final Thread owner, final CharBuffer buffer, final LoggerService loggerService) {
 		/*
-		 * It worth to cache thread name at thread local variable cause
+		 * It worth to cache thread categoryName at thread local variable cause
 		 * thread.getName() creates new String(char[])
 		 */
 		this.threadName = owner.getName();
@@ -44,20 +42,12 @@ public final class LocalLogEntry implements LogEntry {
 		this.logLevel = logLevel;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
 	}
 	
-	public String getName() {
-		return name;
-	}
-	
-	public String getClassName() {
-		return this.className;
-	}
-	
-	public void setClassName(String className) {
-		this.className = className;
+	public String getCategoryName() {
+		return categoryName;
 	}
 
 	public String getThreadName() {

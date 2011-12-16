@@ -12,23 +12,20 @@ public class LoggerView implements Logger {
 
 	private final MockLogEntry mockLogEntry;
 
-	private final String name;
-	private final String className;
+	private final String categoryName;
 
 	public LoggerView(final LoggerService loggerService, final String name) {
 		this.loggerService = loggerService;
 		this.level = loggerService != null ? loggerService.getLevel() : LogLevel.ERROR;
 		this.mockLogEntry = new MockLogEntry();
-		this.name = name;
-		this.className = null;
+		this.categoryName = name;
 	}
 
 	public LoggerView(final LoggerService loggerService, final Class clazz) {
 		this.loggerService = loggerService;
 		this.level = loggerService != null ? loggerService.getLevel() : LogLevel.ERROR;
 		this.mockLogEntry = new MockLogEntry();
-		this.name = null;
-		this.className = clazz.getName();
+		this.categoryName = clazz.getName();
 	}
 
 	@Override
@@ -39,7 +36,7 @@ public class LoggerView implements Logger {
 	@Override
 	public LogEntry debug() {
 		if (!isDebugEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.DEBUG, name, className);
+		return loggerService.log(LogLevel.DEBUG, categoryName);
 	}
 
 	@Override
@@ -50,7 +47,7 @@ public class LoggerView implements Logger {
 	@Override
 	public LogEntry info() {
 		if (!isInfoEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.INFO, name, className);
+		return loggerService.log(LogLevel.INFO, categoryName);
 	}
 
 	@Override
@@ -61,6 +58,6 @@ public class LoggerView implements Logger {
 	@Override
 	public LogEntry error() {
 		if (!isErrorEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.ERROR, name, className);
+		return loggerService.log(LogLevel.ERROR, categoryName);
 	}
 }

@@ -222,12 +222,6 @@ public class PatternParser {
 			formattingInfo.dump();
 			currentLiteral.setLength(0);
 			break;
-		case 'C':
-			pc = new ClassNamePatternConverter(formattingInfo, extractPrecisionOption());
-			LogLog.debug("CLASS_NAME converter.");
-			formattingInfo.dump();
-			currentLiteral.setLength(0);
-			break;
 		case 'd':
 			String dateFormatStr = "ISO8601";
 			FastDateFormat df = null;
@@ -470,18 +464,6 @@ public class PatternParser {
 		}
 	}
 
-	private class ClassNamePatternConverter extends NamedPatternConverter {
-
-		ClassNamePatternConverter(FormattingInfo formattingInfo, int precision) {
-			super(formattingInfo, precision);
-		}
-
-		@Override
-		String getFullyQualifiedName(LogEntryItem item) {
-			return item.getClassName();
-		}
-	}
-
 	private class CategoryPatternConverter extends NamedPatternConverter {
 
 		CategoryPatternConverter(FormattingInfo formattingInfo, int precision) {
@@ -490,7 +472,7 @@ public class PatternParser {
 
 		@Override
 		String getFullyQualifiedName(LogEntryItem item) {
-			return item.getName();
+			return item.getCategoryName();
 		}
 	}
 }

@@ -9,7 +9,7 @@ public interface LoggerService {
 	
 	LogLevel getLevel();
 
-	LogEntry log(final LogLevel level, final String name, final String className);
+	LogEntry log(final LogLevel level, final String categoryName);
 	
 	void entryFlushed(final LocalLogEntry localEntry);
 	

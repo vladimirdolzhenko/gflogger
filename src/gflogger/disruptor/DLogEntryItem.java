@@ -15,11 +15,10 @@ public final class DLogEntryItem implements LogEntryItem {
 
 	private final CharBuffer buffer;
 	
-	private String name;
+	private String categoryName;
 	private LogLevel logLevel;
 	private long timestamp;
 	private String threadName;
-	private String className;
 
 	private long sequenceId;
 
@@ -41,18 +40,13 @@ public final class DLogEntryItem implements LogEntryItem {
 	}
 
 	@Override
-	public String getName() {
-		return name;
+	public String getCategoryName() {
+		return categoryName;
 	}
 
 	@Override
 	public String getThreadName() {
 		return threadName;
-	}
-
-	@Override
-	public String getClassName() {
-		return className;
 	}
 
 	@Override
@@ -77,12 +71,8 @@ public final class DLogEntryItem implements LogEntryItem {
 		this.timestamp = timestamp;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public void setClassName(String className) {
-		this.className = className;
+	public void setCategoryName(String name) {
+		this.categoryName = name;
 	}
 	
 	public void setThreadName(String threadName) {

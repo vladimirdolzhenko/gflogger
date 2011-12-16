@@ -13,11 +13,9 @@ public interface LogEntryItem {
 
 	LogLevel getLogLevel();
 	
-	String getName();
+	String getCategoryName();
 
 	String getThreadName();
-
-	String getClassName();
 
 	long getTimestamp();
 
