@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.disruptor;
 
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
@@ -57,7 +71,7 @@ public class DLoggerServiceImpl implements LoggerService {
 		
 		this.level = initLevel(appenders);
 
-		final ByteBuffer buffer = ByteBuffer.allocate(c * bufferSize);
+		final ByteBuffer buffer = ByteBuffer.allocateDirect(c * bufferSize);
 		
 		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
 			@Override
@@ -66,6 +80,7 @@ public class DLoggerServiceImpl implements LoggerService {
 					new LocalLogEntry(Thread.currentThread(), 
 						bufferSize, 
 						DLoggerServiceImpl.this);
+				//System.out.println(logEntry);
 				return logEntry;
 			}
 		};
@@ -75,10 +90,11 @@ public class DLoggerServiceImpl implements LoggerService {
 			int i = 0;
 			@Override
 			public DLogEntryItem newInstance() {
-				buffer.limit((i + 1) * bufferSize - 1);
+				buffer.limit((i + 1) * bufferSize);
 				buffer.position(i * bufferSize);
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
+				// System.out.println("item at " + i + " has capacity " + subBuffer.capacity());
 				return new DLogEntryItem(subBuffer.asCharBuffer());
 			}
 		}, 
