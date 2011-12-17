@@ -1,15 +1,32 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.disruptor.appender;
 
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.disruptor.DLogEntryItem;
+import gflogger.helpers.LogLog;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-
+/**
+ * 
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
 public abstract class AbstractAsyncAppender implements DAppender {
-
 
 	// inner thread buffer
 	protected final CharBuffer charBuffer;
@@ -26,7 +43,8 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	}
 
 	public AbstractAsyncAppender(final int sizeOfBuffer) {
-		charBuffer = ByteBuffer.allocate(sizeOfBuffer).asCharBuffer();
+		charBuffer = ByteBuffer.allocateDirect(sizeOfBuffer).asCharBuffer();
+		charBuffer.clear();
 	}
 
 	@Override
@@ -63,25 +81,34 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		if (entryLevel == null) throw new IllegalStateException(); 
 		final boolean hasProperLevel = logLevel.compareTo(entryLevel) >= 0;
 		if (hasProperLevel) {
-			formatMessage(event);
-		}
+			// it could be on different threads
+			synchronized (charBuffer) {
+				formatMessage(event);
+				processCharBuffer();
 
-		if (hasProperLevel) {
-			processCharBuffer();
-
-			if (immediateFlush) {
-				flushCharBuffer();
+				if (immediateFlush) {
+					flushCharBuffer();
+				}
 			}
 		}
 	}
 	
 	@Override
 	public void flush() {
-		flushCharBuffer();
+		try{
+			// it could be on different threads
+			synchronized (charBuffer) {
+				flushCharBuffer();
+			}
+		} catch (RuntimeException e){
+			LogLog.error("[" + Thread.currentThread().getName() +  
+				"] exception at " + name() + " - " + e.getMessage(), e);
+		}
 	}
 
-	protected void processCharBuffer(){
+	protected void processCharBuffer() {
 		// empty
+
 	}
 
 	protected void flushCharBuffer(){
@@ -95,8 +122,15 @@ public abstract class AbstractAsyncAppender implements DAppender {
 			final int position = buffer.position();
 			final int limit = buffer.limit();
 
-			layout.format(charBuffer, entry);
-
+			try { 
+				layout.format(charBuffer, entry);
+			} catch (RuntimeException e){
+				LogLog.error("[" + Thread.currentThread().getName() 
+					+ "] exception at " + name() + " pos: " + 
+					position + ", limit:" + limit +
+					" - " + e.getMessage(), e);
+			}
+	
 			buffer.position(position);
 			buffer.limit(limit);
 		}
@@ -108,10 +142,14 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	
 	@Override
 	public void onStart() {
+		LogLog.debug("[" + Thread.currentThread().getName() + "] " + 
+			name() + " is starting");
 	}
 
 	@Override
 	public void onShutdown() {
+		LogLog.debug("[" + Thread.currentThread().getName() + "] " + 
+			name() + " is about to shutdown");
 		immediateFlush = true;
 		flushCharBuffer();
 	}
