@@ -40,7 +40,7 @@ public class DLoggerExample extends AbstractLoggerExample {
     
     @Override
     protected void logFinalMessage(long t, long e) {
-        final DLoggerServiceImpl impl2 = (DLoggerServiceImpl) impl;
+        final DLoggerServiceImpl impl2 = (DLoggerServiceImpl) service;
 //        logMessage("__ park:" + impl2.park.get().get(), 0);
 //        logMessage("__ miss:" + impl2.miss.get().get(), 0);
         logMessage("__ acq:" + ((impl2.acq.get().get() / 1000) / 1e3) + " ms", 0);

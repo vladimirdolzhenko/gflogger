@@ -1,5 +1,7 @@
 package perftest;
 
+import gflogger.helpers.LogLog;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -107,8 +109,7 @@ public abstract class AbstractExample {
                     try {
                         doSmth();
                     } catch (Throwable e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                    	LogLog.error("[" + name + "] exception: " + e.getMessage(), e);
                     }
                     System.out.println(finishedMessage);
                 }

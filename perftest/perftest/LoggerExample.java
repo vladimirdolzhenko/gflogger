@@ -39,7 +39,7 @@ public class LoggerExample extends AbstractLoggerExample {
     
     @Override
     protected void logFinalMessage(long t, long e) {
-        final DefaultLoggerServiceImpl impl2 = (DefaultLoggerServiceImpl) impl;
+        final DefaultLoggerServiceImpl impl2 = (DefaultLoggerServiceImpl) service;
         logMessage("__ park:" + impl2.park.get().get(), 0);
         logMessage("__ miss:" + impl2.miss.get().get(), 0);
         logMessage("__ acq:" + ((impl2.acq.get().get() / 1000) / 1e3) + " ms", 0);

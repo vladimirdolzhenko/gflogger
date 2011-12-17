@@ -11,14 +11,14 @@ import java.util.Collections;
  */
 public abstract class AbstractLoggerExample extends AbstractExample {
     
-    private Logger logger;
-    LoggerService impl;
+    protected Logger logger;
+    protected LoggerService service;
     
     @Override
     protected void initLogger() {
-        impl = createLoggerImpl();
+        service = createLoggerImpl();
 
-        LogFactory.init(Collections.singletonMap("com.db", impl));
+        LogFactory.init(Collections.singletonMap("com.db", service));
 
         this.logger = LogFactory.getLog("com.db.fxpricing.Logger");
     }
