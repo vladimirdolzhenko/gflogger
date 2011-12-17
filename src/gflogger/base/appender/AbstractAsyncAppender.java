@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.base.appender;
 
 import gflogger.Layout;
@@ -5,6 +19,7 @@ import gflogger.LogLevel;
 import gflogger.PatternLayout;
 import gflogger.base.LogEntryItemImpl;
 import gflogger.base.RingBuffer;
+import gflogger.helpers.LogLog;
 import gflogger.util.MutableLong;
 import gflogger.util.Sequence;
 
@@ -81,7 +96,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	@Override
 	public void run() {
-		System.out.println(Thread.currentThread().getName() + " is started.");
+		LogLog.debug(Thread.currentThread().getName() + " is started.");
 		int loopCounter = 0;
 		final MutableLong idx = idxLocal.get();
 		do{
@@ -133,9 +148,9 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 			}
 
 			loopCounter++;
-	   } while((running || rightIndex.get() > idx.get()) && !Thread.interrupted());
+		} while((running || rightIndex.get() > idx.get()) && !Thread.interrupted());
 		workerIsAboutToFinish();
-		System.out.println(Thread.currentThread().getName() + " is finished.");
+		LogLog.debug(Thread.currentThread().getName() + " is finished.");
 	}
 
 	protected void processCharBuffer(){
@@ -208,7 +223,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	public void stop(){
 		if (!running)
 			throw new IllegalStateException();
-		System.out.println(name() + " stop ");
+		LogLog.debug(name() + " stop ");
 		running = false;
 		synchronized (lock) {
 			lock.notifyAll();

@@ -1,9 +1,23 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.formatter;
 
 import java.nio.CharBuffer;
 
 /**
- * CharBufferFormatter
+ * BufferFormatter
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
@@ -192,7 +206,7 @@ public class BufferFormatter {
 		int charPos = size;
 		
 		int oldPos = buffer.position();
-
+		
 		// Generate two digits per iteration
 		while (i >= 65536) {
 			q = i / 100;
@@ -206,7 +220,13 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
 		for (;;) { 
+			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1  
+			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
+			/*/
+			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
+			/*/
 			q = (i * 52429) >>> (16+3);
+			//*/
 			r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
 			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
 			i = q;
@@ -268,7 +288,12 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
+			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
+			/*/
+			q2 = ((i2 << 15) + (i2 << 14) + (i2 << 11) + (i2 << 10) + (i2 << 7) + (i2 << 6) + (i2 << 3) + (i2 << 2) + i2) >> (16 + 3);
+			/*/
 			q2 = (i2 * 52429) >>> (16+3);
+			//*/
 			r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
 			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
 			i2 = q2;

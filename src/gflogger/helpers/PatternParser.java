@@ -489,11 +489,8 @@ public class PatternParser {
 				// happen if
 				// precision is 1 and the category name ends with a dot.
 				int end = len - 1;
-				for (int i = precision; i > 0; i--) {
+				for (int i = precision; i > 0 && end > 0; i--) {
 					end = n.lastIndexOf('.', end - 1);
-					if (end == -1) {
-						buffer.append(n);
-					}
 				}
 				for(int i = end + 1; i < len; i++){
 					buffer.append(n.charAt(i));

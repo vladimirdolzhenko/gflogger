@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.formatter;
 
 import gflogger.formatter.BufferFormatter;
@@ -16,7 +30,10 @@ import junit.framework.TestCase;
 public class BufferFormatterTest extends TestCase {
 
     public void testStringLength() throws Exception {
-        final int[] numbers = new int[]{0, 1, 7, 11, 123, 7895, 100, 101, 10007, Integer.MAX_VALUE};
+        final int[] numbers = new int[]{0, 1, 7, 11, 123, 7895, 100, 101, 
+    		10007, 1000000, 123456789, 
+    		987654321,
+    		Integer.MAX_VALUE};
         for (int i = 0; i < numbers.length; i++) {
             assertEquals(Integer.toString(numbers[i]).length(), BufferFormatter.stringSize(numbers[i]));
         }
@@ -80,6 +97,8 @@ public class BufferFormatterTest extends TestCase {
         
         final long[] numbers = new long[]{7123712398L, 
                 9999999999399L, 99999999999999L, 
+                10007, 1000000, 123456789,  1234567890L,
+        		987654321, 9876543210L,
                 Integer.MAX_VALUE, Integer.MIN_VALUE, 
                 Integer.MAX_VALUE + 249, Integer.MIN_VALUE - 100, 
                 Long.MAX_VALUE, Long.MIN_VALUE};

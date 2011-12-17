@@ -1,6 +1,21 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package gflogger.disruptor.appender;
 
 import gflogger.Layout;
+import gflogger.helpers.LogLog;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -99,10 +114,12 @@ public class FileAppender extends AbstractAsyncAppender {
 			channel.write(buffer);
 //			final long end = System.nanoTime();
 
-			//LogLog.debug(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
+//			LogLog.debug("[" + Thread.currentThread().getName() + "] " + name() +
+//				" " + cause + ":" + limit + " bytes stored in " + 
+//				((end - start) / 1000 / 1e3) + " ms");
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogLog.error("[" + Thread.currentThread().getName() +  
+				"] exception at " + name() + " - " + e.getMessage(), e);
 		} finally {
 			buffer.clear();
 		}
@@ -125,8 +142,8 @@ public class FileAppender extends AbstractAsyncAppender {
 			channel.close();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogLog.error("[" + Thread.currentThread().getName() +  
+				"] exception at " + name() + " - " + e.getMessage(), e);
 		}
 	}
 	
