@@ -14,8 +14,29 @@
 
 package gflogger.base.appender;
 
+import java.io.PrintStream;
+
 public class ConsoleAppender extends AbstractAsyncAppender implements Runnable {
 
+	private final PrintStream out;
+	
+	public ConsoleAppender() {
+		this(System.out);
+	}
+	
+	public ConsoleAppender(final int sizeOfBuffer) {
+		this(sizeOfBuffer, System.out);
+	}
+	
+	public ConsoleAppender(final PrintStream out) {
+		this.out = out;
+	}
+	
+	public ConsoleAppender(final int sizeOfBuffer, final PrintStream out) {
+		super(sizeOfBuffer);
+		this.out = out;
+	}
+	
 	@Override
 	protected void processCharBuffer() {
 		flushCharBuffer();
@@ -27,11 +48,11 @@ public class ConsoleAppender extends AbstractAsyncAppender implements Runnable {
 			charBuffer.flip();
 			//*/
 			while(charBuffer.hasRemaining()){
-				System.out.append(charBuffer.get());
+				out.append(charBuffer.get());
 			}
 			//*/
 			//*/
-			System.out.flush();
+			out.flush();
 			charBuffer.clear();
 		}
 	}
