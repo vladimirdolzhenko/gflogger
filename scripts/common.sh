@@ -15,6 +15,8 @@ run(){
     -Xms512m
     -Xmx512m
 
+	-Dgflogger.direct=true
+
 	-XX:CompileThreshold=5000
     
     -XX:-UseBiasedLocking
