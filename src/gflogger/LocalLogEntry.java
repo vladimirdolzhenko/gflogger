@@ -15,9 +15,10 @@
 package gflogger;
 
 import static gflogger.formatter.BufferFormatter.*;
+import static gflogger.util.StackTraceUtils.*;
+
 import gflogger.formatter.BufferFormatter;
 
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
@@ -156,8 +157,7 @@ public final class LocalLogEntry implements LogEntry {
 							}
 							
 							final Class clazz = 
-								loadClass(Thread.currentThread().getContextClassLoader(), 
-									trace[i].getClassName());
+								loadClass(trace[i].getClassName());
 							if (clazz != null){
 								append('[').append(getCodeLocation(clazz));
 								final String implVersion = getImplementationVersion(clazz);
@@ -180,72 +180,7 @@ public final class LocalLogEntry implements LogEntry {
 		}
 		return this;
 	}
-	
-	String getImplementationVersion(Class clazz) {
-		if (clazz == null) return null;
-		
-		final Package pkg = clazz.getPackage();
-		if (pkg != null) {
-			String v = pkg.getImplementationVersion();
-			if (v != null) return v;
-		}
-		return null;
 
-	}
-
-	String getCodeLocation(Class type) {
-		try {
-			if (type != null) {
-				// file:/C:/java/maven-2.0.8/repo/com/icegreen/greenmail/1.3/greenmail-1.3.jar
-				URL resource = type.getProtectionDomain().getCodeSource().getLocation();
-				if (resource != null) {
-					String locationStr = resource.toString();
-					// now lets remove all but the file name
-					String result = getCodeLocation(locationStr, '/');
-					if (result != null) {
-						return result;
-					}
-					return getCodeLocation(locationStr, '\\');
-				}
-			}
-		} catch (Exception e) {
-			// ignore
-		}
-		return "na";
-	}
-
-	private String getCodeLocation(String locationStr, char separator) {
-		int idx = locationStr.lastIndexOf(separator);
-		if (isFolder(idx, locationStr)) {
-			idx = locationStr.lastIndexOf(separator, idx - 1);
-			return locationStr.substring(idx + 1);
-		} else if (idx > 0) {
-			return locationStr.substring(idx + 1);
-		}
-		return null;
-	}
-	
-	private boolean isFolder(int idx, String text) {
-		return (idx != -1 && idx + 1 == text.length());
-	}
-
-	private Class loadClass(ClassLoader cl, String className) {
-		if (cl == null) {
-			return null;
-		}
-		try {
-			return cl.loadClass(className);
-		} catch (ClassNotFoundException e1) {
-			return null;
-		} catch (NoClassDefFoundError e1) {
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace(); // this is unexpected
-			return null;
-		}
-
-	}
-	
 	@Override
 	public LogEntry append(Object o) {
 		if (o != null){
