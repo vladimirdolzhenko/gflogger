@@ -14,6 +14,8 @@
 
 package gflogger.base;
 
+import static gflogger.formatter.BufferFormatter.*;
+
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -110,7 +112,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	}
 
 	private LogEntryItemImpl[] initEnties(int count, final int bufferSize) {
-		final ByteBuffer buffer = ByteBuffer.allocateDirect(count * bufferSize);
+		final ByteBuffer buffer = allocate(count * bufferSize);
 
 		final LogEntryItemImpl[] entries = new LogEntryItemImpl[count];
 		for (int i = 0; i < count; i++) {
@@ -254,17 +256,6 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		for(int i = 0; i < appenders.length; i++){
 			appenders[i].stop();
 		}
-	}
-	
-	private int roundUpNextPower2(int x) {
-		// HD, Figure 3-3
-		x = x - 1; 
-		x = x | (x >> 1); 
-		x = x | (x >> 2); 
-		x = x | (x >> 4); 
-		x = x | (x >> 8); 
-		x = x | (x >>16); 
-		return x + 1; 
 	}
 
 }

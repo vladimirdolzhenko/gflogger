@@ -15,6 +15,8 @@
 package gflogger.disruptor;
 
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
+import static gflogger.formatter.BufferFormatter.*;
+
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -30,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
-
 
 /**
  * DLoggerServiceImpl - is the garbage-free logger implementation on the top of disruptor.
@@ -71,7 +72,7 @@ public class DLoggerServiceImpl implements LoggerService {
 		
 		this.level = initLevel(appenders);
 
-		final ByteBuffer buffer = ByteBuffer.allocateDirect(c * bufferSize);
+		final ByteBuffer buffer = allocate(c * bufferSize);
 		
 		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
 			@Override
@@ -287,17 +288,6 @@ public class DLoggerServiceImpl implements LoggerService {
 		for(int i = 0; i < appenders.length; i++){
 			appenders[i].flush();
 		}
-	}
-	
-	private int roundUpNextPower2(int x) {
-		// HD, Figure 3-3
-		x = x - 1; 
-		x = x | (x >> 1); 
-		x = x | (x >> 2); 
-		x = x | (x >> 4); 
-		x = x | (x >> 8); 
-		x = x | (x >>16); 
-		return x + 1; 
 	}
 
 }

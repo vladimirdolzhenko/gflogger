@@ -14,12 +14,13 @@
 
 package gflogger.disruptor.appender;
 
+import static gflogger.formatter.BufferFormatter.allocate;
+
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.disruptor.DLogEntryItem;
 import gflogger.helpers.LogLog;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	}
 
 	public AbstractAsyncAppender(final int sizeOfBuffer) {
-		charBuffer = ByteBuffer.allocateDirect(sizeOfBuffer).asCharBuffer();
+		charBuffer = allocate(sizeOfBuffer).asCharBuffer();
 		charBuffer.clear();
 	}
 

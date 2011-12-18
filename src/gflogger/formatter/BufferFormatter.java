@@ -14,6 +14,7 @@
 
 package gflogger.formatter;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
@@ -23,6 +24,22 @@ import java.nio.CharBuffer;
  */
 public class BufferFormatter {
 
+	public static ByteBuffer allocate(final int capacity){
+		final boolean direct = Boolean.parseBoolean(System.getProperty("gflogger.direct", "true"));
+		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+	}
+	
+	public static int roundUpNextPower2(int x) {
+		// HD, Figure 3-3
+		x = x - 1; 
+		x = x | (x >> 1); 
+		x = x | (x >> 2); 
+		x = x | (x >> 4); 
+		x = x | (x >> 8); 
+		x = x | (x >>16); 
+		return x + 1; 
+	}
+	
 	public static CharBuffer append(final CharBuffer buffer, boolean b){
 		if (b){
 			return buffer.put('t').put('r').put('u').put('e');

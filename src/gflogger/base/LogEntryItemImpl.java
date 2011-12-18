@@ -14,10 +14,11 @@
 
 package gflogger.base;
 
+import static gflogger.formatter.BufferFormatter.allocate;
+
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
@@ -37,7 +38,7 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	private volatile long id;
 
 	public LogEntryItemImpl(final int sizeInBytes) {
-		this(ByteBuffer.allocateDirect(sizeInBytes).asCharBuffer());
+		this(allocate(sizeInBytes).asCharBuffer());
 	}
 
 	public LogEntryItemImpl(final CharBuffer buffer) {

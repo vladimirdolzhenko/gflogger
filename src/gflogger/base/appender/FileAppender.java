@@ -14,6 +14,8 @@
 
 package gflogger.base.appender;
 
+import static gflogger.formatter.BufferFormatter.allocate;
+
 import gflogger.Layout;
 import gflogger.base.LogEntryItemImpl;
 import gflogger.base.RingBuffer;
@@ -51,7 +53,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	public FileAppender(int bufferSize) {
 		// unicode char is 4 bytes 
 		super(bufferSize << 2);
-		buffer = ByteBuffer.allocateDirect(bufferSize);
+		buffer = allocate(bufferSize);
 		immediateFlush = false;
 	}
 

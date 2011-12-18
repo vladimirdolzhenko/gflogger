@@ -14,6 +14,7 @@
 
 package gflogger;
 
+import static gflogger.formatter.BufferFormatter.*;
 import gflogger.formatter.BufferFormatter;
 
 import java.net.URL;
@@ -36,7 +37,7 @@ public final class LocalLogEntry implements LogEntry {
 	private LogLevel logLevel;
 	
 	public LocalLogEntry(final Thread owner, final int size, final LoggerService loggerService) {
-		this(owner, ByteBuffer.allocateDirect(size), loggerService);
+		this(owner, allocate(size), loggerService);
 	}
 
 	public LocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService) {

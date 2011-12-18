@@ -14,6 +14,8 @@
 
 package gflogger.base.appender;
 
+import static gflogger.formatter.BufferFormatter.*;
+
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
@@ -23,9 +25,7 @@ import gflogger.helpers.LogLog;
 import gflogger.util.MutableLong;
 import gflogger.util.Sequence;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.concurrent.locks.LockSupport;
 
 public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl>, Runnable {
 
@@ -60,7 +60,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	public AbstractAsyncAppender(final int sizeOfBuffer) {
-		charBuffer = ByteBuffer.allocateDirect(sizeOfBuffer).asCharBuffer();
+		charBuffer = allocate(sizeOfBuffer).asCharBuffer();
 		lock = new Object();
 	}
 

@@ -14,10 +14,11 @@
 
 package gflogger.disruptor;
 
+import static gflogger.formatter.BufferFormatter.allocate;
+
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
@@ -37,7 +38,7 @@ public final class DLogEntryItem implements LogEntryItem {
 	private long sequenceId;
 
 	public DLogEntryItem(final int size) {
-		this(ByteBuffer.allocateDirect(size).asCharBuffer());
+		this(allocate(size).asCharBuffer());
 	}
 
 	public DLogEntryItem(final CharBuffer buffer) {

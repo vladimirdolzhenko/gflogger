@@ -14,6 +14,8 @@
 
 package gflogger.disruptor.appender;
 
+import static gflogger.formatter.BufferFormatter.allocate;
+
 import gflogger.Layout;
 import gflogger.helpers.LogLog;
 
@@ -25,7 +27,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-
 
 public class FileAppender extends AbstractAsyncAppender {
 
@@ -49,7 +50,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	public FileAppender(int bufferSize) {
 		// unicode char is 4 bytes 
 		super(bufferSize << 2);
-		buffer = ByteBuffer.allocateDirect(bufferSize);
+		buffer = allocate(bufferSize);
 		immediateFlush = false;
 	}
 
