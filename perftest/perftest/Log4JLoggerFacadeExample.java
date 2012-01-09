@@ -16,6 +16,11 @@ public class Log4JLoggerFacadeExample extends AbstractLoggerExample {
         return impl;
     }
     
+    @Override
+    protected String fileAppenderFileName() {
+        return null;
+    }
+    
     public static void main(final String[] args) throws Throwable {
         final Log4JLoggerFacadeExample loggerExample = new Log4JLoggerFacadeExample();
         loggerExample.parseArgs(args);
