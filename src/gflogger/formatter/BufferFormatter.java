@@ -207,11 +207,8 @@ public class BufferFormatter {
 	//
 	
 	// based on java.lang.Integer.getChars(int i, int index, char[] buf)
-	static void put(final CharBuffer buffer, int i) {
+	private static void put(final CharBuffer buffer, int i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
-		if (buffer.remaining() < size){
-			throw new IllegalStateException("No enough buffer space");
-		}
 		
 		if (i < 0) {
 			buffer.put('-');
@@ -262,11 +259,8 @@ public class BufferFormatter {
 	}
 	
 	// based on java.lang.Long.getChars(int i, int index, char[] buf)
-	static void put(final CharBuffer buffer, long i) {
+	private static void put(final CharBuffer buffer, long i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
-		if (buffer.remaining() < size){
-			throw new IllegalStateException("No enough buffer space");
-		}
 		
 		int oldPos = buffer.position();
 		
@@ -322,12 +316,12 @@ public class BufferFormatter {
 		buffer.position(oldPos + size);
 	}
 	
-	static void putAt(final CharBuffer buffer, int pos, char b){
+	private static void putAt(final CharBuffer buffer, int pos, char b){
 		buffer.position(pos);
 		buffer.append(b);
 	}
 	
-	static void put(final CharBuffer buffer, double i, int precision) {
+	private static void put(final CharBuffer buffer, double i, int precision) {
 		long x = (long)i;
 		put(buffer, x);
 		buffer.put('.');

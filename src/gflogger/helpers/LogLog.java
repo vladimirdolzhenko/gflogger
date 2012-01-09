@@ -27,7 +27,6 @@ package gflogger.helpers;
  * internal error messages are sent to <code>System.err</code>. All internal
  * messages are prepended with the string "gflogger: ".
  * 
- * @since 0.8.2
  * @author Ceki G&uuml;lc&uuml;
  * @author Vladimir Dolzhenko
  */

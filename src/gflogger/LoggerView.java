@@ -42,36 +42,43 @@ public class LoggerView implements Logger {
 		this.categoryName = clazz.getName();
 	}
 
+	private boolean hasNecessaryLevel(LogLevel level) {
+		return loggerService != null && this.level.compareTo(level) <= 0;
+	}
+
+	private LogEntry logEntry(final LogLevel logLevel) {
+		return hasNecessaryLevel(logLevel) ? 
+			loggerService.log(logLevel, categoryName) : 
+			mockLogEntry;
+	}	
+
 	@Override
 	public boolean isDebugEnabled() {
-		return loggerService != null && level.compareTo(LogLevel.DEBUG) <= 0;
+		return hasNecessaryLevel(LogLevel.DEBUG);
 	}
 
 	@Override
 	public LogEntry debug() {
-		if (!isDebugEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.DEBUG, categoryName);
+		return logEntry(LogLevel.DEBUG);
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return loggerService != null && level.compareTo(LogLevel.INFO) <= 0;
+		return hasNecessaryLevel(LogLevel.INFO);
 	}
 
 	@Override
 	public LogEntry info() {
-		if (!isInfoEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.INFO, categoryName);
+		return logEntry(LogLevel.INFO);
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return loggerService != null && level.compareTo(LogLevel.ERROR) <= 0;
+		return hasNecessaryLevel(LogLevel.ERROR);
 	}
 
 	@Override
 	public LogEntry error() {
-		if (!isErrorEnabled()) return mockLogEntry;
-		return loggerService.log(LogLevel.ERROR, categoryName);
+		return logEntry(LogLevel.ERROR);
 	}
 }

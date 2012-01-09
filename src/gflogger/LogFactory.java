@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class LogFactory {
 
+	private final Object lock = new Object();
+	
 	private final Map<String, LoggerService> services;
 	private final Map<String, LoggerView> namedLogger;
 	private final Map<Class, LoggerView> classedLogger;
@@ -38,7 +40,7 @@ public class LogFactory {
 	private Logger get(final String name){
 		LoggerView logger = namedLogger.get(name);
 		if (logger != null) return logger;
-		synchronized (namedLogger) {
+		synchronized (lock) {
 			logger = namedLogger.get(name);
 			if (logger != null) return logger;
 
@@ -46,9 +48,9 @@ public class LogFactory {
 
 			// look for name
 			for(;;){
-				final LoggerService impl = services.get(n);
-				if (impl != null){
-					logger = new LoggerView(impl, name);
+				final LoggerService service = services.get(n);
+				if (service != null){
+					logger = new LoggerView(service, name);
 					namedLogger.put(name, logger);
 					return logger;
 				}
@@ -70,7 +72,7 @@ public class LogFactory {
 	private Logger get(final Class clazz){
 		LoggerView logger = classedLogger.get(clazz);
 		if (logger != null) return logger;
-		synchronized (classedLogger) {
+		synchronized (lock) {
 			logger = classedLogger.get(clazz);
 			if (logger != null) return logger;
 
@@ -78,9 +80,9 @@ public class LogFactory {
 
 			// look for name
 			for(;;){
-				final LoggerService impl = services.get(n);
-				if (impl != null){
-					logger = new LoggerView(impl, clazz);
+				final LoggerService service = services.get(n);
+				if (service != null){
+					logger = new LoggerView(service, clazz);
 					classedLogger.put(clazz, logger);
 					return logger;
 				}
@@ -108,17 +110,31 @@ public class LogFactory {
 	}
 
 	public static void stop(){
-		final Collection<LoggerService> values = Helper.FACTORY.services.values();
-		for (final LoggerService impl : values) {
-			impl.stop();
-		}
+		synchronized (Helper.FACTORY.lock) {
+			final Collection<LoggerService> values = Helper.FACTORY.services.values();
+			for (final LoggerService service : values) {
+				service.stop();
+			}
+        }
+	}
+	
+	private void reset(){
+		synchronized (lock) {
+	        services.clear();
+	        classedLogger.clear();
+	        namedLogger.clear();
+        }
 	}
 
-	public static void init(final Map<String, LoggerService> impls){
-		Helper.FACTORY.services.clear();
-		if (impls != null){
-			Helper.FACTORY.services.putAll(impls);
+	public static LogFactory init(final Map<String, LoggerService> services){
+		synchronized (Helper.FACTORY.lock) {
+			stop();
+			Helper.FACTORY.reset();
+			if (services != null){
+				Helper.FACTORY.services.putAll(services);
+			}
 		}
+		return Helper.FACTORY;
 	}
 
 	private static class Helper {
