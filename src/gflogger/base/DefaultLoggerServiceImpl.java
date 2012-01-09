@@ -20,15 +20,19 @@ import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.LoggerService;
+import gflogger.appender.AppenderFactory;
 import gflogger.base.appender.Appender;
-import gflogger.util.MutableLong;
-import gflogger.util.Sequence;
+import gflogger.ring.BlockingWaitStrategy;
+import gflogger.ring.RingBuffer;
+import gflogger.util.NamedThreadFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-
+import org.apache.log4j.helpers.LogLog;
 
 /**
  * DefaultLoggerServiceImpl is the garbage-free implementation on the top of 
@@ -40,64 +44,58 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	private final LogLevel level;
 	private final Appender[] appenders;
-	private final Sequence cursor;
-	
-	//*/
-	private final ThreadLocal<MutableLong> maxIndexThreadLocal;
-	/*/
-	private final PaddedAtomicLong maxIndexAtomic;
-	//*/
 	
 	private final ThreadLocal<LocalLogEntry> logEntryThreadLocal;
 
 	private final RingBuffer<LogEntryItemImpl> ringBuffer;
-	private final int size;
+	private final ExecutorService executorService;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
-	 * @param bufferSize buffer size of each item in the ring 
+	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param appenderFactories
+	 */
+	public DefaultLoggerServiceImpl(final int count, final int maxMessageSize, final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, createAppenders(appenderFactories));
+    }
+
+	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
+		final Appender[] appenders = new Appender[appenderFactories.length];
+		for (int i = 0; i < appenders.length; i++) {
+			appenders[i] = (Appender) appenderFactories[i].createAppender(DefaultLoggerServiceImpl.class);
+		}
+		return appenders;
+	}
+
+	/**
+	 * @param count a number of items in the ring, could be rounded up to the next power of 2
+	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param appenders
 	 */
-	public DefaultLoggerServiceImpl(final int count, final int bufferSize, final Appender ... appenders) {
-		if (appenders.length == 0){
+	public DefaultLoggerServiceImpl(final int count, final int maxMessageSize, final Appender ... appenders) {
+		if (appenders.length <= 0){
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
-		// flag size restriction
-		if (appenders.length > (Integer.SIZE - 1)){
-			throw new IllegalArgumentException("Expected less than " + (Integer.SIZE - 1) + " appenders");
-		}
 		this.appenders = appenders;
-		
-		this.cursor = new Sequence(0);
 		
 		final int c = (count & (count - 1)) != 0 ? 
 			roundUpNextPower2(count) : count;
 		this.ringBuffer = 
-			new RingBuffer<LogEntryItemImpl>(initEnties(c, bufferSize));
+			new RingBuffer<LogEntryItemImpl>(new BlockingWaitStrategy(), 
+				initEnties(c, maxMessageSize));
+		this.ringBuffer.setEntryProcessors(appenders);
 		this.level = initLogLevel(appenders);
-		this.size = this.ringBuffer.size();
-		
-		//*/
-		this.maxIndexThreadLocal = new ThreadLocal<MutableLong>(){
-			@Override
-			protected MutableLong initialValue() {
-				return new MutableLong(c - 1);
-			}
-		};
-		/*/
-		this.maxIndexAtomic = new PaddedAtomicLong(c - 1);
-		//*/
 		
 		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry = 
-					new LocalLogEntry(Thread.currentThread(), 
-						bufferSize, 
-						DefaultLoggerServiceImpl.this);
+					new LocalLogEntry(maxMessageSize, DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}
 		};
+		
+		executorService = initExecutorService(appenders);
 		
 		start(appenders);
 	}
@@ -110,8 +108,19 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		}
 		return level;
 	}
+	
+	private ExecutorService initExecutorService(final Appender... appenders){
+		final String[] names = new String[appenders.length];
+		for (int i = 0; i < appenders.length; i++) {
+			names[i] = appenders[i].getName();
+		}
+		
+		return Executors.newFixedThreadPool(appenders.length, new NamedThreadFactory("appender", names));
+	}
 
-	private LogEntryItemImpl[] initEnties(int count, final int bufferSize) {
+	private LogEntryItemImpl[] initEnties(int count, final int maxMessageSize) {
+		// unicode char has 2 bytes
+		final int bufferSize = maxMessageSize << 1;
 		final ByteBuffer buffer = allocate(count * bufferSize);
 
 		final LogEntryItemImpl[] entries = new LogEntryItemImpl[count];
@@ -124,75 +133,36 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		return entries;
 	}
 
-	private void start(final Appender... appenders) {
+	private void start(final Appender ... appenders) {
 		for (int i = 0; i < appenders.length; i++) {
-			appenders[i].start(ringBuffer);
+			appenders[i].start();
+		}
+		for (int i = 0; i < appenders.length; i++) {
+			executorService.execute(appenders[i]);
 		}
 	}
 
 	@Override
 	public LogEntry log(final LogLevel level, final String categoryName){
 		final LocalLogEntry entry = logEntryThreadLocal.get();
+		
+		if (!entry.isCommited()){
+			LogLog.error("ERROR! log message was not properly commited.");
+			entry.commit();
+		}
+		
+		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.getBuffer().clear();
 		return entry;
 	}
 	
-	
-	private LogEntryItemImpl log0(){
-		//*/
-		final MutableLong mutableMaxIndex = maxIndexThreadLocal.get();
-		long maxIdx = mutableMaxIndex.get();
-		/*/
-		long maxIdx = maxIndexAtomic.get();
-		//*/
-		
-		final long localIndex = cursor.getAndIncrement();
-		
-		for(int i = 0;  ; i++){
-			//
-			//   maxIndex - size < index <= maxIndex	
-			//   
-			if (localIndex <= maxIdx){
-				final LogEntryItemImpl entry = ringBuffer.get(localIndex);
-				entry.setId(localIndex);
-				return entry;
-			}
-			
-			//miss.get().set(miss.get().get() + 1);
-
-			while(localIndex > maxIdx){
-				long max = maxIdx;
-				// find the min of max release
-				for (int j = 0; j < appenders.length; j++) {
-					// fence reading
-					final long maxReleased = appenders[j].getMaxReleased();
-					max = max <= maxReleased ? max : maxReleased;
-				}
-				maxIdx = max + size;
-				
-				if (localIndex <= maxIdx) break;
-				/*/
-				final MutableLong mutableLong = park.get();
-				park.get().set(mutableLong.get() + 1);
-				/*/
-				//*/
-				LockSupport.parkNanos(1L);
-			}
-
-			//*/
-			mutableMaxIndex.set(maxIdx);
-			/*/
-			maxIndexAtomic.set(maxIdx);
-			//*/
-		}
-	}
-
 	@Override
     public void entryFlushed(final LocalLogEntry localEntry){
-		//final long time0 = System.nanoTime();
-		final LogEntryItemImpl entry = log0();
+		final long next = ringBuffer.next();
+		final LogEntryItemImpl entry = ringBuffer.get(next);
+		
 		entry.setCategoryName(localEntry.getCategoryName());
 		entry.setLogLevel(localEntry.getLogLevel());
 		entry.setThreadName(localEntry.getThreadName());
@@ -200,51 +170,9 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		final CharBuffer buffer = entry.getBuffer();
 		buffer.clear();
 		buffer.put(localEntry.getBuffer()).flip();
-		//final long time1 = System.nanoTime();
-		for (int i = 0; i < appenders.length; i++) {
-			appenders[i].entryFlushed(entry);
-		}
-		/*/
-		final long time2 = System.nanoTime();
-		{
-			final MutableLong mutableLong = acq.get();
-			mutableLong.set(mutableLong.get() + time1 - time0);
-		}
-		{
-			final MutableLong mutableLong = commit.get();
-			mutableLong.set(mutableLong.get() + time2 - time1);
-		}
-		/*/
-		//*/
+		
+		ringBuffer.publish(next);
 	}
-
-	public final ThreadLocal<MutableLong> acq = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
-	
-	public final ThreadLocal<MutableLong> commit = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
-	
-	public final ThreadLocal<MutableLong> park = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
-	
-	public final ThreadLocal<MutableLong> miss = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
 	
 	@Override
 	public LogLevel getLevel() {
@@ -255,6 +183,12 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	public void stop(){
 		for(int i = 0; i < appenders.length; i++){
 			appenders[i].stop();
+		}
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// ignore
 		}
 	}
 

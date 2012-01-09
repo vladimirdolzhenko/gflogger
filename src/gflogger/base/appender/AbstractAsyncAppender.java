@@ -20,14 +20,16 @@ import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
 import gflogger.base.LogEntryItemImpl;
-import gflogger.base.RingBuffer;
 import gflogger.helpers.LogLog;
-import gflogger.util.MutableLong;
-import gflogger.util.Sequence;
+import gflogger.ring.MutableLong;
+import gflogger.ring.RingBuffer;
+import gflogger.ring.RingBufferAware;
+import gflogger.ring.PaddedAtomicLong;
 
 import java.nio.CharBuffer;
+import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl>, Runnable {
+public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl>, RingBufferAware<LogEntryItemImpl> {
 
 	protected final Object lock;
 	// inner thread buffer
@@ -38,19 +40,19 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	protected boolean immediateFlush = false;
 	protected int bufferedIOThreshold = 100;
 	protected long awaitTimeout = 10L;
+	
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 	
 	// runtime changing properties
 	
 	protected volatile boolean running = false;
 
-	protected final Sequence leftIndex = new Sequence(-1);
-	protected final Sequence rightIndex = new Sequence(-1);
+	protected final PaddedAtomicLong cursor = new PaddedAtomicLong(RingBuffer.INITIAL_CURSOR_VALUE);
 
 	protected final ThreadLocal<MutableLong> idxLocal = new ThreadLocal<MutableLong>(){
 	  @Override
 		protected MutableLong initialValue() {
-			return new MutableLong(-1);
+			return new MutableLong(RingBuffer.INITIAL_CURSOR_VALUE);
 		}  
 	};
 	
@@ -59,8 +61,9 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		this(1 << 22);
 	}
 
-	public AbstractAsyncAppender(final int sizeOfBuffer) {
-		charBuffer = allocate(sizeOfBuffer).asCharBuffer();
+	public AbstractAsyncAppender(final int bufferSize) {
+		// unicode char has 2 bytes
+		charBuffer = allocate(bufferSize << 1).asCharBuffer();
 		lock = new Object();
 	}
 
@@ -90,65 +93,54 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 	
 	@Override
-	public long getMaxReleased() {
-		return leftIndex.get();
+	public long getSequence() {
+		return cursor.get();
 	}
 
 	@Override
 	public void run() {
 		LogLog.debug(Thread.currentThread().getName() + " is started.");
-		int loopCounter = 0;
 		final MutableLong idx = idxLocal.get();
+		long loopCounter = 0;
 		do{
-			// handle all available changes in a row
-			long localMaxIndex = rightIndex.get();
-			while (localMaxIndex > idx.get() || ((localMaxIndex = rightIndex.get()) > idx.get())){
-				// handle if entry has not been processed yet. 
-				while(idx.get() < localMaxIndex){
-					final LogEntryItemImpl entry = ringBuffer.get(idx.get() + 1);
-					// handle entry that has a log level equals or higher than required
-					final boolean hasProperLevel =
-						logLevel.compareTo(entry.getLogLevel()) >= 0;
-						if (hasProperLevel){
-							formatMessage(entry);
-						}
-
-						// release entry anyway
-						releaseEntry(entry, idx);
-
-						if (hasProperLevel){
-							processCharBuffer();
-
-							if (immediateFlush){
-								flushCharBuffer();
-								loopCounter = 0;
-							}
-						}
+			
+			long maxIndex;
+			try {
+				maxIndex = ringBuffer.waitFor(idx.get() + 1, awaitTimeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+	            break;
+            }
+            
+         // handle all available changes in a row
+            while ((maxIndex > idx.get()) || ((maxIndex = ringBuffer.getCursor()) > idx.get())){
+            	final LogEntryItemImpl entry = ringBuffer.get(idx.get() + 1);
+				// handle entry that has a log level equals or higher than required
+				final boolean hasProperLevel =
+					logLevel.compareTo(entry.getLogLevel()) >= 0;
+				if (hasProperLevel){
+					formatMessage(entry);
 				}
-			}
 
-			if (immediateFlush || loopCounter > bufferedIOThreshold){
+				// release entry anyway
+				releaseEntry(entry, idx);
+
+				if (hasProperLevel){
+					processCharBuffer();
+
+					if (immediateFlush){
+						flushCharBuffer();
+						loopCounter = 0;
+					}
+				}
+            }
+
+            if (loopCounter > bufferedIOThreshold){
 				flushCharBuffer();
 				loopCounter = 0;
-				
-				if (!immediateFlush) {
-					// to eliminate cpu-burned busy spin
-					//*/
-					synchronized (lock) {
-						try {
-							lock.wait(awaitTimeout);
-						} catch (final InterruptedException e) {
-							// nothing
-						}
-					}
-					/*/
-					LockSupport.parkNanos(1000L);
-					//*/
-				}
 			}
 
 			loopCounter++;
-		} while((running || rightIndex.get() > idx.get()) && !Thread.interrupted());
+		} while(running && !Thread.interrupted());
 		workerIsAboutToFinish();
 		LogLog.debug(Thread.currentThread().getName() + " is finished.");
 	}
@@ -165,16 +157,6 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		flushCharBuffer();
 	}
 
-	@Override
-	public void entryFlushed(final LogEntryItemImpl entry) {
-		final long id = entry.getId();
-		final long expectedId = id - 1;
-		while(!rightIndex.compareAndSet(expectedId, id)){
-			// busy-spin on await index
-		}
-	}
-	
-
 	protected void formatMessage(final LogEntryItemImpl entry) {
 		final CharBuffer buffer = entry.getBuffer();
 		synchronized (buffer) {
@@ -190,20 +172,24 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	protected void releaseEntry(final LogEntryItemImpl entry, final MutableLong idx) {
 		final long id = idx.get();
-		final long leftIdx = leftIndex.get();
+		final long leftIdx = cursor.get();
 		if (leftIdx < id){
-			leftIndex.set(id);
+			cursor.set(id);
 		}
 		idx.set(id + 1);
 	}
 
-	protected abstract String name();
+	@Override
+	public void setRingBuffer(RingBuffer<LogEntryItemImpl> ringBuffer) {
+		this.ringBuffer = ringBuffer;
+	}
 
 	@Override
-	public void start(final RingBuffer<LogEntryItemImpl> ringBuffer) {
+	public void start() {
 		if (running)
 			throw new IllegalStateException();
 		
+		LogLog.debug(getName() + " is starting ");
 		running = true;
 
 		// just fence
@@ -211,19 +197,13 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 			if (layout == null){
 				layout = new PatternLayout();
 			}
-
-			this.ringBuffer = ringBuffer;
 		}
-
-		final Thread thread = new Thread(this, name() + "-logger");
-		thread.start();
 	}
 
 	@Override
 	public void stop(){
-		if (!running)
-			throw new IllegalStateException();
-		LogLog.debug(name() + " stop ");
+		if (!running) return;
+		LogLog.debug(getName() + " is stopping ");
 		running = false;
 		synchronized (lock) {
 			lock.notifyAll();

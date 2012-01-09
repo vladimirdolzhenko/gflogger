@@ -15,18 +15,14 @@
 package gflogger.base.appender;
 
 import gflogger.LogEntryItem;
-import gflogger.LogLevel;
-import gflogger.base.RingBuffer;
 
-public interface Appender<T extends LogEntryItem> {
+import gflogger.ring.EntryProcessor;
 
-	LogLevel getLogLevel();
-	
-	void start(final RingBuffer<T> ringBuffer);
+public interface Appender<T extends LogEntryItem> extends gflogger.Appender, EntryProcessor, Runnable {
 
-	void entryFlushed(T entryItem);
-	
-	long getMaxReleased();
+	void start();
 
 	void stop();
+	
+	String getName();
 }

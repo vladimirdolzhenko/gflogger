@@ -35,8 +35,6 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	private long timestamp;
 	private String threadName;
 
-	private volatile long id;
-
 	public LogEntryItemImpl(final int sizeInBytes) {
 		this(allocate(sizeInBytes).asCharBuffer());
 	}
@@ -45,14 +43,6 @@ public final class LogEntryItemImpl implements LogEntryItem {
 		this.buffer = buffer;
 	}
 	
-	public void setId(long id) {
-		this.id = id;
-	}
-	
-	public long getId() {
-		return this.id;
-	}
-
 	@Override
 	public LogLevel getLogLevel() {
 		return logLevel;
@@ -96,8 +86,7 @@ public final class LogEntryItemImpl implements LogEntryItem {
 
 	@Override
 	public String toString() {
-		return "[" + 
-		id + " , " + logLevel
+		return "[" + logLevel
 		+ " pos:" + buffer.position() + " limit:" + buffer.limit() + " capacity:" + buffer.capacity() + "]";
 	}
 

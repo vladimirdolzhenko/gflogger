@@ -17,8 +17,6 @@ package gflogger.base.appender;
 import static gflogger.formatter.BufferFormatter.allocate;
 
 import gflogger.Layout;
-import gflogger.base.LogEntryItemImpl;
-import gflogger.base.RingBuffer;
 import gflogger.helpers.LogLog;
 
 import java.io.FileNotFoundException;
@@ -30,7 +28,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 
-
+/**
+ * FileAppender
+ * 
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
 public class FileAppender extends AbstractAsyncAppender {
 
 	protected final ByteBuffer buffer;
@@ -51,9 +53,9 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 	
 	public FileAppender(int bufferSize) {
-		// unicode char is 4 bytes 
-		super(bufferSize << 2);
-		buffer = allocate(bufferSize);
+		super(bufferSize);
+		// unicode char has 2 bytes 
+		buffer = allocate(bufferSize << 1);
 		immediateFlush = false;
 	}
 
@@ -116,7 +118,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	public void start(RingBuffer<LogEntryItemImpl> ringBuffer) {
+	public void start() {
 		try {
 			encoder = Charset.forName(codepage).newEncoder();
 			createFileChannel();
@@ -126,7 +128,7 @@ public class FileAppender extends AbstractAsyncAppender {
 
 		maxBytesPerChar = (int) Math.floor(encoder.maxBytesPerChar());
 
-		super.start(ringBuffer);
+		super.start();
 	}
 
 	protected void createFileChannel() throws FileNotFoundException {
@@ -141,7 +143,7 @@ public class FileAppender extends AbstractAsyncAppender {
 			
 		} catch (IOException e) {
 			LogLog.error("[" + Thread.currentThread().getName() +  
-				"] exception at " + name() + " - " + e.getMessage(), e);
+				"] exception at " + getName() + " - " + e.getMessage(), e);
 		}
 	}
 
@@ -157,7 +159,7 @@ public class FileAppender extends AbstractAsyncAppender {
 			//LogLog.debug(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
 		} catch (final IOException e) {
 			LogLog.error("[" + Thread.currentThread().getName() +  
-				"] exception at " + name() + " - " + e.getMessage(), e);
+				"] exception at " + getName() + " - " + e.getMessage(), e);
 		} finally {
 			buffer.clear();
 		}
@@ -165,7 +167,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	protected String name() {
+	public String getName() {
 		return "file";
 	}
 }
