@@ -7,7 +7,7 @@ run(){
     THREADS=$2
     MESSAGES=$3
     
-    for a in 1 2 3; do
+    for a in {1..3}; do
         $SCRIPT ${THREADS} ${MESSAGES} 1>>${REPORT} 2>&1
         rm logs/*
     done
