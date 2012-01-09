@@ -28,6 +28,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 
+/**
+ * FileAppender
+ * 
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
 public class FileAppender extends AbstractAsyncAppender {
 
 	protected final ByteBuffer buffer;
@@ -48,9 +53,9 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 	
 	public FileAppender(int bufferSize) {
-		// unicode char is 4 bytes 
-		super(bufferSize << 2);
-		buffer = allocate(bufferSize);
+		super(bufferSize);
+		// unicode char has 2 bytes
+		buffer = allocate(bufferSize << 1);
 		immediateFlush = false;
 	}
 

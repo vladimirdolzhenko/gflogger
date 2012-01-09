@@ -43,8 +43,9 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		this(1 << 22);
 	}
 
-	public AbstractAsyncAppender(final int sizeOfBuffer) {
-		charBuffer = allocate(sizeOfBuffer).asCharBuffer();
+	public AbstractAsyncAppender(final int bufferSize) {
+		// unicode char has 2 bytes
+		charBuffer = allocate(bufferSize << 1).asCharBuffer();
 		charBuffer.clear();
 	}
 

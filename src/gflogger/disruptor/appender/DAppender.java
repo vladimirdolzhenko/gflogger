@@ -17,7 +17,7 @@ package gflogger.disruptor.appender;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.LifecycleAware;
 
-import gflogger.LogLevel;
+import gflogger.Appender;
 import gflogger.disruptor.DLogEntryItem;
 
 /**
@@ -25,9 +25,7 @@ import gflogger.disruptor.DLogEntryItem;
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface DAppender extends EventHandler<DLogEntryItem>, LifecycleAware {
+public interface DAppender extends Appender, EventHandler<DLogEntryItem>, LifecycleAware {
 
-	LogLevel getLogLevel();
-	
 	void flush();
 }

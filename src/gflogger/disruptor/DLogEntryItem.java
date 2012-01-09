@@ -22,7 +22,7 @@ import gflogger.LogLevel;
 import java.nio.CharBuffer;
 
 /**
- * LogEntryItem
+ * DLogEntryItem
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */

@@ -14,27 +14,39 @@
 
 package gflogger.disruptor.appender;
 
+import gflogger.helpers.LogLog;
+
+import java.io.Flushable;
+import java.io.IOException;
 import java.io.PrintStream;
 
+/**
+ * ConsoleAppender
+ * 
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
 public class ConsoleAppender extends AbstractAsyncAppender {
 
-	private final PrintStream out;
+	private final Appendable out;
+	private final Flushable flushable; 
 	
 	public ConsoleAppender() {
 		this(System.out);
 	}
 	
-	public ConsoleAppender(final int sizeOfBuffer) {
-		this(sizeOfBuffer, System.out);
+	public ConsoleAppender(final int bufferSize) {
+		this(bufferSize, System.out);
 	}
 	
-	public ConsoleAppender(final PrintStream out) {
+	public ConsoleAppender(final Appendable out) {
 		this.out = out;
+		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
 	
-	public ConsoleAppender(final int sizeOfBuffer, final PrintStream out) {
-		super(sizeOfBuffer);
+	public ConsoleAppender(final int bufferSize, final Appendable out) {
+		super(bufferSize);
 		this.out = out;
+		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
 	
 	@Override
@@ -46,11 +58,18 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	protected void flushCharBuffer() {
 		if (charBuffer.position() > 0){
 			charBuffer.flip();
-			while(charBuffer.hasRemaining()){
-				out.append(charBuffer.get());
+			try {
+				while(charBuffer.hasRemaining()){
+					out.append(charBuffer.get());
+				}
+				if (flushable != null)
+					flushable.flush();
+			} catch (IOException e){
+				LogLog.error("[" + Thread.currentThread().getName() +  
+					"] exception at " + name() + " - " + e.getMessage(), e);
+			} finally {
+				charBuffer.clear();
 			}
-			out.flush();
-			charBuffer.clear();
 		}
 	}
 	

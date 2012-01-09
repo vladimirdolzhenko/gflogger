@@ -21,14 +21,16 @@ import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.LoggerService;
+import gflogger.appender.AppenderFactory;
 import gflogger.disruptor.appender.DAppender;
-import gflogger.util.MutableLong;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.helpers.LogLog;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -48,21 +50,36 @@ public class DLoggerServiceImpl implements LoggerService {
 
 	private final Disruptor<DLogEntryItem> disruptor;
 
-	private final RingBuffer<DLogEntryItem> ringBuffer;
-
 	private final ExecutorService executorService;
+	
+	private final RingBuffer<DLogEntryItem> ringBuffer;
+	
 
 	/**
 	 * @param count a number of items in the ring
-	 * @param bufferSize buffer size of each item in the ring 
+	 * @param maxMessageSize max message size in the ring (in chars) 
 	 * @param appenders
 	 */
-	public DLoggerServiceImpl(final int count, final int bufferSize, final DAppender ... appenders) {
+	public DLoggerServiceImpl(final int count, final int maxMessageSize, final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, createAppenders(appenderFactories));
+	}
+	
+	private static DAppender[] createAppenders(AppenderFactory[] appenderFactories) {
+		final DAppender[] appenders = new DAppender[appenderFactories.length];
+		for (int i = 0; i < appenders.length; i++) {
+			appenders[i] = (DAppender) appenderFactories[i].createAppender(DLoggerServiceImpl.class);
+		}
+		return appenders;
+	}
+	
+	/**
+	 * @param count a number of items in the ring
+	 * @param maxMessageSize max message size in the ring (in chars) 
+	 * @param appenders
+	 */
+	public DLoggerServiceImpl(final int count, final int maxMessageSize, final DAppender ... appenders) {
 		if (appenders.length == 0){
 			throw new IllegalArgumentException("Expected at least one appender");
-		}
-		if (appenders.length > (Integer.SIZE - 1)){
-			throw new IllegalArgumentException("Expected less than " + (Integer.SIZE - 1) + " appenders");
 		}
 		this.appenders = appenders;
 		
@@ -72,21 +89,23 @@ public class DLoggerServiceImpl implements LoggerService {
 		
 		this.level = initLevel(appenders);
 
+		// unicode char has 2 bytes
+		final int bufferSize = maxMessageSize << 1;
 		final ByteBuffer buffer = allocate(c * bufferSize);
 		
-		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
+		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>(){
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry = 
 					new LocalLogEntry(Thread.currentThread(), 
-						bufferSize, 
+						maxMessageSize, 
 						DLoggerServiceImpl.this);
-				//System.out.println(logEntry);
 				return logEntry;
 			}
 		};
 		
 		executorService = Executors.newFixedThreadPool(appenders.length);
+
 		disruptor = new Disruptor<DLogEntryItem>(new EventFactory<DLogEntryItem>() {
 			int i = 0;
 			@Override
@@ -161,6 +180,7 @@ public class DLoggerServiceImpl implements LoggerService {
 
 			@Override
 			public void signalAllWhenBlocking() {
+				// nothing
 			}
 
 			private int applyWaitMethod(final SequenceBarrier barrier, int counter) 
@@ -211,6 +231,13 @@ public class DLoggerServiceImpl implements LoggerService {
 	@Override
 	public LogEntry log(final LogLevel level, final String categoryName){
 		final LocalLogEntry entry = logEntryThreadLocal.get();
+		
+		if (!entry.isCommited()){
+			LogLog.error("ERROR! log message was not properly commited.");
+			entry.commit();
+		}
+		
+		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.getBuffer().clear();
@@ -219,11 +246,8 @@ public class DLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
-		
-		//final long time0 = System.nanoTime();
 		long sequence = ringBuffer.next();
 		final DLogEntryItem entry = ringBuffer.get(sequence);
-		//final long time1 = System.nanoTime();
 		
 		entry.setCategoryName(localEntry.getCategoryName());
 		entry.setLogLevel(localEntry.getLogLevel());
@@ -233,44 +257,11 @@ public class DLoggerServiceImpl implements LoggerService {
 		buffer.clear();
 		buffer.put(localEntry.getBuffer()).flip();
 		
-		
 		entry.setSequenceId(sequence);
 		
 		ringBuffer.publish(sequence);
-		
-		/*/
-		final long time2 = System.nanoTime();
-		{
-			final MutableLong mutableLong = acq.get();
-			mutableLong.set(mutableLong.get() + time1 - time0);
-		}
-		/*/
-		//*/
-		
-		/*/
-		final long time1 = System.nanoTime();
-		{
-			final MutableLong mutableLong = commit.get();
-			mutableLong.set(mutableLong.get() + time2 - time1);
-		}
-		/*/
-		//*/
-		//System.out.println(sequenceId);
 	}
 
-	public final ThreadLocal<MutableLong> acq = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
-	
-	public final ThreadLocal<MutableLong> commit = new ThreadLocal<MutableLong>(){
-		@Override
-		protected MutableLong initialValue() {
-			return new MutableLong();
-		}
-	};
 	
 	@Override
 	public LogLevel getLevel() {
@@ -282,6 +273,11 @@ public class DLoggerServiceImpl implements LoggerService {
 		disruptor.halt();
 		flush();
 		executorService.shutdown();
+		try {
+	        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+	        // ignore
+        }
 	}
 
 	void flush() {

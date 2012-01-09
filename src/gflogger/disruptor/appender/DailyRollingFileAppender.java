@@ -135,13 +135,24 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	// The code assumes that the following constants are in a increasing
 	// sequence.
-	static final int TOP_OF_TROUBLE = -1;
-	static final int TOP_OF_MINUTE = 0;
-	static final int TOP_OF_HOUR = 1;
-	static final int HALF_DAY = 2;
-	static final int TOP_OF_DAY = 3;
-	static final int TOP_OF_WEEK = 4;
-	static final int TOP_OF_MONTH = 5;
+	
+	enum Troubles {
+		TOP_OF_TROUBLE(-1),
+		TOP_OF_MINUTE(0),
+		TOP_OF_HOUR(1),
+		HALF_DAY(2),
+		TOP_OF_DAY(3),
+		TOP_OF_WEEK(4),
+		TOP_OF_MONTH(5);
+		
+		private final int code;
+		
+		public static Troubles[] values = values();
+
+		private Troubles(int code) {
+			this.code = code;
+        }
+	}
 
 	/**
 	 * The date pattern. By default, the pattern is set to "'.'yyyy-MM-dd"
@@ -170,7 +181,7 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	RollingCalendar rc = new RollingCalendar();
 
-	int checkPeriod = TOP_OF_TROUBLE;
+	Troubles checkPeriod = Troubles.TOP_OF_TROUBLE;
 
 	// The gmtTimeZone is used only in computeCheckPeriod() method.
 	static final TimeZone gmtTimeZone = TimeZone.getTimeZone("GMT");
@@ -195,6 +206,12 @@ public class DailyRollingFileAppender extends FileAppender {
 		super(layout, filename);
 		this.datePattern = datePattern;
 	}
+	
+	public DailyRollingFileAppender(int bufferSize, Layout layout, String filename,
+			String datePattern) {
+		super(bufferSize, layout, filename);
+		this.datePattern = datePattern;
+	}
 
 	/**
 	 * The <b>DatePattern</b> takes a string in the same format as expected by
@@ -216,7 +233,7 @@ public class DailyRollingFileAppender extends FileAppender {
 		scheduledFilename = fileName + sdf.format(now);
 	}
 
-	void printPeriodicity(int type) {
+	void printPeriodicity(Troubles type) {
 		switch (type) {
 		case TOP_OF_MINUTE:
 			LogLog.debug("Appender to be rolled every minute.");
@@ -250,27 +267,28 @@ public class DailyRollingFileAppender extends FileAppender {
 	// logic is based on comparisons relative to 1970-01-01 00:00:00
 	// GMT (the epoch).
 
-	int computeCheckPeriod() {
+	Troubles computeCheckPeriod() {
 		RollingCalendar rollingCalendar = new RollingCalendar(gmtTimeZone,
 				Locale.getDefault());
 		// set sate to 1970-01-01 00:00:00 GMT
 		Date epoch = new Date(0);
 		if (datePattern != null) {
-			for (int i = TOP_OF_MINUTE; i <= TOP_OF_MONTH; i++) {
+			for(int i = 0, l = Troubles.values.length; i < l; i++) {
+				Troubles troubles = Troubles.values[i];
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 				simpleDateFormat.setTimeZone(gmtTimeZone); // do all date
 														   // formatting in GMT
 				String r0 = simpleDateFormat.format(epoch);
-				rollingCalendar.setType(i);
+				rollingCalendar.setType(troubles);
 				Date next = new Date(rollingCalendar.getNextCheckMillis(epoch));
 				String r1 = simpleDateFormat.format(next);
 				// System.out.println("Type = "+i+", r0 = "+r0+", r1 = "+r1);
 				if (r0 != null && r1 != null && !r0.equals(r1)) {
-					return i;
+					return troubles;
 				}
 			}
 		}
-		return TOP_OF_TROUBLE; // Deliberately head for trouble...
+		return Troubles.TOP_OF_TROUBLE; // Deliberately head for trouble...
 	}
 
 	/**
@@ -351,7 +369,7 @@ public class DailyRollingFileAppender extends FileAppender {
 	public void onStart() {
 		now.setTime(System.currentTimeMillis());
 		sdf = new SimpleDateFormat(datePattern);
-		int type = computeCheckPeriod();
+		Troubles type = computeCheckPeriod();
 		printPeriodicity(type);
 		rc.setType(type);
 		
@@ -366,7 +384,7 @@ public class DailyRollingFileAppender extends FileAppender {
 	static class RollingCalendar extends GregorianCalendar {
 		private static final long serialVersionUID = -3560331770601814177L;
 
-		int type = DailyRollingFileAppender.TOP_OF_TROUBLE;
+		Troubles type = Troubles.TOP_OF_TROUBLE;
 
 		RollingCalendar() {
 			super();
@@ -376,7 +394,7 @@ public class DailyRollingFileAppender extends FileAppender {
 			super(tz, locale);
 		}
 
-		void setType(int type) {
+		void setType(Troubles type) {
 			this.type = type;
 		}
 
@@ -388,18 +406,18 @@ public class DailyRollingFileAppender extends FileAppender {
 			this.setTime(now);
 
 			switch (type) {
-			case DailyRollingFileAppender.TOP_OF_MINUTE:
+			case TOP_OF_MINUTE:
 				this.set(Calendar.SECOND, 0);
 				this.set(Calendar.MILLISECOND, 0);
 				this.add(Calendar.MINUTE, 1);
 				break;
-			case DailyRollingFileAppender.TOP_OF_HOUR:
+			case TOP_OF_HOUR:
 				this.set(Calendar.MINUTE, 0);
 				this.set(Calendar.SECOND, 0);
 				this.set(Calendar.MILLISECOND, 0);
 				this.add(Calendar.HOUR_OF_DAY, 1);
 				break;
-			case DailyRollingFileAppender.HALF_DAY:
+			case HALF_DAY:
 				this.set(Calendar.MINUTE, 0);
 				this.set(Calendar.SECOND, 0);
 				this.set(Calendar.MILLISECOND, 0);
@@ -411,14 +429,14 @@ public class DailyRollingFileAppender extends FileAppender {
 					this.add(Calendar.DAY_OF_MONTH, 1);
 				}
 				break;
-			case DailyRollingFileAppender.TOP_OF_DAY:
+			case TOP_OF_DAY:
 				this.set(Calendar.HOUR_OF_DAY, 0);
 				this.set(Calendar.MINUTE, 0);
 				this.set(Calendar.SECOND, 0);
 				this.set(Calendar.MILLISECOND, 0);
 				this.add(Calendar.DATE, 1);
 				break;
-			case DailyRollingFileAppender.TOP_OF_WEEK:
+			case TOP_OF_WEEK:
 				this.set(Calendar.DAY_OF_WEEK, getFirstDayOfWeek());
 				this.set(Calendar.HOUR_OF_DAY, 0);
 				this.set(Calendar.MINUTE, 0);
@@ -426,7 +444,7 @@ public class DailyRollingFileAppender extends FileAppender {
 				this.set(Calendar.MILLISECOND, 0);
 				this.add(Calendar.WEEK_OF_YEAR, 1);
 				break;
-			case DailyRollingFileAppender.TOP_OF_MONTH:
+			case TOP_OF_MONTH:
 				this.set(Calendar.DATE, 1);
 				this.set(Calendar.HOUR_OF_DAY, 0);
 				this.set(Calendar.MINUTE, 0);
