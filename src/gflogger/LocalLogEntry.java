@@ -18,7 +18,9 @@ import static gflogger.formatter.BufferFormatter.*;
 import static gflogger.util.StackTraceUtils.*;
 
 import gflogger.formatter.BufferFormatter;
+import gflogger.helpers.LogLog;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
@@ -37,8 +39,16 @@ public final class LocalLogEntry implements LogEntry {
 	private String categoryName;
 	private LogLevel logLevel;
 	
-	public LocalLogEntry(final Thread owner, final int size, final LoggerService loggerService) {
-		this(owner, allocate(size), loggerService);
+	private boolean commited = true;
+	private Throwable error;
+	
+	public LocalLogEntry(final int maxMessageSize, final LoggerService loggerService) {
+		this(Thread.currentThread(), maxMessageSize, loggerService);
+	}
+	
+	public LocalLogEntry(final Thread owner, final int maxMessageSize, final LoggerService loggerService) {
+		// char has max 2 bytes
+		this(owner, allocate(maxMessageSize << 1), loggerService);
 	}
 
 	public LocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService) {
@@ -75,58 +85,124 @@ public final class LocalLogEntry implements LogEntry {
 	public CharBuffer getBuffer() {
 		return buffer;
 	}
+	
+	public boolean isCommited() {
+	    return this.commited;
+    }
+	
+	public void setCommited(boolean commited) {
+	    this.commited = commited;
+    }
+	
+	public Throwable getError() {
+	    return this.error;
+    }
 
 	@Override
 	public LocalLogEntry append(final char c) {
-		buffer.append(c);
+		try {
+			buffer.append(c);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(char c):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LocalLogEntry append(final CharSequence csq) {
-		BufferFormatter.append(buffer, csq);
+		try{
+			BufferFormatter.append(buffer, csq);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(CharSequence csq):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LocalLogEntry append(final CharSequence csq, final int start, final int end) {
-		BufferFormatter.append(buffer, csq, start, end);
+		try{
+			BufferFormatter.append(buffer, csq, start, end);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(CharSequence csq, int start, int end):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LogEntry append(final boolean b) {
-		BufferFormatter.append(buffer, b);
+		try{
+			BufferFormatter.append(buffer, b);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(boolean b):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LogEntry append(final byte i) {
-		BufferFormatter.append(buffer, i);
+		try{
+			BufferFormatter.append(buffer, i);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(byte i):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LogEntry append(final short i) {
-		BufferFormatter.append(buffer, i);
+		try{
+			BufferFormatter.append(buffer, i);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(short i):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LocalLogEntry append(final int i){
-		BufferFormatter.append(buffer, i);
+		try{
+			BufferFormatter.append(buffer, i);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(int i):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LogEntry append(final long i) {
-		BufferFormatter.append(buffer, i);
+		try{
+			BufferFormatter.append(buffer, i);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(long i):" + e.getMessage(), e);
+		}
 		return this;
 	}
 
 	@Override
 	public LogEntry append(final double i, final int precision) {
-		BufferFormatter.append(buffer, i, precision);
+		try{
+			BufferFormatter.append(buffer, i, precision);
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(double i, int precision):" + e.getMessage(), e);
+		}
 		return this;
 	}
 	
@@ -174,8 +250,8 @@ public final class LocalLogEntry implements LogEntry {
 					append(')').append('\n');
 				}
 			} catch (Throwable t){
-				//
-				t.printStackTrace();
+				// there is insufficient space in this buffer
+				LogLog.error("append(Throwable e):" + t.getMessage(), t);
 			}
 		}
 		return this;
@@ -183,10 +259,16 @@ public final class LocalLogEntry implements LogEntry {
 
 	@Override
 	public LogEntry append(Object o) {
-		if (o != null){
-			buffer.append(o.toString());
-		} else {
-			buffer.put('n').put('u').put('l').put('l');
+		try {
+			if (o != null){
+				buffer.append(o.toString());
+			} else {
+				buffer.put('n').put('u').put('l').put('l');
+			}
+		} catch (BufferOverflowException e){
+			this.error = e;
+			// there is insufficient space in this buffer
+			LogLog.error("append(Object o):" + e.getMessage(), e);
 		}
 		return this;
 	}
@@ -195,6 +277,8 @@ public final class LocalLogEntry implements LogEntry {
 	public void commit() {
 		buffer.flip();
 		loggerService.entryFlushed(this);
+		commited = true;
+		error = null;
 	}
 
 	@Override
