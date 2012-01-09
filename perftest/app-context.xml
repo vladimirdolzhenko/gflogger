@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean class="gflogger.LogFactory" factory-method="init" destroy-method="stop">
+		<constructor-arg>
+			<map>
+				<entry key="com.db">
+					<bean class="gflogger.base.DefaultLoggerServiceImpl">
+						<constructor-arg index="0" value="1024"/>
+						<constructor-arg index="1" value="4096"/>
+						<constructor-arg index="2">
+							<bean class="gflogger.appender.ConsoleAppenderFactory"
+								p:logLevel="INFO" />
+						</constructor-arg>
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+</beans>

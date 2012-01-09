@@ -64,8 +64,9 @@ run(){
    
     LOG_ENTRIES=`grep -c "test" logs/${NAME}.log`
 	AVG_TIME=`grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print t/c;}'`
+	MPS=`echo ${LOG_ENTRIES} ${AVG_TIME} | awk '{print 1000*$1/$2;}'`
  
-    echo "${LOG_ENTRIES} avg time ${AVG_TIME}"     
+    echo "${LOG_ENTRIES} avg time: ${AVG_TIME} mps: ${MPS}"     
     WARMED_LINE=`nl logs/${OUT} | grep "warmed up ---" | tail -1 | cut -f1 | sed "s/ //g"`
     STOPPING_LINE=`nl logs/${OUT} | grep "stopping" | head -1 | cut -f1 | sed "s/ //g"`
 

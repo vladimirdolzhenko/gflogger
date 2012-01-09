@@ -22,6 +22,7 @@ public final class AsynchFileAppender<E> extends FileAppender<E> {
 
     private static final Object workerLock = new Object();
 
+    @Override
     public void start() {
         synchronized (workerLock) {
             if (worker == null || !workerStarted) {
@@ -36,6 +37,7 @@ public final class AsynchFileAppender<E> extends FileAppender<E> {
         super.start();
     }
 
+    @Override
     public void stop() {
         synchronized (workerLock) {
             if (worker != null) {
@@ -54,6 +56,7 @@ public final class AsynchFileAppender<E> extends FileAppender<E> {
         super.subAppend(event);
     }
 
+    @Override
     protected void subAppend(E event) {
         ((ILoggingEvent) event).prepareForDeferredProcessing();
 
@@ -87,6 +90,7 @@ public final class AsynchFileAppender<E> extends FileAppender<E> {
             running = false;
         }
 
+        @Override
         public void run() {
             AsynchEvent<E> e;
             while (running) {
