@@ -14,49 +14,33 @@
  * limitations under the License.
  */
 
-package gflogger.util;
+package gflogger.ring;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Holder class for a long value.
+ * Version of AtomicLong with cache line padding to prevent false sharing.
  */
-public class MutableLong
-{
-	private long value = 0L;
+public class PaddedAtomicLong extends AtomicLong {
+	public volatile long p1, p2, p3, p4, p5, p6 = 7L;
 
 	/**
 	 * Default constructor
 	 */
-	public MutableLong()
-	{
+	public PaddedAtomicLong() {
 	}
 
 	/**
-	 * Construct the holder with initial value.
-	 *
-	 * @param initialValue to be initially set.
+	 * Construct with an initial value.
+	 * 
+	 * @param initialValue
+	 *            for initialisation
 	 */
-	public MutableLong(final long initialValue)
-	{
-		this.value = initialValue;
+	public PaddedAtomicLong(final long initialValue) {
+		super(initialValue);
 	}
 
-	/**
-	 * Get the long value.
-	 *
-	 * @return the long value.
-	 */
-	public long get()
-	{
-		return value;
-	}
-
-	/**
-	 * Set the long value.
-	 *
-	 * @param value to set.
-	 */
-	public void set(final long value)
-	{
-		this.value = value;
+	public long sumPaddingToPreventOptimisation() {
+		return p1 + p2 + p3 + p4 + p5 + p6;
 	}
 }
