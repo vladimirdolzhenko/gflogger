@@ -152,6 +152,10 @@ public class DailyRollingFileAppender extends FileAppender {
 		private Troubles(int code) {
 			this.code = code;
         }
+		
+		public int getCode() {
+	        return this.code;
+        }
 	}
 
 	/**
@@ -275,6 +279,7 @@ public class DailyRollingFileAppender extends FileAppender {
 		if (datePattern != null) {
 			for(int i = 0, l = Troubles.values.length; i < l; i++) {
 				Troubles troubles = Troubles.values[i];
+				if (troubles.getCode() < 0) continue;
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 				simpleDateFormat.setTimeZone(gmtTimeZone); // do all date
 														   // formatting in GMT
@@ -453,7 +458,7 @@ public class DailyRollingFileAppender extends FileAppender {
 				this.add(Calendar.MONTH, 1);
 				break;
 			default:
-				throw new IllegalStateException("Unknown periodicity type.");
+				throw new IllegalStateException("Unknown periodicity type:" + type);
 			}
 			return getTime();
 		}
