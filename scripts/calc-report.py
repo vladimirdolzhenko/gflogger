@@ -13,6 +13,7 @@ if __name__ == '__main__':
 
 	reader = open(sys.argv[1], "r")
 	writer = open(sys.argv[1] + '.csv', "w")
+	writer2 = open(sys.argv[1] + '.js', "w")
 
 	name = ''
 	threads = ''
@@ -73,6 +74,7 @@ if __name__ == '__main__':
 		for messages in sortedKeys(messagesMap):
 			v2 = list(v)	
 			v2.append(str(messages))
+	
 			for name in sortedKeys(loggerMap):
 				key = name + '_' + str(threads) + '_' + str(messages)
 				v2.append('%.2f' % (float(messages) / timeMap[key]))
@@ -80,5 +82,97 @@ if __name__ == '__main__':
 				v2.append('%.2f' % (1000 * gcMap[key]))
 			writer.write('%s\n' % ','.join(v2))
 
+	for threads in sortedKeys(threadsMap):
+		t = str(threads)
+		ts = str(threads)
+		tname = "threads"
+		if threads == 1:
+			tname = "thread"			
+			ts = 'single'
+		v = []
+		for messages in sortedKeys(messagesMap):
+			v2 = []	
+			v2.append("'" + str(messages) + "'")
+			vc = ['Messages']
+	
+			for name in sortedKeys(loggerMap):
+				key = name + '_' + str(threads) + '_' + str(messages)
+				v2.append('%.2f' % (float(messages) / timeMap[key]))
+				# into ms
+				#v2.append('%.2f' % (1000 * gcMap[key]))
+				vc.append(name)
+			v.append('[' + ( ','.join(v2)) + ']')	
+			logger_names = ','.join(vc)
+
+		logger_names = '';
+		for i in range(0, len(vc)):
+			type = 'number'
+			if i == 0:
+				type = 'string'	
+			logger_names = "%s\n\
+		data.addColumn('%s', '%s');" % (logger_names, type, vc[i])
+
+
+		writer2.write("/********* %s %s **************/ \n\
+		//throughput	\n\
+		data = new google.visualization.DataTable();	\n\
+		%s \n\
+		data.addRows([	\n\
+%s				\n\
+		]);				\n\
+	\n\
+        chart = new google.visualization.LineChart(document.getElementById('throughput_%s_chart')); \n\
+        chart.draw(data, \n\
+		{		\n\
+          width: 600, height: 250, \n\
+          title: 'Throughput, %s %s', \n\
+          hAxis: {title: 'number of messages',  titleTextStyle: {color: '#000'}, logScale: true}, \n\
+          vAxis: {title: 'messages / ms', gridlines: {color: '#ccc', count: 8}}, \n\
+          legend: {position: 'right', textStyle: {color: 'black', fontSize: 10}} \n\
+        });\n\
+		" % (ts, tname, logger_names, ',\n'.join(v), t, ts, tname))
+		
+
+		v = []
+		for messages in sortedKeys(messagesMap):
+			v2 = []
+			v2.append("'" + str(messages) + "'")
+			vc = ['Messages']
+	
+			for name in sortedKeys(loggerMap):
+				key = name + '_' + str(threads) + '_' + str(messages)
+				#v2.append('%.2f' % (float(messages) / timeMap[key]))
+				# into ms
+				v2.append('%.2f' % (1000 * gcMap[key]))
+				vc.append(name)
+			v.append('[' + ( ','.join(v2)) + ']')	
+
+		logger_names = '';
+		for i in range(0, len(vc)):
+			type = 'number'
+			if i == 0:
+				type = 'string'	
+			logger_names = "%s\n\
+		data.addColumn('%s', '%s');" % (logger_names, type, vc[i])
+	
+
+		writer2.write("//gc \n\
+		data = new google.visualization.DataTable(); \n\
+		%s\n\
+		data.addRows([ \n\
+%s \n\
+		]); \n\
+\n\
+		chart = new google.visualization.LineChart(document.getElementById('gc_%s_chart'));\n\
+        chart.draw(data, \n\
+        {\n\
+          width: 600, height: 250,\n\
+          title: 'Total stop the world, %s %s',\n\
+          hAxis: {title: 'number of messages',  titleTextStyle: {color: '#000'}, logScale: true},\n\
+          vAxis: {title: 'ms', gridlines: {color: '#ccc', count: 8}},\n\
+          legend: {position: 'right', textStyle: {color: 'black', fontSize: 10}}\n\
+        });\n" % (logger_names, ',\n'.join(v), t, ts, tname ))
+
 	writer.close()	
+	writer2.close()
 

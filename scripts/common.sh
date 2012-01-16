@@ -2,10 +2,11 @@
 
 run(){
     NAME=$1
-    THREADS=$2
-    MESSAGES=$3
-    MAINCLASS=$4
-    JAVA_EXTRA_OPTS=$5
+    LOG_NAME=$2
+    THREADS=$3
+    MESSAGES=$4
+    MAINCLASS=$5
+    JAVA_EXTRA_OPTS=$6
     
     echo ${NAME} number of threads: "${THREADS}" messages: ${MESSAGES}
     
@@ -27,12 +28,14 @@ run(){
     -XX:MaxPermSize=128m
     
     -verbose:gc
-    -XX:+PrintGCTimeStamps
+    -XX:+PrintGCDateStamps
     -XX:+PrintGC
     -XX:+PrintGCDetails
     -XX:+PrintGCApplicationStoppedTime
     -XX:+PrintGCApplicationConcurrentTime
     -XX:+PrintTenuringDistribution
+    -XX:+PrintSafepointStatistics
+    -XX:+PrintHeapAtGC
     
     -XX:+UseParNewGC
     -XX:ParallelGCThreads=2
@@ -49,7 +52,7 @@ run(){
     -XX:+HeapDumpOnOutOfMemoryError
     "
     
-    OUT=${NAME}.std
+    OUT=${LOG_NAME}.std
     if [ -f logs/${OUT} ]; then
         rm logs/${OUT}
     fi
@@ -62,8 +65,8 @@ run(){
     
     java -cp ${CLASSPATH} ${JAVA_OPTS} ${MAINCLASS} ${THREADS} ${MESSAGES} 1>logs/${OUT} 2>&1
    
-    LOG_ENTRIES=`grep -c "test" logs/${NAME}.log`
-	AVG_TIME=`grep "final" logs/${NAME}.log | awk '{t+=$5;c++}END{print t/c;}'`
+    LOG_ENTRIES=`grep -c "test" logs/${LOG_NAME}.log`
+	AVG_TIME=`grep "final" logs/${LOG_NAME}.log | awk '{t+=$5;c++}END{print t/c;}'`
 	MPS=`echo ${LOG_ENTRIES} ${AVG_TIME} | awk '{print 1000*$1/$2;}'`
  
     echo "${LOG_ENTRIES} avg time: ${AVG_TIME} mps: ${MPS}"     
@@ -72,7 +75,7 @@ run(){
 
     cat logs/${OUT} | sed -n "${WARMED_LINE},${STOPPING_LINE}p" | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
     
-    for f in ${NAME}.log ${OUT};
+    for f in ${LOG_NAME}.log ${OUT};
     do
     	if [ -f logs/$f ]; then	
     		mv logs/$f logs/${THREADS}-${MESSAGES}-$f
