@@ -15,8 +15,13 @@
 						<constructor-arg index="0" value="1024"/>
 						<constructor-arg index="1" value="4096"/>
 						<constructor-arg index="2">
-							<bean class="gflogger.appender.ConsoleAppenderFactory"
-								p:logLevel="INFO" />
+							<list>
+								<bean class="gflogger.appender.ConsoleAppenderFactory"
+									p:logLevel="INFO" />
+								<bean class="gflogger.appender.DailyRollingFileAppenderFactory"
+									p:logLevel="INFO"
+									p:fileName="logs/logger.log"/>
+							</list>
 						</constructor-arg>
 					</bean>
 				</entry>
