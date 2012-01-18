@@ -44,26 +44,9 @@ public class LogFactory {
 			logger = namedLogger.get(name);
 			if (logger != null) return logger;
 
-			String n = name;
-
-			// look for name
-			for(;;){
-				final LoggerService service = services.get(n);
-				if (service != null){
-					logger = new LoggerView(service, name);
-					namedLogger.put(name, logger);
-					return logger;
-				}
-				final int idx = n.lastIndexOf('.');
-				if (idx < 0) {
-					break;
-				}
-				n = n.substring(0, idx);
-			}
-
-
-			// otherwise looking for dumpl root
-			logger = new LoggerView(null, name);
+			logger = new LoggerView(name);
+			final LoggerService service = getService(name);
+			logger.setLoggerService(service);
 			namedLogger.put(name, logger);
 			return logger;
 		}
@@ -76,15 +59,26 @@ public class LogFactory {
 			logger = classedLogger.get(clazz);
 			if (logger != null) return logger;
 
-			String n = clazz.getName();
-
+			logger = new LoggerView(clazz);
+			final LoggerService service = getService(clazz.getName());
+			logger.setLoggerService(service);
+			classedLogger.put(clazz, logger);
+			return logger;
+		}
+	}
+	
+	static LoggerService lookupService(final String categoryName) {
+		return Helper.FACTORY.getService(categoryName);
+	}
+	
+	private LoggerService getService(final String categoryName){
+		String n = categoryName;
+		synchronized (lock) {
 			// look for name
 			for(;;){
 				final LoggerService service = services.get(n);
 				if (service != null){
-					logger = new LoggerView(service, clazz);
-					classedLogger.put(clazz, logger);
-					return logger;
+					return service;
 				}
 				final int idx = n.lastIndexOf('.');
 				if (idx < 0) {
@@ -92,13 +86,8 @@ public class LogFactory {
 				}
 				n = n.substring(0, idx);
 			}
-
-
-			// otherwise looking for dumpl root
-			logger = new LoggerView(null, clazz);
-			classedLogger.put(clazz, logger);
-			return logger;
 		}
+		return null;
 	}
 
 	public static Logger getLog(final String name){
@@ -112,24 +101,24 @@ public class LogFactory {
 	public static void stop(){
 		synchronized (Helper.FACTORY.lock) {
 			final Collection<LoggerService> values = Helper.FACTORY.services.values();
+			if (values.isEmpty()) return;
 			for (final LoggerService service : values) {
 				service.stop();
 			}
-        }
-	}
-	
-	private void reset(){
-		synchronized (lock) {
-	        services.clear();
-	        classedLogger.clear();
-	        namedLogger.clear();
-        }
+			
+			Helper.FACTORY.services.clear();
+			for(final LoggerView loggerView : Helper.FACTORY.namedLogger.values()){
+				loggerView.setLoggerService(null);
+			}
+			for(final LoggerView loggerView : Helper.FACTORY.classedLogger.values()){
+				loggerView.setLoggerService(null);
+			}
+		}
 	}
 
 	public static LogFactory init(final Map<String, LoggerService> services){
 		synchronized (Helper.FACTORY.lock) {
 			stop();
-			Helper.FACTORY.reset();
 			if (services != null){
 				Helper.FACTORY.services.putAll(services);
 			}
