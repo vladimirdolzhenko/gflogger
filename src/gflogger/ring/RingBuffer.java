@@ -140,4 +140,8 @@ public final class RingBuffer<T> {
 	public int size(){
 		return entries.length;
 	}
+	
+	public void stop(){
+		waitStrategy.signallAll();
+	}
 }

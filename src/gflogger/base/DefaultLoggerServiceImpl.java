@@ -49,6 +49,8 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	private final RingBuffer<LogEntryItemImpl> ringBuffer;
 	private final ExecutorService executorService;
+	
+	private volatile boolean running = false;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -98,6 +100,8 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		executorService = initExecutorService(appenders);
 		
 		start(appenders);
+		
+		running = true;
 	}
 	
 	private LogLevel initLogLevel(final Appender... appenders) {
@@ -144,6 +148,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public LogEntry log(final LogLevel level, final String categoryName){
+		if (!running) throw new IllegalStateException("Logger was stopped.");
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 		
 		if (!entry.isCommited()){
@@ -181,9 +186,11 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public void stop(){
+		running = false;
 		for(int i = 0; i < appenders.length; i++){
 			appenders[i].stop();
 		}
+		ringBuffer.stop();
 		executorService.shutdown();
 		try {
 			executorService.awaitTermination(5, TimeUnit.SECONDS);

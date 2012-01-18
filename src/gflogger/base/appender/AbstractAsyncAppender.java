@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl>, RingBufferAware<LogEntryItemImpl> {
 
-	protected final Object lock;
 	// inner thread buffer
 	protected final CharBuffer charBuffer;
 
@@ -64,7 +63,6 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	public AbstractAsyncAppender(final int bufferSize) {
 		// unicode char has 2 bytes
 		charBuffer = allocate(bufferSize << 1).asCharBuffer();
-		lock = new Object();
 	}
 
 	@Override
@@ -186,18 +184,14 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	@Override
 	public void start() {
-		if (running)
-			throw new IllegalStateException();
+		if (running) throw new IllegalStateException();
 		
 		LogLog.debug(getName() + " is starting ");
-		running = true;
 
-		// just fence
-		synchronized(lock){
-			if (layout == null){
-				layout = new PatternLayout();
-			}
+		if (layout == null){
+			layout = new PatternLayout();
 		}
+		running = true;
 	}
 
 	@Override
@@ -205,8 +199,5 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		if (!running) return;
 		LogLog.debug(getName() + " is stopping ");
 		running = false;
-		synchronized (lock) {
-			lock.notifyAll();
-		}
 	}
 }
