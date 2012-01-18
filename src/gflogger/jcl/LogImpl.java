@@ -50,19 +50,20 @@ public class LogImpl implements Log {
 
 	@Override
 	public boolean isWarnEnabled() {
-		// there is no fatal log level
+		// there is no warn log level
 		return log.isErrorEnabled();
 	}
 
 	@Override
 	public void trace(Object message) {
-		// TODO Auto-generated method stub
+		// there is no trace log level
+		log.debug().append(message).commit();
 	}
 
 	@Override
 	public void trace(Object message, Throwable t) {
-		// TODO Auto-generated method stub
-
+		// there is no trace log level
+		log.debug().append(message).append(t).commit();
 	}
 
 	@Override
@@ -88,38 +89,36 @@ public class LogImpl implements Log {
 
 	@Override
 	public void warn(Object message) {
-		// TODO Auto-generated method stub
-
+		// there is no warn log level
+		log.error().append(message).commit();
 	}
 
 	@Override
 	public void warn(Object message, Throwable t) {
-		// TODO Auto-generated method stub
-
+		// there is no warn log level
+		log.error().append(message).append(t).commit();
 	}
 
 	@Override
 	public void error(Object message) {
-		// TODO Auto-generated method stub
-
+		log.error().append(message).commit();
 	}
 
 	@Override
 	public void error(Object message, Throwable t) {
-		// TODO Auto-generated method stub
-
+		log.error().append(message).append(t).commit();
 	}
 
 	@Override
 	public void fatal(Object message) {
-		// TODO Auto-generated method stub
-
+		// there is no fatal log level
+		log.error().append(message).commit();
 	}
 
 	@Override
 	public void fatal(Object message, Throwable t) {
-		// TODO Auto-generated method stub
-
+		// there is no fatal log level
+		log.error().append(message).append(t).commit();
 	}
 
 }
