@@ -54,6 +54,8 @@ public class DLoggerServiceImpl implements LoggerService {
 	
 	private final RingBuffer<DLogEntryItem> ringBuffer;
 	
+	private volatile boolean running = false;
+	
 
 	/**
 	 * @param count a number of items in the ring
@@ -217,19 +219,22 @@ public class DLoggerServiceImpl implements LoggerService {
 		disruptor.handleEventsWith(appenders);
 		
 		ringBuffer = disruptor.start();
+		running = true;
 	}
 
 	private LogLevel initLevel(final DAppender... appenders) {
 		LogLevel level = LogLevel.ERROR;
 		for (int i = 0; i < appenders.length; i++) {
 			final LogLevel l = appenders[i].getLogLevel();
-			level = level.compareTo(l) <= 0 ? level : l;
+			level = level.isHigher(l) ? level : l;
 		}
 		return level;
 	}
 
 	@Override
 	public LogEntry log(final LogLevel level, final String categoryName){
+		if (!running) throw new IllegalStateException("Logger was stopped.");
+		
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 		
 		if (!entry.isCommited()){
@@ -270,6 +275,10 @@ public class DLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public void stop(){
+		if (!running) return;
+		
+		running = false;
+		
 		disruptor.halt();
 		flush();
 		executorService.shutdown();

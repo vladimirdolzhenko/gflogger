@@ -21,42 +21,46 @@ package gflogger;
  */
 public class LoggerView implements Logger {
 
-	private volatile LoggerService loggerService;
-	private volatile LogLevel level;
+	private LoggerService loggerService;
+	private LogLevel level;
+	private volatile boolean valid; 
 
-	private final MockLogEntry mockLogEntry;
+	private final LogEntry mockLogEntry;
 
-	private final String categoryName;
+	private final String name;
 
 	public LoggerView(final String name) {
-		this.mockLogEntry = new MockLogEntry();
-		this.categoryName = name;
+		this.mockLogEntry = MockLogEntry.INSTANCE;
+		this.name = name;
 	}
 
-	public LoggerView(final Class clazz) {
-		this(clazz.getName());
+	void invalidate(){
+		this.loggerService = null;
+		this.level = null;
+		this.valid = false;
 	}
 	
 	LoggerService setLoggerService(LoggerService loggerService) {
 		this.loggerService = loggerService;
 		this.level = loggerService != null ? loggerService.getLevel() : LogLevel.ERROR;
+		this.valid = true;
 		return this.loggerService;
 	}
 
 	private boolean hasNecessaryLevel(LogLevel level) {
-		return loggerService() != null && this.level.compareTo(level) <= 0;
+		return loggerService() != null && this.level.isHigher(level);
 	}
 
 	private LoggerService loggerService() {
-		if (loggerService != null) return loggerService;
+		if (valid) return loggerService;
 		
 		// lazy reinit
-		return setLoggerService(LogFactory.lookupService(categoryName));
+		return setLoggerService(LogFactory.lookupService(name));
  	}
 
 	private LogEntry logEntry(final LogLevel logLevel) {
 		return hasNecessaryLevel(logLevel) ? 
-			loggerService.log(logLevel, categoryName) : 
+			loggerService.log(logLevel, name) : 
 			mockLogEntry;
 	}	
 

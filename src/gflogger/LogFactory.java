@@ -23,7 +23,7 @@ import java.util.Map;
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class LogFactory {
+public final class LogFactory {
 
 	private final Object lock = new Object();
 	
@@ -38,41 +38,34 @@ public class LogFactory {
 	}
 
 	private Logger get(final String name){
-		LoggerView logger = namedLogger.get(name);
+		return get0(name, name, namedLogger);
+	}
+
+	private Logger get(final Class clazz){
+		return get0(clazz, clazz.getName(), classedLogger);
+	}
+	
+	private <T> Logger get0(final T key, final String name, final Map<T, LoggerView> map){
+		LoggerView logger = map.get(key);
 		if (logger != null) return logger;
 		synchronized (lock) {
-			logger = namedLogger.get(name);
+			logger = map.get(name);
 			if (logger != null) return logger;
 
 			logger = new LoggerView(name);
 			final LoggerService service = getService(name);
 			logger.setLoggerService(service);
-			namedLogger.put(name, logger);
-			return logger;
-		}
-	}
-
-	private Logger get(final Class clazz){
-		LoggerView logger = classedLogger.get(clazz);
-		if (logger != null) return logger;
-		synchronized (lock) {
-			logger = classedLogger.get(clazz);
-			if (logger != null) return logger;
-
-			logger = new LoggerView(clazz);
-			final LoggerService service = getService(clazz.getName());
-			logger.setLoggerService(service);
-			classedLogger.put(clazz, logger);
+			map.put(key, logger);
 			return logger;
 		}
 	}
 	
-	static LoggerService lookupService(final String categoryName) {
-		return Helper.FACTORY.getService(categoryName);
+	static LoggerService lookupService(final String name) {
+		return Helper.FACTORY.getService(name);
 	}
 	
-	private LoggerService getService(final String categoryName){
-		String n = categoryName;
+	private LoggerService getService(final String name){
+		String n = name;
 		synchronized (lock) {
 			// look for name
 			for(;;){
@@ -102,16 +95,17 @@ public class LogFactory {
 		synchronized (Helper.FACTORY.lock) {
 			final Collection<LoggerService> values = Helper.FACTORY.services.values();
 			if (values.isEmpty()) return;
+			
 			for (final LoggerService service : values) {
 				service.stop();
 			}
 			
 			Helper.FACTORY.services.clear();
 			for(final LoggerView loggerView : Helper.FACTORY.namedLogger.values()){
-				loggerView.setLoggerService(null);
+				loggerView.invalidate();
 			}
 			for(final LoggerView loggerView : Helper.FACTORY.classedLogger.values()){
-				loggerView.setLoggerService(null);
+				loggerView.invalidate();
 			}
 		}
 	}

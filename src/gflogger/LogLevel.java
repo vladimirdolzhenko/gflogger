@@ -21,5 +21,9 @@ package gflogger;
  */
 public enum LogLevel {
 
-	DEBUG, INFO, ERROR
+	DEBUG, INFO, ERROR;
+	
+	public boolean isHigher(final LogLevel level){
+		return this.ordinal() <= level.ordinal();
+	}
 }

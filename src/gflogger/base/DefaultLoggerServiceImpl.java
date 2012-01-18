@@ -108,7 +108,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		LogLevel level = LogLevel.ERROR;
 		for (int i = 0; i < appenders.length; i++) {
 			final LogLevel l = appenders[i].getLogLevel();
-			level = level.compareTo(l) <= 0 ? level : l;
+			level = level.isHigher(l) ? level : l;
 		}
 		return level;
 	}
