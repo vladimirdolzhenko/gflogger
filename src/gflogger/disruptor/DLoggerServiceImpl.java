@@ -254,17 +254,19 @@ public class DLoggerServiceImpl implements LoggerService {
 		long sequence = ringBuffer.next();
 		final DLogEntryItem entry = ringBuffer.get(sequence);
 		
-		entry.setCategoryName(localEntry.getCategoryName());
-		entry.setLogLevel(localEntry.getLogLevel());
-		entry.setThreadName(localEntry.getThreadName());
-		entry.setTimestamp(System.currentTimeMillis());
-		final CharBuffer buffer = entry.getBuffer();
-		buffer.clear();
-		buffer.put(localEntry.getBuffer()).flip();
-		
-		entry.setSequenceId(sequence);
-		
-		ringBuffer.publish(sequence);
+		try {
+			entry.setCategoryName(localEntry.getCategoryName());
+			entry.setLogLevel(localEntry.getLogLevel());
+			entry.setThreadName(localEntry.getThreadName());
+			entry.setTimestamp(System.currentTimeMillis());
+			final CharBuffer buffer = entry.getBuffer();
+			buffer.clear();
+			buffer.put(localEntry.getBuffer()).flip();
+			
+			entry.setSequenceId(sequence);
+		} finally {
+			ringBuffer.publish(sequence);
+		}
 	}
 
 	
@@ -283,10 +285,10 @@ public class DLoggerServiceImpl implements LoggerService {
 		flush();
 		executorService.shutdown();
 		try {
-	        executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-	        // ignore
-        }
+			executorService.awaitTermination(5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// ignore
+		}
 	}
 
 	void flush() {

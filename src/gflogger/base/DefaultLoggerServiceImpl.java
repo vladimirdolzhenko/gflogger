@@ -59,7 +59,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	 */
 	public DefaultLoggerServiceImpl(final int count, final int maxMessageSize, final AppenderFactory ... appenderFactories) {
 		this(count, maxMessageSize, createAppenders(appenderFactories));
-    }
+	}
 
 	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
 		final Appender[] appenders = new Appender[appenderFactories.length];
@@ -164,19 +164,21 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	}
 	
 	@Override
-    public void entryFlushed(final LocalLogEntry localEntry){
+	public void entryFlushed(final LocalLogEntry localEntry){
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
 		
-		entry.setCategoryName(localEntry.getCategoryName());
-		entry.setLogLevel(localEntry.getLogLevel());
-		entry.setThreadName(localEntry.getThreadName());
-		entry.setTimestamp(System.currentTimeMillis());
-		final CharBuffer buffer = entry.getBuffer();
-		buffer.clear();
-		buffer.put(localEntry.getBuffer()).flip();
-		
-		ringBuffer.publish(next);
+		try {
+			entry.setCategoryName(localEntry.getCategoryName());
+			entry.setLogLevel(localEntry.getLogLevel());
+			entry.setThreadName(localEntry.getThreadName());
+			entry.setTimestamp(System.currentTimeMillis());
+			final CharBuffer buffer = entry.getBuffer();
+			buffer.clear();
+			buffer.put(localEntry.getBuffer()).flip();
+		} finally {
+			ringBuffer.publish(next);
+		}
 	}
 	
 	@Override
