@@ -1,6 +1,5 @@
 package gflogger.base;
 
-import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;
 import gflogger.LogFactory;
 import gflogger.LogLevel;
@@ -102,6 +101,8 @@ public class TestGarbageDefaultLoggerServiceImpl {
               //*/
             }
           });
+        BasicConfigurator.configure();
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("com.db.fxpricing.Logger");
 	}
 	
 	@AfterClass
@@ -124,7 +125,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	    factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
 		
-		LogFactory.init(singletonMap("com.db", loggerService));
+		LogFactory.init("com.db", loggerService);
 		
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 
@@ -195,6 +196,26 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	}
 	
 	@Test
+	public void testLog4JAppendLongs() throws Exception {
+		BasicConfigurator.configure();
+		org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog("com.db.fxpricing.Logger");
+		
+		for(long i = 0; i < WARMUP_COUNT; i++)
+			log.info("value:" + i + " " + i + " " + i + " " + i + " " + i
+					+ i + " " + i + " " + i + " " + i + " " + i);
+		Thread.sleep(1000L);
+		
+		objectCounting.set(true);
+		for(long i = 0; i < TEST_COUNT; i++)
+			log.info("value:" + i + " " + i + " " + i + " " + i + " " + i
+					+ i + " " + i + " " + i + " " + i + " " + i);
+		
+		Thread.sleep(500L);
+		
+		printState("log4j-longs");
+	}
+	
+	@Test
 	public void testLogbackAppendString() throws Exception {
 		org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("com.db.fxpricing.Logger");
 		
@@ -228,6 +249,24 @@ public class TestGarbageDefaultLoggerServiceImpl {
 		Thread.sleep(500L);
 		
 		printState("logback-long");
+	}
+	
+	@Test
+	public void testLogbackAppendLongs() throws Exception {
+		org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("com.db.fxpricing.Logger");
+		
+		for(long i = 0; i < WARMUP_COUNT; i++)
+			log.info("value:{} {} {} {} {} {} {} {} {} {} ", new long[]{i, i, i, i, i, i, i, i, i, i});
+		
+		Thread.sleep(1000L);
+		
+		objectCounting.set(true);
+		for(long i = 0; i < TEST_COUNT; i++)
+			log.info("value:{} {} {} {} {} {} {} {} {} {} ", new long[]{i, i, i, i, i, i, i, i, i, i});
+		
+		Thread.sleep(500L);
+		
+		printState("logback-longs");
 	}
 	
 	@Test

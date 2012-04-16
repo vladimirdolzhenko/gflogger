@@ -1,13 +1,11 @@
 package gflogger.base;
 
-import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import gflogger.LogFactory;
 import gflogger.LogLevel;
 import gflogger.Logger;
 import gflogger.LoggerService;
-import gflogger.appender.ConsoleAppenderFactory;
 import gflogger.appender.FileAppenderFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -124,7 +122,7 @@ public class TestZODDefaultLoggerServiceImpl {
 	    factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new DefaultLoggerServiceImpl(1 << 10, maxMessageSize, factory);
 		
-		LogFactory.init(singletonMap("com.db", loggerService));
+		LogFactory.init("com.db", loggerService);
 		
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 		
