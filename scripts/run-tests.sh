@@ -3,15 +3,15 @@
 REPORT=report-`date +%y%m%d-%H%M`.txt
 
 run(){
-    SCRIPT=$1
-    THREADS=$2
-    MESSAGES=$3
+	SCRIPT=$1
+	THREADS=$2
+	MESSAGES=$3
 	OPTS=$4
-    
-    for a in {1..3}; do
-        $SCRIPT ${THREADS} ${MESSAGES} ${OPTS} 1>>${REPORT} 2>&1
-        rm logs/*
-    done
+	
+	for a in {1..10}; do
+		$SCRIPT ${THREADS} ${MESSAGES} ${OPTS} 1>>${REPORT} 2>&1
+		rm logs/*
+	done
 }
 
 for t in 1 2 4 6 ;
@@ -30,9 +30,9 @@ do
 		sleep 5
 		run scripts/jcl-logger.sh $t $c
 		sleep 5
-		#run scripts/logger.sh $t $c false
-		#sleep 5
-		#run scripts/dlogger.sh $t $c false
-		#sleep 5
+		run scripts/logger.sh $t $c false
+		sleep 5
+		run scripts/dlogger.sh $t $c false
+		sleep 5
 	done
 done

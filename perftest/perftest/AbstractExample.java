@@ -13,11 +13,11 @@ import com.google.monitoring.runtime.instrumentation.Sampler;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public abstract class AbstractExample {
-    
+
     protected boolean allocationEnabled;
-    
+
     protected int threadCount = 1;
-    
+
     protected int messageCount = 1 << 10;
 
     protected void parseArgs(final String[] args){
@@ -37,26 +37,26 @@ public abstract class AbstractExample {
         synchronized (this) {
             initLogger();
         }
-        
+
         final ThreadLocal<StringBuilder> local = new ThreadLocal<StringBuilder>(){
             @Override
             public StringBuilder get() {
                 return new StringBuilder(1 << 6);
             }
         };
-        
+
         final ThreadLocal<String> threadName = new ThreadLocal<String>(){
             @Override
             protected String initialValue() {
                 return Thread.currentThread().getName();
             }
         };
-        
+
         final AtomicBoolean objectCounting = new AtomicBoolean(false);
         //*/
         if (allocationEnabled)
         AllocationRecorder.addSampler(new Sampler() {
-            
+
             @Override
             public void sampleAllocation(int count, String desc,
               Object newObj, long size) {
@@ -104,7 +104,7 @@ public abstract class AbstractExample {
                     this.startUpMessage = name + "--- start up ---";
                     this.warmedUpMessage = name + "--- warmed up ---";
                     this.finishedMessage = name + "--- finished ---";
-                    
+
                     System.out.println(startUpMessage);
                     try {
                         doSmth();
@@ -113,14 +113,14 @@ public abstract class AbstractExample {
                     }
                     System.out.println(finishedMessage);
                 }
-                
+
                 public void doSmth() throws Throwable{
                     for(int k = 0; k < 5; k++){
                         for(int j = 0; j < 10000; j++){
                             logMessage("warm", j);
                         }
                     }
-                    
+
                     latch.await();
                     System.gc();
                     System.gc();
@@ -132,20 +132,20 @@ public abstract class AbstractExample {
                     System.out.println(warmedUpMessage);
 
                     objectCounting.set(true);
-                    
+
                     final long t = System.nanoTime();
                     //System.out.println(Thread.currentThread().getName() + " is started.");
                     for(int j = 0; j < n; j++){
                         logMessage("test", j);
                     }
                     final long e = System.nanoTime();
-                    logFinalMessage(t, e);
+                    logFinalMessage(n, t, e);
                     finalLatch.countDown();
 
                     //System.out.println(Thread.currentThread().getName() + " is finished.");
                 }
 
-                
+
             }, "thread-" + i);
             threads[i].start();
         }
@@ -167,19 +167,19 @@ public abstract class AbstractExample {
         System.out.println("--- stopping ---");
         stop();
         System.out.println("stopped.");
-        
+
         //System.exit(0);
     }
 
     protected abstract void stop();
 
     protected abstract void initLogger();
-    
+
     protected abstract void logDebugTestMessage(int i);
-    
+
     protected abstract void logMessage(final String msg, int j) ;
-    
-    protected abstract void logFinalMessage(final long t, final long e);
-    
+
+    protected abstract void logFinalMessage(final int count, final long t, final long e);
+
     protected abstract void logTotalMessage(final long start);
 }

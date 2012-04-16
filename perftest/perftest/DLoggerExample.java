@@ -1,8 +1,9 @@
 package perftest;
 
+import static gflogger.helpers.OptionConverter.*;
+
 import gflogger.LoggerService;
 import gflogger.disruptor.DLoggerServiceImpl;
-
 
 /**
  * LoggerExample
@@ -13,13 +14,16 @@ public class DLoggerExample extends AbstractLoggerExample {
     
     @Override
     protected LoggerService createLoggerImpl() {
-        final LoggerService impl = new DLoggerServiceImpl(1 << 10, 1 << 8, createAppenderFactories());
+        final LoggerService impl = new DLoggerServiceImpl(
+        	getIntProperty("gflogger.service.count", 1 << 10),
+        	getIntProperty("gflogger.service.maxMessageSize", 1 << 8), 
+        	createAppenderFactories());
         return impl;
     }
     
 	@Override
 	protected String fileAppenderFileName() {
-		return "./logs/dgflogger.log";
+		return getStringProperty("gflogger.filename", "./logs/dgflogger.log");
 	}
     
     public static void main(final String[] args) throws Throwable {
