@@ -115,17 +115,22 @@ public class FileAppender extends AbstractAsyncAppender {
 		if (buffer.position() == 0) return false;
 		buffer.flip();
 		try {
-//			final int limit = buffer.limit();
-//			final long start = System.nanoTime();
+			/*/
+			final int limit = buffer.limit();
+			final long start = System.nanoTime();
 			channel.write(buffer);
-//			final long end = System.nanoTime();
-
-//			LogLog.debug("[" + Thread.currentThread().getName() + "] " + name() +
-//				" " + cause + ":" + limit + " bytes stored in " + 
-//				((end - start) / 1000 / 1e3) + " ms");
+			final long end = System.nanoTime();
+			
+			final String msg = "[" + Thread.currentThread().getName() + "] " + getName() +
+				" " + cause + ":" + limit + " bytes stored in " + 
+				((end - start) / 1000 / 1e3) + " ms";
+			LogLog.debug(msg);
+			/*/
+			channel.write(buffer);
+			//*/
 		} catch (final IOException e) {
 			LogLog.error("[" + Thread.currentThread().getName() +  
-				"] exception at " + name() + " - " + e.getMessage(), e);
+				"] exception at " + getName() + " - " + e.getMessage(), e);
 		} finally {
 			buffer.clear();
 		}
@@ -133,7 +138,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	protected String name() {
+	protected String getName() {
 		return "file";
 	}
 	
@@ -149,7 +154,7 @@ public class FileAppender extends AbstractAsyncAppender {
 			
 		} catch (IOException e) {
 			LogLog.error("[" + Thread.currentThread().getName() +  
-				"] exception at " + name() + " - " + e.getMessage(), e);
+				"] exception at " + getName() + " - " + e.getMessage(), e);
 		}
 	}
 	

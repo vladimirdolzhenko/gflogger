@@ -35,21 +35,21 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.helpers.LogLog;
 
 /**
- * DefaultLoggerServiceImpl is the garbage-free implementation on the top of 
+ * DefaultLoggerServiceImpl is the garbage-free implementation on the top of
  * own ring buffer implementation and off-heap buffer.
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class DefaultLoggerServiceImpl implements LoggerService {
 
 	private final LogLevel level;
 	private final Appender[] appenders;
-	
+
 	private final ThreadLocal<LocalLogEntry> logEntryThreadLocal;
 
 	private final RingBuffer<LogEntryItemImpl> ringBuffer;
 	private final ExecutorService executorService;
-	
+
 	private volatile boolean running = false;
 
 	/**
@@ -79,31 +79,31 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
 		this.appenders = appenders;
-		
-		final int c = (count & (count - 1)) != 0 ? 
+
+		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
-		this.ringBuffer = 
-			new RingBuffer<LogEntryItemImpl>(new BlockingWaitStrategy(), 
+		this.ringBuffer =
+			new RingBuffer<LogEntryItemImpl>(new BlockingWaitStrategy(),
 				initEnties(c, maxMessageSize));
 		this.ringBuffer.setEntryProcessors(appenders);
 		this.level = initLogLevel(appenders);
-		
+
 		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
 			@Override
 			protected LocalLogEntry initialValue() {
-				final LocalLogEntry logEntry = 
+				final LocalLogEntry logEntry =
 					new LocalLogEntry(maxMessageSize, DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}
 		};
-		
+
 		executorService = initExecutorService(appenders);
-		
+
 		start(appenders);
-		
+
 		running = true;
 	}
-	
+
 	private LogLevel initLogLevel(final Appender... appenders) {
 		LogLevel level = LogLevel.ERROR;
 		for (int i = 0; i < appenders.length; i++) {
@@ -112,13 +112,13 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		}
 		return level;
 	}
-	
+
 	private ExecutorService initExecutorService(final Appender... appenders){
 		final String[] names = new String[appenders.length];
 		for (int i = 0; i < appenders.length; i++) {
 			names[i] = appenders[i].getName();
 		}
-		
+
 		return Executors.newFixedThreadPool(appenders.length, new NamedThreadFactory("appender", names));
 	}
 
@@ -150,37 +150,60 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	public LogEntry log(final LogLevel level, final String categoryName){
 		if (!running) throw new IllegalStateException("Logger was stopped.");
 		final LocalLogEntry entry = logEntryThreadLocal.get();
-		
+
 		if (!entry.isCommited()){
 			LogLog.error("ERROR! log message was not properly commited.");
 			entry.commit();
 		}
-		
+
 		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.getBuffer().clear();
 		return entry;
 	}
-	
+
+//	public static final ThreadLocal<MutableLong> commit = new ThreadLocal<MutableLong>(){
+//		@Override
+//		protected MutableLong initialValue() {
+//		    return new MutableLong();
+//		}
+//	};
+//	public static final ThreadLocal<MutableLong> commitbytes = new ThreadLocal<MutableLong>(){
+//		@Override
+//		protected MutableLong initialValue() {
+//			return new MutableLong();
+//		}
+//	};
+
 	@Override
-	public void entryFlushed(final LocalLogEntry localEntry){
+    public void entryFlushed(final LocalLogEntry localEntry){
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
-		
+
 		try {
+
 			entry.setCategoryName(localEntry.getCategoryName());
 			entry.setLogLevel(localEntry.getLogLevel());
 			entry.setThreadName(localEntry.getThreadName());
 			entry.setTimestamp(System.currentTimeMillis());
 			final CharBuffer buffer = entry.getBuffer();
+			final CharBuffer localBuffer = localEntry.getBuffer();
 			buffer.clear();
-			buffer.put(localEntry.getBuffer()).flip();
+//			final long t1 = System.nanoTime();
+			buffer.put(localBuffer).flip();
+//			final long t2 = System.nanoTime();
+//
+//			final MutableLong cbLong = commitbytes.get();
+//			cbLong.set(cbLong.get() + buffer.length());
+//
+//			final MutableLong mutableLong = commit.get();
+//			mutableLong.set(mutableLong.get() + t2 - t1);
 		} finally {
 			ringBuffer.publish(next);
 		}
 	}
-	
+
 	@Override
 	public LogLevel getLevel() {
 		return level;

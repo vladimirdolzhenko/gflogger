@@ -151,12 +151,19 @@ public class FileAppender extends AbstractAsyncAppender {
 		if (buffer.position() == 0) return false;
 		buffer.flip();
 		try {
-//			final int limit = buffer.limit();
-//			final long start = System.nanoTime();
+			//*/
+			final int limit = buffer.limit();
+			final long start = System.nanoTime();
 			channel.write(buffer);
-//			final long end = System.nanoTime();
+			final long end = System.nanoTime();
 
-			//LogLog.debug(cause + ":" + limit + " bytes stored in " + ((end - start) / 1000 / 1e3) + " ms");
+			final String msg = "[" + Thread.currentThread().getName() + "] " + getName() +
+				" " + cause + ":" + limit + " bytes stored in " + 
+				((end - start) / 1000 / 1e3) + " ms";
+			LogLog.debug(msg);
+			/*/
+			channel.write(buffer);
+			//*/
 		} catch (final IOException e) {
 			LogLog.error("[" + Thread.currentThread().getName() +  
 				"] exception at " + getName() + " - " + e.getMessage(), e);

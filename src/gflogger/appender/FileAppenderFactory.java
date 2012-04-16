@@ -14,6 +14,8 @@
 
 package gflogger.appender;
 
+import static gflogger.helpers.OptionConverter.*;
+
 import gflogger.Appender;
 import gflogger.LoggerService;
 import gflogger.base.DefaultLoggerServiceImpl;
@@ -26,9 +28,9 @@ import gflogger.disruptor.DLoggerServiceImpl;
  */
 public class FileAppenderFactory extends AbstractAppenderFactory {
 
-	protected String fileName;
-	protected String codepage = "UTF-8";
-	protected boolean append = true;
+	protected String fileName = getStringProperty("gflogger.filename", null);
+	protected String codepage = getStringProperty("gflogger.codepage", "UTF-8");
+	protected boolean append = getBooleanProperty("gflogger.append", true);
 
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {

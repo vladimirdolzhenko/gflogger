@@ -14,6 +14,8 @@
 
 package gflogger.appender;
 
+import static gflogger.helpers.OptionConverter.*;
+
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
@@ -26,13 +28,13 @@ import gflogger.PatternLayout;
 public abstract class AbstractAppenderFactory implements AppenderFactory {
 
 	// 1M
-	protected int bufferSize = 1 << 20;
+	protected int bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
 
-	protected LogLevel logLevel = LogLevel.ERROR;
-	protected Layout layout = new PatternLayout("%m%n");
-	protected boolean immediateFlush = false;
-	protected int bufferedIOThreshold = 100;
-	protected long awaitTimeout = 10L;
+	protected LogLevel logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "ERROR"));
+	protected Layout layout = new PatternLayout(getStringProperty("gflogger.pattern", "%m%n"));
+	protected boolean immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
+	protected int bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
+	protected long awaitTimeout = getIntProperty("gflogger.awaitTimeout", 10);
 
 	/*
 	 * Setters'n'Getters

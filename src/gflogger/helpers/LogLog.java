@@ -58,12 +58,12 @@ public class LogLog {
 	 */
 	public static final String  CONFIG_DEBUG_KEY = "logger.configDebug";
 
-	protected static boolean	debugEnabled	 = false;
+	protected static boolean	debugEnabled	 = Boolean.getBoolean("gflogger.internalDebugEnabled");
 
 	/**
 	 * In quietMode not even errors generate any output.
 	 */
-	private static boolean	  quietMode		= false;
+	private static boolean	  quietMode		= Boolean.getBoolean("gflogger.internalQuietMode");
 
 	private static final String PREFIX		   = "gflogger: ";
 	private static final String ERR_PREFIX	   = "gflogger:ERROR ";

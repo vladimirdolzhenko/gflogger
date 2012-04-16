@@ -18,7 +18,6 @@ import gflogger.helpers.LogLog;
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * ConsoleAppender
@@ -66,7 +65,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 					flushable.flush();
 			} catch (IOException e){
 				LogLog.error("[" + Thread.currentThread().getName() +  
-					"] exception at " + name() + " - " + e.getMessage(), e);
+					"] exception at " + getName() + " - " + e.getMessage(), e);
 			} finally {
 				charBuffer.clear();
 			}
@@ -74,7 +73,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	}
 	
 	@Override
-	protected String name() {
+	protected String getName() {
 		return "console";
 	}
 }

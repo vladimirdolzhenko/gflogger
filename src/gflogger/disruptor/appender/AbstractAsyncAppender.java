@@ -80,7 +80,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		//System.out.println(">" + event.getSequenceId() + " " + sequence + " " + endOfBatch);
 		// handle entry that has a log level equals or higher than required
 		final LogLevel entryLevel = event.getLogLevel();
-		if (entryLevel == null) throw new IllegalStateException(); 
+		assert entryLevel != null;
 		final boolean hasProperLevel = logLevel.compareTo(entryLevel) >= 0;
 		if (hasProperLevel) {
 			// it could be on different threads
@@ -104,7 +104,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 			}
 		} catch (RuntimeException e){
 			LogLog.error("[" + Thread.currentThread().getName() +  
-				"] exception at " + name() + " - " + e.getMessage(), e);
+				"] exception at " + getName() + " - " + e.getMessage(), e);
 		}
 	}
 
@@ -128,7 +128,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 				layout.format(charBuffer, entry);
 			} catch (RuntimeException e){
 				LogLog.error("[" + Thread.currentThread().getName() 
-					+ "] exception at " + name() + " pos: " + 
+					+ "] exception at " + getName() + " pos: " + 
 					position + ", limit:" + limit +
 					" - " + e.getMessage(), e);
 			}
@@ -140,18 +140,18 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	}
 
 
-	protected abstract String name();
+	protected abstract String getName();
 	
 	@Override
 	public void onStart() {
 		LogLog.debug("[" + Thread.currentThread().getName() + "] " + 
-			name() + " is starting");
+			getName() + " is starting");
 	}
 
 	@Override
 	public void onShutdown() {
 		LogLog.debug("[" + Thread.currentThread().getName() + "] " + 
-			name() + " is about to shutdown");
+			getName() + " is about to shutdown");
 		immediateFlush = true;
 		flushCharBuffer();
 	}

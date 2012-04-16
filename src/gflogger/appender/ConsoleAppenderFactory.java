@@ -14,8 +14,6 @@
 
 package gflogger.appender;
 
-import java.io.PrintStream;
-
 import gflogger.Appender;
 import gflogger.LoggerService;
 import gflogger.base.DefaultLoggerServiceImpl;

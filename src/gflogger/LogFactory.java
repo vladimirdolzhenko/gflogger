@@ -60,7 +60,7 @@ public final class LogFactory {
 		}
 	}
 	
-	static LoggerService lookupService(final String name) {
+	public static LoggerService lookupService(final String name) {
 		return Helper.FACTORY.getService(name);
 	}
 	
@@ -110,6 +110,16 @@ public final class LogFactory {
 		}
 	}
 
+	public static LogFactory init(String category, LoggerService service){
+		synchronized (Helper.FACTORY.lock) {
+			stop();
+			if (service != null){
+				Helper.FACTORY.services.put(category, service);
+			}
+		}
+		return Helper.FACTORY;
+	}
+	
 	public static LogFactory init(final Map<String, LoggerService> services){
 		synchronized (Helper.FACTORY.lock) {
 			stop();

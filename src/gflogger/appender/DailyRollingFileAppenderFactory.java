@@ -14,6 +14,8 @@
 
 package gflogger.appender;
 
+import static gflogger.helpers.OptionConverter.*;
+
 import gflogger.Appender;
 import gflogger.LoggerService;
 import gflogger.base.DefaultLoggerServiceImpl;
@@ -30,7 +32,7 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 	 * The date pattern. By default, the pattern is set to "'.'yyyy-MM-dd"
 	 * meaning daily rollover.
 	 */
-	protected String datePattern = "'.'yyyy-MM-dd";
+	protected String datePattern = getStringProperty("gflogger.rolling.pattern", "'.'yyyy-MM-dd");
 	
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {

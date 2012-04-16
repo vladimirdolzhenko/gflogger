@@ -101,6 +101,24 @@ public class OptionConverter {
 			return def;
 		}
 	}
+	
+	public static String getStringProperty(final String name, final String defaultValue){
+		return System.getProperty(name, defaultValue);
+	}
+	
+	public static boolean getBooleanProperty(final String name, final boolean defaultValue){
+		try {
+			return Boolean.parseBoolean(System.getProperty(name));
+		} catch (Throwable e){}
+		return defaultValue;
+	}
+	
+	public static int getIntProperty(final String name, final int defaultValue){
+		try {
+			return Integer.parseInt(System.getProperty(name));
+		} catch (Throwable e){}
+		return defaultValue;
+	}
 
 	public static Object instantiateByKey(Properties props, String key, Class superClass,
 			Object defaultValue) {
