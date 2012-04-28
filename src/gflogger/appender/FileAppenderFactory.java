@@ -49,7 +49,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
 			final gflogger.disruptor.appender.FileAppender appender =
-				new gflogger.disruptor.appender.FileAppender(bufferSize, multichar);
+				new gflogger.disruptor.appender.FileAppender(bufferSize, multibyte);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);

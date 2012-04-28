@@ -56,7 +56,7 @@ public class DLoggerServiceImpl implements LoggerService {
 
 	private final RingBuffer<DLogEntryItem> ringBuffer;
 
-	private final boolean multichar;
+	private final boolean multibyte;
 
 	private volatile boolean running = false;
 
@@ -88,7 +88,7 @@ public class DLoggerServiceImpl implements LoggerService {
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
 		this.appenders = appenders;
-		this.multichar = multichar(appenders);;
+		this.multibyte = multibyte(appenders);
 
 		// quick check is count = 2^k ?
 		final int c = (count & (count - 1)) != 0 ?
@@ -97,14 +97,14 @@ public class DLoggerServiceImpl implements LoggerService {
 		this.level = initLevel(appenders);
 
 		// unicode char has 2 bytes
-		final int bufferSize = multichar ? maxMessageSize << 1 : maxMessageSize;
+		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
 		final ByteBuffer buffer = allocate(c * bufferSize);
 
 		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>(){
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry =
-					multichar ?
+					multibyte ?
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize,
 						DLoggerServiceImpl.this) :
@@ -126,7 +126,7 @@ public class DLoggerServiceImpl implements LoggerService {
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
 				// System.out.println("item at " + i + " has capacity " + subBuffer.capacity());
-				return new DLogEntryItem(subBuffer, multichar);
+				return new DLogEntryItem(subBuffer, multibyte);
 			}
 		},
 		executorService,
@@ -245,16 +245,16 @@ public class DLoggerServiceImpl implements LoggerService {
 		return level;
 	}
 
-	private boolean multichar(final DAppender... appenders) {
-		boolean multichar = appenders[0].isMultichar();
+	private boolean multibyte(final DAppender... appenders) {
+		boolean multibyte = appenders[0].isMultibyte();
 		for (int i = 1; i < appenders.length; i++) {
-			if (appenders[i].isMultichar() != multichar){
+			if (appenders[i].isMultibyte() != multibyte){
 				throw new IllegalArgumentException(
-					"Expected " + (multichar ? "multichar" : "unichar") +
+					"Expected " + (multibyte ? "multibyte" : "single byte") +
 					" mode for appender #" + i);
 			}
 		}
-		return multichar;
+		return multibyte;
 	}
 
 	@Override
@@ -271,15 +271,15 @@ public class DLoggerServiceImpl implements LoggerService {
 		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
-		final Buffer b = multichar ? entry.getCharBuffer() : entry.getByteBuffer();
+		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
 		b.clear();
 		return entry;
 	}
 
 	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
-		final ByteBuffer localByteBuffer = multichar ? null : localEntry.getByteBuffer();
-		final CharBuffer localCharBuffer = multichar ? localEntry.getCharBuffer() : null;
+		final ByteBuffer localByteBuffer = multibyte ? null : localEntry.getByteBuffer();
+		final CharBuffer localCharBuffer = multibyte ? localEntry.getCharBuffer() : null;
 
 		final String categoryName = localEntry.getCategoryName();
 		final LogLevel logLevel = localEntry.getLogLevel();
@@ -289,15 +289,15 @@ public class DLoggerServiceImpl implements LoggerService {
 		long sequence = ringBuffer.next();
 		final DLogEntryItem entry = ringBuffer.get(sequence);
 		try {
-			final ByteBuffer byteBuffer = multichar ? null : entry.getBuffer();
-			final CharBuffer charBuffer = multichar ? entry.getCharBuffer() : null;
+			final ByteBuffer byteBuffer = multibyte ? null : entry.getBuffer();
+			final CharBuffer charBuffer = multibyte ? entry.getCharBuffer() : null;
 
 			entry.setCategoryName(categoryName);
 			entry.setLogLevel(logLevel);
 			entry.setThreadName(threadName);
 			entry.setTimestamp(now);
 
-			if (multichar) {
+			if (multibyte) {
 				charBuffer.put(localCharBuffer);
 			} else {
 				byteBuffer.put(localByteBuffer);

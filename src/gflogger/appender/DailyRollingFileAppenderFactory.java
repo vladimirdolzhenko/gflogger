@@ -53,7 +53,7 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
 			final gflogger.disruptor.appender.DailyRollingFileAppender appender =
-				new gflogger.disruptor.appender.DailyRollingFileAppender(bufferSize, multichar);
+				new gflogger.disruptor.appender.DailyRollingFileAppender(bufferSize, multibyte);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);

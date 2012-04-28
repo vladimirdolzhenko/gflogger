@@ -16,12 +16,12 @@ package gflogger;
 
 /**
  * Appender
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public interface Appender {
-	
-	boolean isMultichar();
+
+	boolean isMultibyte();
 
 	LogLevel getLogLevel();
 }

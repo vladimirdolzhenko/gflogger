@@ -37,8 +37,8 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 		this(bufferSize, false);
 	}
 
-	public ConsoleAppender(final int bufferSize, final boolean multichar) {
-		this(bufferSize, multichar, System.out);
+	public ConsoleAppender(final int bufferSize, final boolean multibyte) {
+		this(bufferSize, multibyte, System.out);
 	}
 
 	public ConsoleAppender(final Appendable out) {
@@ -46,8 +46,8 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
 
-	public ConsoleAppender(final int bufferSize, final boolean multichar, final Appendable out) {
-		super(bufferSize, multichar);
+	public ConsoleAppender(final int bufferSize, final boolean multibyte, final Appendable out) {
+		super(bufferSize, multibyte);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
@@ -59,7 +59,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 
 	@Override
 	protected void flushBuffer() {
-		if (multichar) {
+		if (multibyte) {
 			if (charBuffer.position() > 0){
 				charBuffer.flip();
 				try {

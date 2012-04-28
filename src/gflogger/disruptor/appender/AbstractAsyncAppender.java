@@ -38,7 +38,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	protected boolean immediateFlush = false;
 	protected int bufferedIOThreshold = 50;
 	protected long awaitTimeout = 100;
-	protected boolean multichar;
+	protected boolean multibyte;
 
 	public AbstractAsyncAppender() {
 		// 4M
@@ -49,12 +49,12 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		this(bufferSize, false);
 	}
 
-	public AbstractAsyncAppender(final int bufferSize, boolean multichar) {
-		this.multichar = multichar;
+	public AbstractAsyncAppender(final int bufferSize, boolean multibyte) {
+		this.multibyte = multibyte;
 		// unicode char has 2 bytes
-		byteBuffer = allocate(multichar ? bufferSize << 1 : bufferSize);
+		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
 		byteBuffer.clear();
-		charBuffer = multichar ? byteBuffer.asCharBuffer() : null;
+		charBuffer = multibyte ? byteBuffer.asCharBuffer() : null;
 	}
 
 	@Override
@@ -63,8 +63,8 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	}
 
 	@Override
-	public boolean isMultichar() {
-		return multichar;
+	public boolean isMultibyte() {
+		return multibyte;
 	}
 
 	public synchronized void setLogLevel(final LogLevel logLevel) {
@@ -97,7 +97,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		assert entryLevel != null;
 		final boolean hasProperLevel = logLevel.compareTo(entryLevel) >= 0;
 
-		if (multichar) {
+		if (multibyte) {
 			final CharBuffer eventBuffer = event.getCharBuffer();
 			if (hasProperLevel) {
 				eventBuffer.flip();

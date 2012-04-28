@@ -40,13 +40,13 @@ public final class DLogEntryItem implements LogEntryItem {
 		this(size, false);
 	}
 
-	public DLogEntryItem(final int size, final boolean multichar) {
-		this(allocate(size), multichar);
+	public DLogEntryItem(final int size, final boolean multibyte) {
+		this(allocate(size), multibyte);
 	}
 
-	public DLogEntryItem(final ByteBuffer buffer, final boolean multichar) {
+	public DLogEntryItem(final ByteBuffer buffer, final boolean multibyte) {
 		this.buffer = buffer;
-		this.charBuffer = multichar ? buffer.asCharBuffer() : null;
+		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;
 	}
 
 	@Override

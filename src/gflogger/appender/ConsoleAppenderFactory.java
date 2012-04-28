@@ -43,7 +43,7 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
 			final gflogger.disruptor.appender.ConsoleAppender appender =
-				new gflogger.disruptor.appender.ConsoleAppender(bufferSize, multichar, outputStream);
+				new gflogger.disruptor.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);

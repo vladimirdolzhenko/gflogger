@@ -203,8 +203,8 @@ public class DailyRollingFileAppender extends FileAppender {
 		super(bufferSize);
 	}
 
-	public DailyRollingFileAppender(int bufferSize, boolean multichar) {
-		super(bufferSize, multichar);
+	public DailyRollingFileAppender(int bufferSize, boolean multibyte) {
+		super(bufferSize, multibyte);
 	}
 
 	/**

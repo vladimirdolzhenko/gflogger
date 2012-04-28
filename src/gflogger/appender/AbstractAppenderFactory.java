@@ -28,7 +28,7 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 
 	// 1M
 	protected int bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
-	protected boolean multichar = getBooleanProperty("gflogger.multichar", false);
+	protected boolean multibyte = getBooleanProperty("gflogger.multibyte", false);
 
 	protected LogLevel logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "ERROR"));
 	protected Layout layout = new PatternLayout(getStringProperty("gflogger.pattern", "%m%n"));
@@ -47,12 +47,12 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 		this.bufferSize = bufferSize;
 	}
 
-	public boolean isMultichar() {
-		return this.multichar;
+	public boolean isMultibyte() {
+		return this.multibyte;
 	}
 
-	public void setMultichar(boolean multichar) {
-		this.multichar = multichar;
+	public void setMultibyte(boolean multibyte) {
+		this.multibyte = multibyte;
 	}
 
 	public LogLevel getLogLevel() {

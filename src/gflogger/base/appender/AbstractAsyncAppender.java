@@ -66,7 +66,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
-	public boolean isMultichar() {
+	public boolean isMultibyte() {
 		return true;
 	}
 

@@ -51,8 +51,8 @@ public class FileAppender extends AbstractAsyncAppender {
 		immediateFlush = false;
 	}
 
-	public FileAppender(int bufferSize, boolean multichar) {
-		super(bufferSize, multichar);
+	public FileAppender(int bufferSize, boolean multibyte) {
+		super(bufferSize, multibyte);
 		immediateFlush = false;
 	}
 
@@ -149,7 +149,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	@Override
 	public void onStart() {
 		try {
-			encoder = multichar ? Charset.forName(codepage).newEncoder() : null;
+			encoder = multibyte ? Charset.forName(codepage).newEncoder() : null;
 			createFileChannel();
 		} catch (final FileNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);

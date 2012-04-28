@@ -82,7 +82,7 @@ public class TestDLoggerServiceImpl {
 		final int maxMessageSize = 20;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
-		factory.setMultichar(true);
+		factory.setMultibyte(true);
 		final StringBuffer buffer = new StringBuffer();
 		factory.setOutputStream(buffer);
 		factory.setLogLevel(LogLevel.INFO);
