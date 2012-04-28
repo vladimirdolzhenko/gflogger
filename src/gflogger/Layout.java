@@ -14,12 +14,14 @@
 
 package gflogger;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
  * Extend this abstract class to create your own log layout format.
  * 
  * @author Ceki G&uuml;lc&uuml;
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 
 public abstract class Layout {
@@ -32,7 +34,11 @@ public abstract class Layout {
 	/**
 	 * Implement this method to create your own layout format.
 	 */
-	abstract public CharBuffer format(CharBuffer buffer, LogEntryItem item);
+	public abstract CharBuffer format(CharBuffer buffer, LogEntryItem item);
+	
+	public abstract ByteBuffer format(ByteBuffer buffer, LogEntryItem item);
+	
+	public abstract int size(LogEntryItem item);
 
 	/**
 	 * Returns the content type output by this layout. The base class returns

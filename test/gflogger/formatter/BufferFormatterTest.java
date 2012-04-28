@@ -39,7 +39,18 @@ public class BufferFormatterTest extends TestCase {
         }
     }
     
-    public void testAppendBoolean() throws Exception {
+    public void testAppendByteBufferString() throws Exception {
+    	final String[] values = new String[]{"true", null, "value"};
+    	final ByteBuffer buffer = ByteBuffer.allocateDirect(50);
+    	for (int i = 0; i < values.length; i++) {
+    		BufferFormatter.append(buffer, values[i]);
+    		final String s = toString(buffer);
+			assertEquals(String.valueOf(values[i]), s);
+    		buffer.clear();
+    	}
+    }
+    
+    public void testAppendCharBufferBoolean() throws Exception {
         final boolean[] booleans = new boolean[]{true, false};
         final CharBuffer buffer = ByteBuffer.allocateDirect(50).asCharBuffer();
         for (int i = 0; i < booleans.length; i++) {
@@ -47,6 +58,16 @@ public class BufferFormatterTest extends TestCase {
             assertEquals(Boolean.toString(booleans[i]), toString(buffer));
             buffer.clear();
         }
+    }
+    
+    public void testAppendByteBufferBoolean() throws Exception {
+    	final boolean[] booleans = new boolean[]{true, false};
+    	final ByteBuffer buffer = ByteBuffer.allocateDirect(50);
+    	for (int i = 0; i < booleans.length; i++) {
+    		BufferFormatter.append(buffer, booleans[i]);
+    		assertEquals(Boolean.toString(booleans[i]), toString(buffer));
+    		buffer.clear();
+    	}
     }
     
     public void testAppendByte() throws Exception {
@@ -139,6 +160,13 @@ public class BufferFormatterTest extends TestCase {
         final char[] chs = new char[buffer.limit()];
         buffer.get(chs);
         return new String(chs);
+    }
+    
+    static String toString(final ByteBuffer buffer) {
+    	buffer.flip();
+    	final byte[] chs = new byte[buffer.limit()];
+    	buffer.get(chs);
+    	return new String(chs);
     }
     
 

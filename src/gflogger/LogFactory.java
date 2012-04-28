@@ -20,13 +20,13 @@ import java.util.Map;
 
 /**
  * LogFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public final class LogFactory {
 
 	private final Object lock = new Object();
-	
+
 	private final Map<String, LoggerService> services;
 	private final Map<String, LoggerView> namedLogger;
 	private final Map<Class, LoggerView> classedLogger;
@@ -44,7 +44,7 @@ public final class LogFactory {
 	private Logger get(final Class clazz){
 		return get0(clazz, clazz.getName(), classedLogger);
 	}
-	
+
 	private <T> Logger get0(final T key, final String name, final Map<T, LoggerView> map){
 		LoggerView logger = map.get(key);
 		if (logger != null) return logger;
@@ -59,11 +59,11 @@ public final class LogFactory {
 			return logger;
 		}
 	}
-	
+
 	public static LoggerService lookupService(final String name) {
 		return Helper.FACTORY.getService(name);
 	}
-	
+
 	private LoggerService getService(final String name){
 		String n = name;
 		synchronized (lock) {
@@ -95,11 +95,11 @@ public final class LogFactory {
 		synchronized (Helper.FACTORY.lock) {
 			final Collection<LoggerService> values = Helper.FACTORY.services.values();
 			if (values.isEmpty()) return;
-			
+
 			for (final LoggerService service : values) {
 				service.stop();
 			}
-			
+
 			Helper.FACTORY.services.clear();
 			for(final LoggerView loggerView : Helper.FACTORY.namedLogger.values()){
 				loggerView.invalidate();
@@ -119,7 +119,7 @@ public final class LogFactory {
 		}
 		return Helper.FACTORY;
 	}
-	
+
 	public static LogFactory init(final Map<String, LoggerService> services){
 		synchronized (Helper.FACTORY.lock) {
 			stop();

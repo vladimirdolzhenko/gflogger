@@ -24,7 +24,7 @@ public class MockLogEntry implements LogEntry {
 	public static final LogEntry INSTANCE = new MockLogEntry();
 	
 	public MockLogEntry() {
-    }
+	}
 	
 	@Override
 	public LogEntry append(final char c) {

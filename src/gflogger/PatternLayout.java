@@ -17,6 +17,7 @@ package gflogger;
 import gflogger.helpers.PatternConverter;
 import gflogger.helpers.PatternParser;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 // Contributors:   Nelson Minar <nelson@monkey.org>
@@ -492,4 +493,31 @@ public class PatternLayout extends Layout {
 		}
 		return buffer;
 	}
+	
+	/**
+	 * Produces a formatted string as specified by the conversion pattern.
+	 */
+	@Override
+	public ByteBuffer format(final ByteBuffer buffer, final LogEntryItem item) {
+		PatternConverter c = head;
+		
+		while (c != null) {
+			c.format(buffer, item);
+			c = c.next;
+		}
+		return buffer;
+	}
+	
+	@Override
+	public int size(LogEntryItem item) {
+		int size = 0;
+		PatternConverter c = head;
+		
+		while (c != null) {
+			size += c.size(item);
+			c = c.next;
+		}
+		return size;
+	}
+
 }

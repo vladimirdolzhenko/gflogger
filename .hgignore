@@ -4,3 +4,5 @@ syntax: regexp
 gflogger.*(zip|jar)
 syntax: regexp
 .*(log|std)
+syntax: regexp
+report*

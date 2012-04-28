@@ -16,14 +16,14 @@ package gflogger;
 
 /**
  * LoggerView
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class LoggerView implements Logger {
 
 	private LoggerService loggerService;
 	private LogLevel level;
-	private volatile boolean valid; 
+	private volatile boolean valid;
 
 	private final LogEntry mockLogEntry;
 
@@ -39,7 +39,7 @@ public class LoggerView implements Logger {
 		this.level = null;
 		this.valid = false;
 	}
-	
+
 	LoggerService setLoggerService(LoggerService loggerService) {
 		this.loggerService = loggerService;
 		this.level = loggerService != null ? loggerService.getLevel() : LogLevel.ERROR;
@@ -53,16 +53,16 @@ public class LoggerView implements Logger {
 
 	private LoggerService loggerService() {
 		if (valid) return loggerService;
-		
+
 		// lazy reinit
 		return setLoggerService(LogFactory.lookupService(name));
  	}
 
 	private LogEntry logEntry(final LogLevel logLevel) {
-		return hasNecessaryLevel(logLevel) ? 
-			loggerService.log(logLevel, name) : 
+		return hasNecessaryLevel(logLevel) ?
+			loggerService.log(logLevel, name) :
 			mockLogEntry;
-	}	
+	}
 
 	@Override
 	public boolean isDebugEnabled() {

@@ -16,7 +16,7 @@ package gflogger;
 
 /**
  * Logger
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public interface Logger {

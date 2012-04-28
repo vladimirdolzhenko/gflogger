@@ -16,13 +16,15 @@ package gflogger;
 
 /**
  * LogLevel
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public enum LogLevel {
 
 	DEBUG, INFO, ERROR;
-	
+
+	public static LogLevel[] values = values();
+
 	public boolean isHigher(final LogLevel level){
 		return this.ordinal() <= level.ordinal();
 	}

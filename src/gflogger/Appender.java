@@ -20,6 +20,8 @@ package gflogger;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public interface Appender {
+	
+	boolean isMultichar();
 
 	LogLevel getLogLevel();
 }
