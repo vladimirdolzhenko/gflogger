@@ -16,6 +16,7 @@ package gflogger.base;
 
 import static gflogger.formatter.BufferFormatter.*;
 
+import gflogger.CharBufferLocalLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -92,7 +93,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry =
-					new LocalLogEntry(maxMessageSize, DefaultLoggerServiceImpl.this);
+					new CharBufferLocalLogEntry(maxMessageSize, DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}
 		};
@@ -159,14 +160,14 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
-		entry.getBuffer().clear();
+		entry.getCharBuffer().clear();
 		return entry;
 	}
 
 //	public static final ThreadLocal<MutableLong> commit = new ThreadLocal<MutableLong>(){
 //		@Override
 //		protected MutableLong initialValue() {
-//		    return new MutableLong();
+//			return new MutableLong();
 //		}
 //	};
 //	public static final ThreadLocal<MutableLong> commitbytes = new ThreadLocal<MutableLong>(){
@@ -177,7 +178,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 //	};
 
 	@Override
-    public void entryFlushed(final LocalLogEntry localEntry){
+	public void entryFlushed(final LocalLogEntry localEntry){
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
 
@@ -187,8 +188,8 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			entry.setLogLevel(localEntry.getLogLevel());
 			entry.setThreadName(localEntry.getThreadName());
 			entry.setTimestamp(System.currentTimeMillis());
-			final CharBuffer buffer = entry.getBuffer();
-			final CharBuffer localBuffer = localEntry.getBuffer();
+			final CharBuffer buffer = entry.getCharBuffer();
+			final CharBuffer localBuffer = localEntry.getCharBuffer();
 			buffer.clear();
 //			final long t1 = System.nanoTime();
 			buffer.put(localBuffer).flip();

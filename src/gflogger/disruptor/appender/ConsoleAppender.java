@@ -21,57 +21,79 @@ import java.io.IOException;
 
 /**
  * ConsoleAppender
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class ConsoleAppender extends AbstractAsyncAppender {
 
 	private final Appendable out;
-	private final Flushable flushable; 
-	
+	private final Flushable flushable;
+
 	public ConsoleAppender() {
 		this(System.out);
 	}
-	
+
 	public ConsoleAppender(final int bufferSize) {
-		this(bufferSize, System.out);
+		this(bufferSize, false);
 	}
-	
+
+	public ConsoleAppender(final int bufferSize, final boolean multichar) {
+		this(bufferSize, multichar, System.out);
+	}
+
 	public ConsoleAppender(final Appendable out) {
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
-	
-	public ConsoleAppender(final int bufferSize, final Appendable out) {
-		super(bufferSize);
+
+	public ConsoleAppender(final int bufferSize, final boolean multichar, final Appendable out) {
+		super(bufferSize, multichar);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
 	}
-	
+
 	@Override
 	protected void processCharBuffer() {
-		flushCharBuffer();
+		flushBuffer();
 	}
 
 	@Override
-	protected void flushCharBuffer() {
-		if (charBuffer.position() > 0){
-			charBuffer.flip();
-			try {
-				while(charBuffer.hasRemaining()){
-					out.append(charBuffer.get());
+	protected void flushBuffer() {
+		if (multichar) {
+			if (charBuffer.position() > 0){
+				charBuffer.flip();
+				try {
+					while(charBuffer.hasRemaining()){
+						out.append(charBuffer.get());
+					}
+					if (flushable != null)
+						flushable.flush();
+				} catch (IOException e){
+					LogLog.error("[" + Thread.currentThread().getName() +
+						"] exception at " + getName() + " - " + e.getMessage(), e);
+				} finally {
+					charBuffer.clear();
 				}
-				if (flushable != null)
-					flushable.flush();
-			} catch (IOException e){
-				LogLog.error("[" + Thread.currentThread().getName() +  
-					"] exception at " + getName() + " - " + e.getMessage(), e);
-			} finally {
-				charBuffer.clear();
+			}
+		} else {
+			if (byteBuffer.position() > 0){
+				byteBuffer.flip();
+				try {
+					while(byteBuffer.hasRemaining()){
+						out.append((char) byteBuffer.get());
+					}
+					if (flushable != null)
+						flushable.flush();
+				} catch (IOException e){
+					LogLog.error("[" + Thread.currentThread().getName() +
+						"] exception at " + getName() + " - " + e.getMessage(), e);
+				} finally {
+					byteBuffer.clear();
+				}
 			}
 		}
 	}
-	
+
 	@Override
 	protected String getName() {
 		return "console";

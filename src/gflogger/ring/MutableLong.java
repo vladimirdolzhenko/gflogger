@@ -32,7 +32,7 @@ public class MutableLong {
 	 * Construct the holder with initial value.
 	 * 
 	 * @param initialValue
-	 *            to be initially set.
+	 *			to be initially set.
 	 */
 	public MutableLong(final long initialValue) {
 		this.value = initialValue;
@@ -51,7 +51,7 @@ public class MutableLong {
 	 * Set the long value.
 	 * 
 	 * @param value
-	 *            to set.
+	 *			to set.
 	 */
 	public void set(final long value) {
 		this.value = value;

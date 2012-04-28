@@ -15,20 +15,20 @@
 package gflogger.appender;
 
 import static gflogger.helpers.OptionConverter.*;
-
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
 
 /**
  * AbstractAppenderFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public abstract class AbstractAppenderFactory implements AppenderFactory {
 
 	// 1M
 	protected int bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
+	protected boolean multichar = getBooleanProperty("gflogger.multichar", false);
 
 	protected LogLevel logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "ERROR"));
 	protected Layout layout = new PatternLayout(getStringProperty("gflogger.pattern", "%m%n"));
@@ -47,6 +47,14 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 		this.bufferSize = bufferSize;
 	}
 
+	public boolean isMultichar() {
+		return this.multichar;
+	}
+
+	public void setMultichar(boolean multichar) {
+		this.multichar = multichar;
+	}
+
 	public LogLevel getLogLevel() {
 		return this.logLevel;
 	}
@@ -62,11 +70,11 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	public void setLayout(Layout layout) {
 		this.layout = layout;
 	}
-	
+
 	public String getLayoutPattern(){
 		return this.layout != null ? this.layout.getContentType() : null;
 	}
-	
+
 	public void setLayoutPattern(String layoutPattern){
 		this.layout = new PatternLayout(layoutPattern);
 	}

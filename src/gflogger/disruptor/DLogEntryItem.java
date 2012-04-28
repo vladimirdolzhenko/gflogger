@@ -15,36 +15,40 @@
 package gflogger.disruptor;
 
 import static gflogger.formatter.BufferFormatter.allocate;
-
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
  * DLogEntryItem
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public final class DLogEntryItem implements LogEntryItem {
 
-	private final CharBuffer buffer;
-	
+	private final ByteBuffer buffer;
+	private final CharBuffer charBuffer;
+
 	private String categoryName;
 	private LogLevel logLevel;
 	private long timestamp;
 	private String threadName;
 
-	private long sequenceId;
-
 	public DLogEntryItem(final int size) {
-		this(allocate(size).asCharBuffer());
+		this(size, false);
 	}
 
-	public DLogEntryItem(final CharBuffer buffer) {
-		this.buffer = buffer;
+	public DLogEntryItem(final int size, final boolean multichar) {
+		this(allocate(size), multichar);
 	}
-	
+
+	public DLogEntryItem(final ByteBuffer buffer, final boolean multichar) {
+		this.buffer = buffer;
+		this.charBuffer = multichar ? buffer.asCharBuffer() : null;
+	}
+
 	@Override
 	public LogLevel getLogLevel() {
 		return logLevel;
@@ -70,35 +74,32 @@ public final class DLogEntryItem implements LogEntryItem {
 	}
 
 	@Override
-	public CharBuffer getBuffer() {
+	public ByteBuffer getBuffer() {
 		return buffer;
 	}
 
-	public void setSequenceId(long sequenceId) {
-		this.sequenceId = sequenceId;
-	}
-	
-	public long getSequenceId() {
-		return this.sequenceId;
+	@Override
+	public CharBuffer getCharBuffer() {
+		return charBuffer;
 	}
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
-	
+
 	public void setCategoryName(String name) {
 		this.categoryName = name;
 	}
-	
+
 	public void setThreadName(String threadName) {
 		this.threadName = threadName;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "[" 
-			+ " pos:" + buffer.position() 
-			+ " limit:" + buffer.limit() 
+		return "["
+			+ " pos:" + buffer.position()
+			+ " limit:" + buffer.limit()
 			+ " capacity:" + buffer.capacity() + "]";
 	}
 

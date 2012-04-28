@@ -15,7 +15,6 @@
 package gflogger.base.appender;
 
 import gflogger.LogEntryItem;
-
 import gflogger.ring.EntryProcessor;
 
 public interface Appender<T extends LogEntryItem> extends gflogger.Appender, EntryProcessor, Runnable {
@@ -23,6 +22,6 @@ public interface Appender<T extends LogEntryItem> extends gflogger.Appender, Ent
 	void start();
 
 	void stop();
-	
+
 	String getName();
 }

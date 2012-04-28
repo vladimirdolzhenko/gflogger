@@ -21,17 +21,17 @@ import gflogger.disruptor.DLoggerServiceImpl;
 
 /**
  * ConsoleAppenderFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 
 	protected Appendable outputStream = System.out;
-	
+
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.base.appender.ConsoleAppender appender = 
+			final gflogger.base.appender.ConsoleAppender appender =
 				new gflogger.base.appender.ConsoleAppender(bufferSize, outputStream);
 
 			appender.setLogLevel(logLevel);
@@ -39,21 +39,21 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.disruptor.appender.ConsoleAppender appender = 
-				new gflogger.disruptor.appender.ConsoleAppender(bufferSize, outputStream);
+			final gflogger.disruptor.appender.ConsoleAppender appender =
+				new gflogger.disruptor.appender.ConsoleAppender(bufferSize, multichar, outputStream);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			return appender;
 		}
-		throw new IllegalArgumentException(loggerServiceClass.getName() 
+		throw new IllegalArgumentException(loggerServiceClass.getName()
 			+ " is unsupported type of logger service");
 	}
 

@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *	  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import gflogger.LogEntryItem;
 import gflogger.formatter.BufferFormatter;
 import gflogger.formatter.FastDateFormat;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 
@@ -31,11 +32,11 @@ import java.nio.CharBuffer;
 /**
  * Most of the work of the {@link org.apache.log4j.PatternLayout} class is
  * delegated to the PatternParser class.
- * 
+ *
  * <p>
  * It is this class that parses conversion patterns and creates a chained list
  * of {@link OptionConverter OptionConverters}.
- * 
+ *
  * @author <a href=mailto:"cakalijp@Maritz.com">James P. Cakalic</a>
  * @author Ceki G&uuml;lc&uuml;
  * @author Anders Kristensen
@@ -190,7 +191,7 @@ public class PatternParser {
 					formattingInfo.max = c - '0';
 					state = MAX_STATE;
 				} else {
-				   LogLog.error("Error occured in position " + i 
+				   LogLog.error("Error occured in position " + i
 					   + ".\n Was expecting digit, instead got char \"" + c + "\".");
 					state = LITERAL_STATE;
 				}
@@ -353,16 +354,20 @@ public class PatternParser {
 		}
 
 		@Override
-		public void format(CharBuffer buffer, LogEntryItem item) {
+		public void format(ByteBuffer buffer, LogEntryItem item) {
 			switch (type) {
 			case RELATIVE_TIME_CONVERTER:
 				BufferFormatter.append(buffer, item.getTimestamp() - LogEntryItem.startTime);
 				break;
 			case THREAD_CONVERTER:
-				 buffer.append(item.getThreadName());
+//				if (item.isByteBufferBased()){
+//					buffer.put(item.getThreadNameBuffer());
+//				} else {
+					BufferFormatter.append(buffer, item.getThreadName());
+//				}
 				 return;
 			case LEVEL_CONVERTER:
-				buffer.append(item.getLogLevel().name());
+				BufferFormatter.append(buffer, item.getLogLevel().name());
 				return;
 //			case NDC_CONVERTER:
 //				return event.getNDC();
@@ -373,7 +378,49 @@ public class PatternParser {
 			default:
 			}
 		}
-		
+
+		@Override
+		public void format(CharBuffer buffer, LogEntryItem item) {
+			switch (type) {
+			case RELATIVE_TIME_CONVERTER:
+				BufferFormatter.append(buffer, item.getTimestamp() - LogEntryItem.startTime);
+				break;
+			case THREAD_CONVERTER:
+				BufferFormatter.append(buffer, item.getThreadName());
+				return;
+			case LEVEL_CONVERTER:
+				BufferFormatter.append(buffer, item.getLogLevel().name());
+				return;
+//			case NDC_CONVERTER:
+//				return event.getNDC();
+			case MESSAGE_CONVERTER: {
+				buffer.put(item.getCharBuffer());
+				return;
+			}
+			default:
+			}
+		}
+
+		@Override
+		public int size(LogEntryItem item) {
+			switch (type) {
+			case RELATIVE_TIME_CONVERTER:
+				return BufferFormatter.stringSize(item.getTimestamp() - LogEntryItem.startTime);
+			case THREAD_CONVERTER:
+				return item.getThreadName().length();
+			case LEVEL_CONVERTER:
+				return item.getLogLevel().name().length();
+//			case NDC_CONVERTER:
+//				return event.getNDC();
+			case MESSAGE_CONVERTER: {
+				final ByteBuffer buffer = item.getBuffer();
+				return buffer.limit() - buffer.position();
+			}
+			default:
+			}
+			return 0;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder();
@@ -387,7 +434,7 @@ public class PatternParser {
 			case LEVEL_CONVERTER:
 				builder.append("%level");
 				break;
-			case MESSAGE_CONVERTER: 
+			case MESSAGE_CONVERTER:
 				builder.append("%msg");
 				break;
 			default:
@@ -407,10 +454,20 @@ public class PatternParser {
 		}
 
 		@Override
-		public void format(CharBuffer buffer, LogEntryItem logEntryItem) {
-			buffer.append(literal);
+		public void format(ByteBuffer buffer, LogEntryItem logEntryItem) {
+			BufferFormatter.append(buffer, literal);
 		}
-		
+
+		@Override
+		public void format(CharBuffer buffer, LogEntryItem logEntryItem) {
+			BufferFormatter.append(buffer, literal);
+		}
+
+		@Override
+		public int size(LogEntryItem entry) {
+			return literal.length();
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder().append(literal);
@@ -428,10 +485,20 @@ public class PatternParser {
 		}
 
 		@Override
+		public void format(ByteBuffer buffer, LogEntryItem logEntryItem) {
+			df.format(logEntryItem.getTimestamp(), buffer);
+		}
+
+		@Override
 		public void format(CharBuffer buffer, LogEntryItem logEntryItem) {
 			df.format(logEntryItem.getTimestamp(), buffer);
 		}
-		
+
+		@Override
+		public int size(LogEntryItem entry) {
+			return df.getMaxLengthEstimate();
+		}
+
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder().append("%date");
@@ -476,10 +543,53 @@ public class PatternParser {
 		abstract String getFullyQualifiedName(LogEntryItem item);
 
 		@Override
+		public int size(LogEntryItem item) {
+			String n = getFullyQualifiedName(item);
+			if (precision <= 0) {
+				return n.length();
+			}
+			int len = n.length();
+
+			// We substract 1 from 'len' when assigning to 'end' to avoid
+			// out of
+			// bounds exception in return r.substring(end+1, len). This can
+			// happen if
+			// precision is 1 and the category name ends with a dot.
+			int end = len - 1;
+			for (int i = precision; i > 0 && end > 0; i--) {
+				end = n.lastIndexOf('.', end - 1);
+			}
+			return (len - (end + 1));
+		}
+
+		@Override
+		public void format(ByteBuffer buffer, LogEntryItem item) {
+//			if (!item.isByteBufferBased()){
+				String n = getFullyQualifiedName(item);
+				if (precision <= 0) {
+					BufferFormatter.append(buffer, n);
+				} else {
+					int len = n.length();
+
+					// We substract 1 from 'len' when assigning to 'end' to avoid
+					// out of
+					// bounds exception in return r.substring(end+1, len). This can
+					// happen if
+					// precision is 1 and the category name ends with a dot.
+					int end = len - 1;
+					for (int i = precision; i > 0 && end > 0; i--) {
+						end = n.lastIndexOf('.', end - 1);
+					}
+					BufferFormatter.append(buffer, n, end + 1, len);
+				}
+//			}
+		}
+
+		@Override
 		public void format(CharBuffer buffer, LogEntryItem item) {
 			String n = getFullyQualifiedName(item);
 			if (precision <= 0) {
-				buffer.append(n);
+				BufferFormatter.append(buffer, n);
 			} else {
 				int len = n.length();
 
@@ -492,12 +602,10 @@ public class PatternParser {
 				for (int i = precision; i > 0 && end > 0; i--) {
 					end = n.lastIndexOf('.', end - 1);
 				}
-				for(int i = end + 1; i < len; i++){
-					buffer.append(n.charAt(i));
-				}
+				BufferFormatter.append(buffer, n, end + 1, len);
 			}
 		}
-		
+
 	}
 
 	private class CategoryPatternConverter extends NamedPatternConverter {
@@ -510,7 +618,7 @@ public class PatternParser {
 		String getFullyQualifiedName(LogEntryItem item) {
 			return item.getCategoryName();
 		}
-		
+
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder().append("%category");

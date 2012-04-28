@@ -75,11 +75,11 @@ public final class RingBuffer<T> {
 	public void setEntryProcessors(final EntryProcessor... entryProcessors) {
 		this.entryProcessors = entryProcessors;
 		for (int i = 0; i < entryProcessors.length; i++) {
-	        if (entryProcessors[i] instanceof RingBufferAware){
-	        	RingBufferAware bufferAware = (RingBufferAware) entryProcessors[i];
-	        	bufferAware.setRingBuffer(this);
-	        }
-        }
+			if (entryProcessors[i] instanceof RingBufferAware){
+				RingBufferAware bufferAware = (RingBufferAware) entryProcessors[i];
+				bufferAware.setRingBuffer(this);
+			}
+		}
 	}
 
 	public long next() {

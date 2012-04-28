@@ -15,21 +15,21 @@
 package gflogger.base;
 
 import static gflogger.formatter.BufferFormatter.allocate;
-
 import gflogger.LogEntryItem;
 import gflogger.LogLevel;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
  * LogEntryItemImpl
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public final class LogEntryItemImpl implements LogEntryItem {
 
 	private final CharBuffer buffer;
-	
+
 	private String categoryName;
 	private LogLevel logLevel;
 	private long timestamp;
@@ -42,7 +42,7 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	public LogEntryItemImpl(final CharBuffer buffer) {
 		this.buffer = buffer;
 	}
-	
+
 	@Override
 	public LogLevel getLogLevel() {
 		return logLevel;
@@ -68,18 +68,23 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	}
 
 	@Override
-	public CharBuffer getBuffer() {
+	public CharBuffer getCharBuffer() {
 		return buffer;
+	}
+
+	@Override
+	public ByteBuffer getBuffer() {
+		throw new UnsupportedOperationException();
 	}
 
 	public void setCategoryName(String name) {
 		this.categoryName = name;
 	}
-	
+
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
-	
+
 	public void setThreadName(String threadName) {
 		this.threadName = threadName;
 	}

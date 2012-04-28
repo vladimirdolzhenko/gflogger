@@ -35,8 +35,8 @@ public class BlockingWaitStrategy implements WaitStrategy {
 		if (waiters != 0) {
 			synchronized (lock) {
 				signalled = true;
-	            lock.notifyAll();
-            }
+				lock.notifyAll();
+			}
 		}
 	}
 
@@ -63,7 +63,7 @@ public class BlockingWaitStrategy implements WaitStrategy {
 	@Override
 	public long waitFor(final Sequence cursor, final long seqNum,
 		final long timeout, final TimeUnit unit)
-    throws InterruptedException {
+	throws InterruptedException {
 		long availableSequence;
 		if ((availableSequence = cursor.get()) < seqNum) {
 			final long timeoutMs = unit.toMillis(timeout);
@@ -81,7 +81,7 @@ public class BlockingWaitStrategy implements WaitStrategy {
 				} finally {
 					--waiters;
 				}
-            }
+			}
 		}
 		return availableSequence;
 	}

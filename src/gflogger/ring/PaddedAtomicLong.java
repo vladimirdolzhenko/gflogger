@@ -34,7 +34,7 @@ public class PaddedAtomicLong extends AtomicLong {
 	 * Construct with an initial value.
 	 * 
 	 * @param initialValue
-	 *            for initialisation
+	 *			for initialisation
 	 */
 	public PaddedAtomicLong(final long initialValue) {
 		super(initialValue);

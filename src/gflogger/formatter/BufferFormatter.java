@@ -40,6 +40,34 @@ public class BufferFormatter {
 		return x + 1; 
 	}
 	
+	public static ByteBuffer append1(final ByteBuffer buffer, CharSequence s){
+		final int length = s != null ? s.length() : 0;
+		buffer.put((byte) length);
+		if (length == 0) return buffer;
+		return append(buffer, s, 0, length);
+	}
+	
+	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s){
+		return append(buffer, s, 0, s != null ? s.length() : 0);
+	}
+	
+	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s, int start, int end){
+		if (s == null){
+			return buffer.put((byte) 'n').put((byte) 'u').put((byte) 'l').put((byte) 'l');
+		}
+		for(int i = start; i < end; i++){
+			buffer.put((byte) s.charAt(i));
+		}
+		return buffer;
+	}
+	
+	public static ByteBuffer append(final ByteBuffer buffer, boolean b){
+		if (b){
+			return buffer.put((byte) 't').put((byte) 'r').put((byte) 'u').put((byte) 'e');
+		}
+		return buffer.put((byte) 'f').put((byte) 'a').put((byte) 'l').put((byte) 's').put((byte) 'e');
+	}
+	
 	public static CharBuffer append(final CharBuffer buffer, boolean b){
 		if (b){
 			return buffer.put('t').put('r').put('u').put('e');
@@ -93,6 +121,20 @@ public class BufferFormatter {
 		return buffer;
 	}
 	
+	public static ByteBuffer append(final ByteBuffer buffer, char i) {
+		buffer.put((byte) i);
+		return buffer;
+	}
+	
+	public static ByteBuffer append(final ByteBuffer buffer, long i) {
+		if (i == Long.MIN_VALUE){
+			// uses java.lang.Long string constant of MIN_VALUE
+			return append(buffer, Long.toString(i));
+		}
+		put(buffer, i);
+		return buffer;
+	}
+	
 	public static CharBuffer append(final CharBuffer buffer, long i) {
 		if (i == Long.MIN_VALUE){
 			// uses java.lang.Long string constant of MIN_VALUE
@@ -102,6 +144,11 @@ public class BufferFormatter {
 		return buffer;
 	}
 	
+	
+	public static ByteBuffer append(final ByteBuffer buffer, double i, int precision) {
+		put(buffer, i, precision < 0 ? 4 : precision);
+		return buffer;
+	}
 	
 	public static CharBuffer append(final CharBuffer buffer, double i, int precision) {
 		put(buffer, i, precision < 0 ? 4 : precision);
@@ -316,9 +363,79 @@ public class BufferFormatter {
 		buffer.position(oldPos + size);
 	}
 	
+	private static void put(final ByteBuffer buffer, long i) {
+		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+		
+		int oldPos = buffer.position();
+		
+		long q;
+		int r;
+		int charPos = size;
+		char sign = 0;
+		
+		if (i < 0) {
+			sign = '-';
+			i = -i;
+		}
+		
+		// Get 2 digits/iteration using longs until quotient fits into an int
+		while (i > Integer.MAX_VALUE) { 
+			q = i / 100;
+			// really: r = i - (q * 100);
+			r = (int)(i - ((q << 6) + (q << 5) + (q << 2)));
+			i = q;
+			putAt(buffer, oldPos + (--charPos), DIGIT_ONES[r]);
+			putAt(buffer, oldPos + (--charPos), DIGIT_TENS[r]);
+		}
+		
+		// Get 2 digits/iteration using ints
+		int q2;
+		int i2 = (int)i;
+		while (i2 >= 65536) {
+			q2 = i2 / 100;
+			// really: r = i2 - (q * 100);
+			r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+			i2 = q2;
+			putAt(buffer, oldPos + (--charPos), DIGIT_ONES[r]);
+			putAt(buffer, oldPos + (--charPos), DIGIT_TENS[r]);
+		}
+		
+		// Fall thru to fast mode for smaller numbers
+		// assert(i2 <= 65536, i2);
+		for (;;) {
+			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
+			/*/
+			q2 = ((i2 << 15) + (i2 << 14) + (i2 << 11) + (i2 << 10) + (i2 << 7) + (i2 << 6) + (i2 << 3) + (i2 << 2) + i2) >> (16 + 3);
+			/*/
+			q2 = (i2 * 52429) >>> (16+3);
+			//*/
+			r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
+			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
+			i2 = q2;
+			if (i2 == 0) break;
+		}
+		if (sign != 0) {
+			putAt(buffer, oldPos + (--charPos), sign);
+		}
+		buffer.position(oldPos + size);
+	}
+	
 	private static void putAt(final CharBuffer buffer, int pos, char b){
 		buffer.position(pos);
 		buffer.append(b);
+	}
+	
+	private static void putAt(final ByteBuffer buffer, int pos, char b){
+		buffer.position(pos);
+		buffer.put((byte) b);
+	}
+	
+	private static void put(final ByteBuffer buffer, double i, int precision) {
+		long x = (long)i;
+		put(buffer, x);
+		buffer.put((byte) '.');
+		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
+		put(buffer, x < 0 ? -x : x);
 	}
 	
 	private static void put(final CharBuffer buffer, double i, int precision) {

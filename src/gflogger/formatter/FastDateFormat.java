@@ -16,6 +16,7 @@ package gflogger.formatter;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -757,6 +758,11 @@ public class FastDateFormat {
 		mCalendar.setTimeInMillis(millis);
 		return applyRules(mCalendar, buf);
 	}
+	
+	public ByteBuffer format(long millis, ByteBuffer buf) {
+		mCalendar.setTimeInMillis(millis);
+		return applyRules(mCalendar, buf);
+	}
 
 	/**
 	 * <p>Formats a <code>Date</code> object into the
@@ -779,6 +785,15 @@ public class FastDateFormat {
 	 * @return the specified string buffer
 	 */
 	protected CharBuffer applyRules(Calendar calendar, CharBuffer buffer) {
+		Rule[] rules = mRules;
+		int len = mRules.length;
+		for (int i = 0; i < len; i++) {
+			rules[i].appendTo(buffer, calendar);
+		}
+		return buffer;
+	}
+	
+	protected ByteBuffer applyRules(Calendar calendar, ByteBuffer buffer) {
 		Rule[] rules = mRules;
 		int len = mRules.length;
 		for (int i = 0; i < len; i++) {
@@ -932,6 +947,8 @@ public class FastDateFormat {
 		 * @param calendar calendar to be appended
 		 */
 		void appendTo(CharBuffer buffer, Calendar calendar);
+		
+		void appendTo(ByteBuffer buffer, Calendar calendar);
 	}
 
 	/**
@@ -945,6 +962,7 @@ public class FastDateFormat {
 		 * @param value the value to be appended
 		 */
 		void appendTo(CharBuffer buffer, int value);
+		void appendTo(ByteBuffer buffer, int value);
 	}
 
 	/**
@@ -978,6 +996,14 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			buffer.append(mValue);
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			BufferFormatter.append(buffer, mValue);
+		}
 	}
 
 	/**
@@ -1010,6 +1036,14 @@ public class FastDateFormat {
 		@Override
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			buffer.append(mValue);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			BufferFormatter.append(buffer, mValue);
 		}
 	}
 
@@ -1055,6 +1089,14 @@ public class FastDateFormat {
 			buffer.append(mValues[calendar.get(mField)]);
 		}
 		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			BufferFormatter.append(buffer, mValues[calendar.get(mField)]);
+		}
+		
 	}
 
 	/**
@@ -1088,6 +1130,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(mField));
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(mField));
+		}
 
 		@Override
 		public void appendTo(CharBuffer buffer, int value) {
@@ -1096,6 +1143,21 @@ public class FastDateFormat {
 			} else if (value < 100) {
 				buffer.append(BufferFormatter.DIGIT_TENS[value]);
 				buffer.append(BufferFormatter.DIGIT_ONES[value]);
+			} else {
+				BufferFormatter.append(buffer, value);
+			}
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
+			if (value < 10) {
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
+			} else if (value < 100) {
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
 			} else {
 				BufferFormatter.append(buffer, value);
 			}
@@ -1131,6 +1193,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(Calendar.MONTH) + 1);
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(Calendar.MONTH) + 1);
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -1143,6 +1210,16 @@ public class FastDateFormat {
 				buffer.append(BufferFormatter.DIGIT_TENS[value]);
 				buffer.append(BufferFormatter.DIGIT_ONES[value]);
 			}
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
+			if (value < 10) {
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
+			} else {
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
+			} 
 		}
 	}
 
@@ -1183,6 +1260,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(mField));
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(mField));
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -1207,6 +1289,31 @@ public class FastDateFormat {
 				}
 				for (int i = mSize; --i >= digits; ) {
 					buffer.append('0');
+				}
+				BufferFormatter.append(buffer, value);
+			}
+		}
+		
+		@Override
+		public final void appendTo(ByteBuffer buffer, int value) {
+			if (value < 100) {
+				for (int i = mSize; --i >= 2; ) {
+					BufferFormatter.append(buffer, '0');
+				}
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
+			} else {
+				int digits;
+				if (value < 1000) {
+					digits = 3;
+				} else {
+					if (!(value > -1)) {
+						throw new IllegalArgumentException("Negative values should not be possible" + value);
+					}
+					digits = BufferFormatter.stringSize(value);
+				}
+				for (int i = mSize; --i >= digits; ) {
+					BufferFormatter.append(buffer, '0');
 				}
 				BufferFormatter.append(buffer, value);
 			}
@@ -1243,6 +1350,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(mField));
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(mField));
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -1252,6 +1364,16 @@ public class FastDateFormat {
 			if (value < 100) {
 				buffer.append(BufferFormatter.DIGIT_TENS[value]);
 				buffer.append(BufferFormatter.DIGIT_ONES[value]);
+			} else {
+				BufferFormatter.append(buffer, value);
+			}
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
+			if (value < 100) {
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+				BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
 			} else {
 				BufferFormatter.append(buffer, value);
 			}
@@ -1286,6 +1408,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(Calendar.YEAR) % 100);
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(Calendar.YEAR) % 100);
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -1294,6 +1421,12 @@ public class FastDateFormat {
 		public final void appendTo(CharBuffer buffer, int value) {
 			buffer.append(BufferFormatter.DIGIT_TENS[value]);
 			buffer.append(BufferFormatter.DIGIT_ONES[value]);
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
 		}
 	}
 
@@ -1325,6 +1458,11 @@ public class FastDateFormat {
 		public void appendTo(CharBuffer buffer, Calendar calendar) {
 			appendTo(buffer, calendar.get(Calendar.MONTH) + 1);
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			appendTo(buffer, calendar.get(Calendar.MONTH) + 1);
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -1333,6 +1471,12 @@ public class FastDateFormat {
 		public final void appendTo(CharBuffer buffer, int value) {
 			buffer.append(BufferFormatter.DIGIT_TENS[value]);
 			buffer.append(BufferFormatter.DIGIT_ONES[value]);
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[value]);
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[value]);
 		}
 	}
 
@@ -1372,11 +1516,25 @@ public class FastDateFormat {
 			mRule.appendTo(buffer, value);
 		}
 
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			int value = calendar.get(Calendar.HOUR);
+			if (value == 0) {
+				value = calendar.getLeastMaximum(Calendar.HOUR) + 1;
+			}
+			mRule.appendTo(buffer, value);
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
 		public void appendTo(CharBuffer buffer, int value) {
+			mRule.appendTo(buffer, value);
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
 			mRule.appendTo(buffer, value);
 		}
 	}
@@ -1416,12 +1574,26 @@ public class FastDateFormat {
 			}
 			mRule.appendTo(buffer, value);
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			int value = calendar.get(Calendar.HOUR_OF_DAY);
+			if (value == 0) {
+				value = calendar.getMaximum(Calendar.HOUR_OF_DAY) + 1;
+			}
+			mRule.appendTo(buffer, value);
+		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
 		public void appendTo(CharBuffer buffer, int value) {
+			mRule.appendTo(buffer, value);
+		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, int value) {
 			mRule.appendTo(buffer, value);
 		}
 	}
@@ -1494,6 +1666,24 @@ public class FastDateFormat {
 				}
 			}
 		}
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			if (mTimeZoneForced) {
+				if (mTimeZone.useDaylightTime() && calendar.get(Calendar.DST_OFFSET) != 0) {
+					BufferFormatter.append(buffer, mDaylight);
+				} else {
+					BufferFormatter.append(buffer, mStandard);
+				}
+			} else {
+				TimeZone timeZone = calendar.getTimeZone();
+				if (timeZone.useDaylightTime() && calendar.get(Calendar.DST_OFFSET) != 0) {
+					BufferFormatter.append(buffer, getTimeZoneDisplay(timeZone, true, mStyle, mLocale));
+				} else {
+					BufferFormatter.append(buffer, getTimeZoneDisplay(timeZone, false, mStyle, mLocale));
+				}
+			}
+		}
 	}
 
 	/**
@@ -1549,6 +1739,30 @@ public class FastDateFormat {
 			buffer.append(BufferFormatter.DIGIT_TENS[minutes]);
 			buffer.append(BufferFormatter.DIGIT_ONES[minutes]);
 		}			
+		
+		@Override
+		public void appendTo(ByteBuffer buffer, Calendar calendar) {
+			int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
+			
+			if (offset < 0) {
+				BufferFormatter.append(buffer, '-');
+				offset = -offset;
+			} else {
+				BufferFormatter.append(buffer, '+');
+			}
+			
+			int hours = offset / (60 * 60 * 1000);
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[hours]);
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[hours]);
+			
+			if (mColon) {
+				BufferFormatter.append(buffer, ':');
+			}
+			
+			int minutes = offset / (60 * 1000) - 60 * hours;
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_TENS[minutes]);
+			BufferFormatter.append(buffer, BufferFormatter.DIGIT_ONES[minutes]);
+		}
 	}
 
 	// ----------------------------------------------------------------------

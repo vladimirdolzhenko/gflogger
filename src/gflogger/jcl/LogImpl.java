@@ -19,7 +19,7 @@ public class LogImpl implements Log {
 	
 	public LogImpl(final String categoryName) {
 		this.log = LogFactory.getLog(categoryName);
-    }
+	}
 
 	@Override
 	public boolean isDebugEnabled() {

@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 public interface WaitStrategy {
 
 	/**
-     * Signal those {@link EventProcessor}s waiting that the cursor has advanced.
-     */
+	 * Signal those {@link EventProcessor}s waiting that the cursor has advanced.
+	 */
 	void signallAll();
 
 	/**

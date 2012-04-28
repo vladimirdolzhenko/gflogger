@@ -15,7 +15,9 @@
 package gflogger.helpers;
 
 import gflogger.LogEntryItem;
+import gflogger.formatter.BufferFormatter;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 
@@ -48,7 +50,11 @@ public abstract class PatternConverter {
 		leftAlign = fi.leftAlign;
 	}
 
-	abstract public void format(CharBuffer buffer, LogEntryItem entryImpl);
+	public abstract void format(ByteBuffer buffer, LogEntryItem entry);
+	
+	public abstract void format(CharBuffer buffer, LogEntryItem entry);
+	
+	public abstract int size(LogEntryItem entry);
 
 	static String[] SPACES = { 
 			" ",				// 1 space 
@@ -61,12 +67,25 @@ public abstract class PatternConverter {
 	/**
 	 * Fast space padding method.
 	 */
+	public void spacePad(ByteBuffer buffer, int length) {
+		while (length >= 32) {
+			BufferFormatter.append(buffer, SPACES[5]);
+			length -= 32;
+		}
+
+		for (int i = 4; i >= 0; i--) {
+			if ((length & (1 << i)) != 0) {
+				BufferFormatter.append(buffer, SPACES[i]);
+			}
+		}
+	}
+	
 	public void spacePad(CharBuffer buffer, int length) {
 		while (length >= 32) {
 			buffer.append(SPACES[5]);
 			length -= 32;
 		}
-
+		
 		for (int i = 4; i >= 0; i--) {
 			if ((length & (1 << i)) != 0) {
 				buffer.append(SPACES[i]);

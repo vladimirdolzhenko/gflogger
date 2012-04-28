@@ -15,7 +15,6 @@
 package gflogger.appender;
 
 import static gflogger.helpers.OptionConverter.*;
-
 import gflogger.Appender;
 import gflogger.LoggerService;
 import gflogger.base.DefaultLoggerServiceImpl;
@@ -23,7 +22,7 @@ import gflogger.disruptor.DLoggerServiceImpl;
 
 /**
  * FileAppenderFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class FileAppenderFactory extends AbstractAppenderFactory {
@@ -35,7 +34,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.base.appender.FileAppender appender = 
+			final gflogger.base.appender.FileAppender appender =
 				new gflogger.base.appender.FileAppender(bufferSize);
 
 			appender.setLogLevel(logLevel);
@@ -43,27 +42,27 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
 			appender.setAppend(append);
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.disruptor.appender.FileAppender appender = 
-				new gflogger.disruptor.appender.FileAppender(bufferSize);
+			final gflogger.disruptor.appender.FileAppender appender =
+				new gflogger.disruptor.appender.FileAppender(bufferSize, multichar);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
 			appender.setAppend(append);
 			return appender;
 		}
-		throw new IllegalArgumentException(loggerServiceClass.getName() 
+		throw new IllegalArgumentException(loggerServiceClass.getName()
 			+ " is unsupported type of logger service");
 	}
 
@@ -93,5 +92,5 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 	public void setAppend(boolean append) {
 		this.append = append;
 	}
-	
+
 }

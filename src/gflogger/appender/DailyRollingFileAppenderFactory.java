@@ -14,8 +14,7 @@
 
 package gflogger.appender;
 
-import static gflogger.helpers.OptionConverter.*;
-
+import static gflogger.helpers.OptionConverter.getStringProperty;
 import gflogger.Appender;
 import gflogger.LoggerService;
 import gflogger.base.DefaultLoggerServiceImpl;
@@ -23,7 +22,7 @@ import gflogger.disruptor.DLoggerServiceImpl;
 
 /**
  * DailyRollingFileAppenderFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
@@ -33,11 +32,11 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 	 * meaning daily rollover.
 	 */
 	protected String datePattern = getStringProperty("gflogger.rolling.pattern", "'.'yyyy-MM-dd");
-	
+
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.base.appender.DailyRollingFileAppender appender = 
+			final gflogger.base.appender.DailyRollingFileAppender appender =
 				new gflogger.base.appender.DailyRollingFileAppender(bufferSize);
 
 			appender.setLogLevel(logLevel);
@@ -45,31 +44,31 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
 			appender.setAppend(append);
-			
+
 			appender.setDatePattern(datePattern);
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
-			final gflogger.disruptor.appender.DailyRollingFileAppender appender = 
-				new gflogger.disruptor.appender.DailyRollingFileAppender(bufferSize);
+			final gflogger.disruptor.appender.DailyRollingFileAppender appender =
+				new gflogger.disruptor.appender.DailyRollingFileAppender(bufferSize, multichar);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
-			
+
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
 			appender.setAppend(append);
-			
+
 			appender.setDatePattern(datePattern);
 			return appender;
 		}
-		throw new IllegalArgumentException(loggerServiceClass.getName() 
+		throw new IllegalArgumentException(loggerServiceClass.getName()
 			+ " is unsupported type of logger service");
 	}
 
