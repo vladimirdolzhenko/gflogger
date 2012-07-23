@@ -23,6 +23,8 @@ import gflogger.formatter.FastDateFormat;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 // Contributors:   Nelson Minar <(nelson@monkey.org>
@@ -71,10 +73,15 @@ public class PatternParser {
 	PatternConverter		  head;
 	PatternConverter		  tail;
 	protected FormattingInfo  formattingInfo			= new FormattingInfo();
-	protected String		  pattern;
 
-	public PatternParser(String pattern) {
+	protected final String    pattern;
+	protected final Locale      locale;
+	protected final TimeZone    timeZone;
+
+	public PatternParser(String pattern, Locale locale, TimeZone timeZone) {
 		this.pattern = pattern;
+		this.locale = locale;
+		this.timeZone = timeZone;
 		patternLength = pattern.length();
 		state = LITERAL_STATE;
 	}
@@ -239,7 +246,7 @@ public class PatternParser {
 //				df = new DateTimeDateFormat();
 //			else {
 				try {
-					df = FastDateFormat.getInstance(dateFormatStr);
+					df = FastDateFormat.getInstance(dateFormatStr, timeZone, locale);
 				} catch (IllegalArgumentException e) {
 					LogLog.error("Could not instantiate SimpleDateFormat with " + dateFormatStr, e);
 					break;

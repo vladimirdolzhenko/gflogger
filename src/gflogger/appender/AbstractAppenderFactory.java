@@ -15,6 +15,10 @@
 package gflogger.appender;
 
 import static gflogger.helpers.OptionConverter.*;
+
+import java.util.Locale;
+import java.util.TimeZone;
+
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
@@ -31,7 +35,9 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	protected boolean multibyte = getBooleanProperty("gflogger.multibyte", false);
 
 	protected LogLevel logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "ERROR"));
-	protected Layout layout = new PatternLayout(getStringProperty("gflogger.pattern", "%m%n"));
+	protected TimeZone timeZone = getStringProperty("gflogger.timeZoneId", null) != null ? TimeZone.getTimeZone(getStringProperty("gflogger.timeZoneId", null)) : null;
+	protected Locale locale = getStringProperty("gflogger.language", null) != null ? new Locale(getStringProperty("gflogger.language", null)) : null;
+	protected Layout layout = new PatternLayout(getStringProperty("gflogger.pattern", "%m%n"), timeZone, locale);
 	protected boolean immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
 	protected int bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
 	protected long awaitTimeout = getIntProperty("gflogger.awaitTimeout", 10);
@@ -71,12 +77,36 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 		this.layout = layout;
 	}
 
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	public TimeZone getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(TimeZone timeZone) {
+		this.timeZone = timeZone;
+	}
+
+	public String getTimeZoneId() {
+		return timeZone != null ? timeZone.getID() : null;
+	}
+
+	public void setTimeZoneId(String timeZoneId) {
+		this.timeZone = timeZoneId != null ? TimeZone.getTimeZone(timeZoneId) : null;
+	}
+
 	public String getLayoutPattern(){
 		return this.layout != null ? this.layout.getContentType() : null;
 	}
 
 	public void setLayoutPattern(String layoutPattern){
-		this.layout = new PatternLayout(layoutPattern);
+		this.layout = new PatternLayout(layoutPattern, timeZone, locale);
 	}
 
 	public boolean isImmediateFlush() {
