@@ -95,7 +95,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 
 		final LogLevel entryLevel = event.getLogLevel();
 		assert entryLevel != null;
-		final boolean hasProperLevel = logLevel.compareTo(entryLevel) >= 0;
+		final boolean hasProperLevel = logLevel.compareTo(entryLevel) <= 0;
 
 		if (multibyte) {
 			final CharBuffer eventBuffer = event.getCharBuffer();

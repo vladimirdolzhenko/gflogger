@@ -119,7 +119,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 				final LogEntryItemImpl entry = ringBuffer.get(idx.get() + 1);
 				// handle entry that has a log level equals or higher than required
 				final boolean hasProperLevel =
-					logLevel.compareTo(entry.getLogLevel()) >= 0;
+					logLevel.compareTo(entry.getLogLevel()) <= 0;
 				if (hasProperLevel){
 					formatMessage(entry);
 				}
