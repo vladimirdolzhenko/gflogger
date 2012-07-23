@@ -24,6 +24,7 @@ import gflogger.LogLevel;
 import gflogger.LoggerService;
 import gflogger.appender.AppenderFactory;
 import gflogger.disruptor.appender.DAppender;
+import gflogger.helpers.LogLog;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -31,8 +32,6 @@ import java.nio.CharBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.helpers.LogLog;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;

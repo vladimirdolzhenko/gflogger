@@ -23,6 +23,7 @@ import gflogger.LogLevel;
 import gflogger.LoggerService;
 import gflogger.appender.AppenderFactory;
 import gflogger.base.appender.Appender;
+import gflogger.helpers.LogLog;
 import gflogger.ring.BlockingWaitStrategy;
 import gflogger.ring.RingBuffer;
 import gflogger.util.NamedThreadFactory;
@@ -32,8 +33,6 @@ import java.nio.CharBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.helpers.LogLog;
 
 /**
  * DefaultLoggerServiceImpl is the garbage-free implementation on the top of
