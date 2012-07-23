@@ -16,16 +16,16 @@ package gflogger;
 
 /**
  * MockLogEntry
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class MockLogEntry implements LogEntry {
 
 	public static final LogEntry INSTANCE = new MockLogEntry();
-	
+
 	public MockLogEntry() {
 	}
-	
+
 	@Override
 	public LogEntry append(final char c) {
 		return this;
@@ -70,12 +70,17 @@ public class MockLogEntry implements LogEntry {
 	public LogEntry append(final double i, final int precision) {
 		return this;
 	}
-	
+
 	@Override
 	public LogEntry append(Throwable e) {
 		return this;
 	}
-	
+
+	@Override
+	public LogEntry append(Loggable loggable) {
+	    return this;
+	}
+
 	@Override
 	public LogEntry append(Object o) {
 		return this;

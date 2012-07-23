@@ -20,36 +20,37 @@ import org.apache.commons.logging.Log;
 
 import gflogger.LogEntry;
 import gflogger.LogLevel;
+import gflogger.Loggable;
 import gflogger.formatter.BufferFormatter;
 
 /**
  * Log4jEntry
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class Log4jEntry implements LogEntry {
 
 	// 2k
 	private static final int DEFAULT_BUFFER_SIZE = 1 << 11;
-	
+
 	private final Log log;
 	private final StringBuilder builder;
-	
+
 	private LogLevel logLevel;
-	
+
 	public Log4jEntry(Log log) {
 		this.log = log;
 		this.builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
 	}
-	
+
 	public void setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
 	}
-	
+
 	public void reset(){
 		builder.setLength(0);
 	}
-	
+
 	@Override
 	public LogEntry append(char c) {
 		this.builder.append(c);
@@ -107,7 +108,7 @@ public class Log4jEntry implements LogEntry {
 		this.builder.append(x < 0 ? -x : x);
 		return this;
 	}
-	
+
 	@Override
 	public LogEntry append(Throwable e) {
 		if (e != null){
@@ -133,8 +134,8 @@ public class Log4jEntry implements LogEntry {
 							if (lineNumber >= 0){
 								append(':').append(lineNumber);
 							}
-							
-							final Class clazz = 
+
+							final Class clazz =
 								loadClass(trace[i].getClassName());
 							if (clazz != null){
 								append('[').append(getCodeLocation(clazz));
@@ -144,7 +145,7 @@ public class Log4jEntry implements LogEntry {
 								}
 								append(']');
 							}
-							
+
 						} else {
 							append("unknown");
 						}
@@ -158,7 +159,13 @@ public class Log4jEntry implements LogEntry {
 		}
 		return this;
 	}
-	
+
+	@Override
+	public LogEntry append(Loggable loggable) {
+		loggable.append(this);
+		return this;
+	}
+
 	@Override
 	public LogEntry append(Object o) {
 		this.builder.append(String.valueOf(o));

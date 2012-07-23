@@ -16,7 +16,7 @@ package gflogger;
 
 /**
  * LogEntry
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public interface LogEntry {
@@ -42,14 +42,16 @@ public interface LogEntry {
 	LogEntry append(long i);
 
 	LogEntry append(double i, int precision);
-	
+
 	LogEntry append(Throwable e);
-	
+
+	LogEntry append(Loggable loggable);
+
 	/**
 	 * append string representation of an object using <code>o.toString()</code> method
-	 * 
+	 *
 	 * Leads to garbage footprint !
-	 * 
+	 *
 	 * @param o
 	 * @return
 	 */
