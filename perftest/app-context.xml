@@ -17,10 +17,11 @@
 						<constructor-arg index="2">
 							<list>
 								<bean class="gflogger.appender.ConsoleAppenderFactory"
-									p:logLevel="INFO" />
-								<bean class="gflogger.appender.DailyRollingFileAppenderFactory"
+									p:layoutPattern="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"
+									p:logLevel="INFO"/>
+								<!--bean class="gflogger.appender.DailyRollingFileAppenderFactory"
 									p:logLevel="INFO"
-									p:fileName="logs/logger.log"/>
+									p:fileName="logs/logger.log"/-->
 							</list>
 						</constructor-arg>
 					</bean>
