@@ -12,16 +12,27 @@
 			<map>
 				<entry key="com.db">
 					<bean class="gflogger.base.DefaultLoggerServiceImpl">
+						<!-- count a number of items in the ring -->
 						<constructor-arg index="0" value="1024"/>
+						<!-- maxMessageSize max message size in the ring 
+							(in bytes in case single-byte mode, otherwise in chars) 
+						-->
 						<constructor-arg index="1" value="4096"/>
+						<!-- appender factories -->
 						<constructor-arg index="2">
 							<list>
 								<bean class="gflogger.appender.ConsoleAppenderFactory"
 									p:layoutPattern="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"
+									p:timeZoneId="GMT"
 									p:logLevel="INFO"/>
-								<!--bean class="gflogger.appender.DailyRollingFileAppenderFactory"
+								<bean class="gflogger.appender.DailyRollingFileAppenderFactory"
+									p:timeZoneId="GMT"
+									p:append="true"
+									p:immediateFlush="false"
 									p:logLevel="INFO"
-									p:fileName="logs/logger.log"/-->
+									p:fileName="logs/logger.log"
+									p:layoutPattern="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"
+									p:datePattern="'.'yyyy-MM-dd"/>
 							</list>
 						</constructor-arg>
 					</bean>
