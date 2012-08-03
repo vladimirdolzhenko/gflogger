@@ -7,9 +7,12 @@ import gflogger.LogFactory;
 import gflogger.LogLevel;
 import gflogger.Logger;
 import gflogger.LoggerService;
+import gflogger.LoggerServiceView;
 import gflogger.appender.ConsoleAppenderFactory;
 
 import java.nio.BufferOverflowException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -48,6 +51,70 @@ public class TestDLoggerServiceImpl {
 
 		final String string = buffer.toString();
 		assertEquals("infoerror", string);
+	}
+
+	@Test
+	public void testLogHierarchyLevelsRootDebugOthersInfo() throws Exception {
+		final int maxMessageSize = 32;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.DEBUG);
+		final LoggerService loggerService = new DLoggerServiceImpl(4, maxMessageSize, factory);
+
+		final Map<String, LoggerService> services = new HashMap<String, LoggerService>();
+		services.put("com.db", new LoggerServiceView(loggerService, LogLevel.INFO));
+		services.put(null, loggerService);
+		LogFactory.init(services);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		logger.debug().append("com.db.debug").commit();
+		logger.info().append("com.db.info").commit();
+		logger.error().append("com.db.error").commit();
+
+		final Logger logger2 = LogFactory.getLog("com");
+
+		logger2.debug().append("com.debug").commit();
+		logger2.info().append("com.info").commit();
+		logger2.error().append("com.error").commit();
+
+		LogFactory.stop();
+
+		assertEquals("com.db.infocom.db.errorcom.debugcom.infocom.error", buffer.toString());
+	}
+
+	@Test
+	public void testLogHierarchyLevelsRootWarnOtherInfo() throws Exception {
+		final int maxMessageSize = 32;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.DEBUG);
+		final LoggerService loggerService = new DLoggerServiceImpl(4, maxMessageSize, factory);
+
+		final Map<String, LoggerService> services = new HashMap<String, LoggerService>();
+		services.put("com.db", new LoggerServiceView(loggerService, LogLevel.INFO));
+		services.put(null, new LoggerServiceView(loggerService, LogLevel.WARN));
+		LogFactory.init(services);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		logger.debug().append("com.db.debug").commit();
+		logger.info().append("com.db.info").commit();
+		logger.error().append("com.db.error").commit();
+
+		final Logger logger2 = LogFactory.getLog("org");
+
+		logger2.debug().append("org.debug").commit();
+		logger2.info().append("org.info").commit();
+		logger2.error().append("org.error").commit();
+
+		LogFactory.stop();
+
+		assertEquals("com.db.infocom.db.errororg.error", buffer.toString());
 	}
 
 	@Test

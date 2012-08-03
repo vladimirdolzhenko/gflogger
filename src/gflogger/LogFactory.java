@@ -17,6 +17,7 @@ package gflogger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * LogFactory
@@ -124,7 +125,16 @@ public final class LogFactory {
 		synchronized (Helper.FACTORY.lock) {
 			stop();
 			if (services != null){
-				Helper.FACTORY.services.putAll(services);
+				for (final Entry<String, LoggerService> entry : services.entrySet()) {
+					final String category = entry.getKey();
+					final LoggerService loggerService = entry.getValue();
+					for (final LoggerService factoryLoggerService : Helper.FACTORY.services.values()) {
+						if (loggerService == factoryLoggerService){
+							throw new IllegalStateException();
+						}
+					}
+					Helper.FACTORY.services.put(category, loggerService);
+				}
 			}
 		}
 		return Helper.FACTORY;
