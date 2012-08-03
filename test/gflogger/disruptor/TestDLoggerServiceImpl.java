@@ -27,6 +27,30 @@ public class TestDLoggerServiceImpl {
 	}
 
 	@Test
+	public void testLogLevels() throws Exception {
+		final int maxMessageSize = 20;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		logger.debug().append("debug").commit();
+		logger.info().append("info").commit();
+		logger.error().append("error").commit();
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("infoerror", string);
+	}
+
+	@Test
     public void testAppendLatinCharsFullMessageSize() throws Exception {
 		final int maxMessageSize = 20;
 	    final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
