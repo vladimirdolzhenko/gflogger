@@ -79,8 +79,8 @@ public final class LogFactory {
 				}
 				n = n.substring(0, idx);
 			}
+			return services.get(null);
 		}
-		return null;
 	}
 
 	public static Logger getLog(final String name){
