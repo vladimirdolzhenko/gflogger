@@ -29,6 +29,10 @@ public interface Logger {
 
 	LogEntry info();
 
+	boolean isWarnEnabled();
+
+	LogEntry warn();
+
 	boolean isErrorEnabled();
 
 	LogEntry error();

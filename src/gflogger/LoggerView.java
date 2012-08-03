@@ -85,6 +85,16 @@ public class LoggerView implements Logger {
 	}
 
 	@Override
+	public boolean isWarnEnabled() {
+		return hasNecessaryLevel(LogLevel.WARN);
+	}
+
+	@Override
+	public LogEntry warn() {
+		return logEntry(LogLevel.WARN);
+	}
+
+	@Override
 	public boolean isErrorEnabled() {
 		return hasNecessaryLevel(LogLevel.ERROR);
 	}

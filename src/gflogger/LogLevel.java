@@ -21,7 +21,7 @@ package gflogger;
  */
 public enum LogLevel {
 
-	DEBUG, INFO, ERROR;
+	DEBUG, INFO, WARN, ERROR;
 
 	public static LogLevel[] values = values();
 
