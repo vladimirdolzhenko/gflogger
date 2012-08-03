@@ -173,6 +173,78 @@ public class Log4jEntry implements LogEntry {
 	}
 
 	@Override
+	public LogEntry appendIf(boolean condition, final char c) {
+		if (condition) append(c);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final CharSequence csq) {
+		if (condition) append(csq);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final CharSequence csq, final int start, final int end) {
+		if (condition) append(csq, start, end);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final boolean b) {
+		if (condition) append(b);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final byte i) {
+		if (condition) append(i);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final short i) {
+		if (condition) append(i);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final int i) {
+		if (condition) append(i);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final long i) {
+		if (condition) append(i);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final double i, final int precision) {
+		if (condition) append(i, precision);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Throwable e) {
+		if (condition) append(e);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Loggable loggable) {
+		if (condition) append(loggable);
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Object o) {
+		if (condition) append(o);
+		return this;
+	}
+
+	@Override
 	public void commit() {
 		switch (logLevel) {
 		case DEBUG:

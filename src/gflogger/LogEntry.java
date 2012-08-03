@@ -22,7 +22,7 @@ package gflogger;
 public interface LogEntry {
 
 	/**
-	 * append a single char
+	 * appends a single char
 	 * @return a reference to this object.
 	 */
 	LogEntry append(char c);
@@ -48,7 +48,7 @@ public interface LogEntry {
 	LogEntry append(Loggable loggable);
 
 	/**
-	 * append string representation of an object using <code>o.toString()</code> method
+	 * appends string representation of an object using <code>o.toString()</code> method
 	 *
 	 * Leads to garbage footprint !
 	 *
@@ -56,6 +56,52 @@ public interface LogEntry {
 	 * @return
 	 */
 	LogEntry append(Object o);
+
+	/**
+	 * appends a single char if condition is true
+	 * @param condition
+	 * @param c char to add
+	 * @return a reference to this object.
+	 */
+	LogEntry appendIf(boolean condition, char c);
+
+	/**
+	 * appends char sequence if condition is true
+	 * @param condition
+	 * @param csq char sequence to add
+	 * @return a reference to this object.
+	 */
+	LogEntry appendIf(boolean condition, CharSequence csq);
+
+	LogEntry appendIf(boolean condition, CharSequence csq, int start, int end);
+
+	LogEntry appendIf(boolean condition, boolean b);
+
+	LogEntry appendIf(boolean condition, byte i);
+
+	LogEntry appendIf(boolean condition, short i);
+
+	LogEntry appendIf(boolean condition, int i);
+
+	LogEntry appendIf(boolean condition, long i);
+
+	LogEntry appendIf(boolean condition, double i, int precision);
+
+	LogEntry appendIf(boolean condition, Throwable e);
+
+	LogEntry appendIf(boolean condition, Loggable loggable);
+
+	/**
+	 * appends string representation of an object  if condition is true
+	 * using <code>o.toString()</code> method
+	 *
+	 * Leads to garbage footprint !
+	 *
+	 * @param condition
+	 * @param o
+	 * @return
+	 */
+	LogEntry appendIf(boolean condition, Object o);
 
 	/**
 	 * commit an entry

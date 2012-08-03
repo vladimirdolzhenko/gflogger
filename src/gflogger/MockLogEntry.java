@@ -87,6 +87,66 @@ public class MockLogEntry implements LogEntry {
 	}
 
 	@Override
+	public LogEntry appendIf(boolean condition, final char c) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final CharSequence csq) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final CharSequence csq, final int start, final int end) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final boolean b) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final byte i) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final short i) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final int i) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final long i) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, final double i, final int precision) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Throwable e) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Loggable loggable) {
+		return this;
+	}
+
+	@Override
+	public LogEntry appendIf(boolean condition, Object o) {
+		return this;
+	}
+
+	@Override
 	public void commit() {
 		// nothing
 	}
