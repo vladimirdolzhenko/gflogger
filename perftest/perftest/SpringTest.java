@@ -29,6 +29,14 @@ public class SpringTest {
 
 	    logger.info().append("test3").commit();
 
+	    final Logger logger2 = LogFactory.getLog("org.spring");
+
+	    logger2.info().append("org.spring.info").commit();
+
+	    logger2.debug().append("org.spring.debug").commit();
+
+	    logger2.error().append("org.spring.error").commit();
+
 	    ctx.stop();
     }
 }
