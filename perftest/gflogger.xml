@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender-factory name="consoleAppenderFactory" class="gflogger.appender.ConsoleAppenderFactory"
+		logLevel="INFO">
+		<layout class="gflogger.PatternLayout"
+			pattern="%d{MMM d HH:mm:ss,SSS zzz} %p - %m [%c{2}] [%t]%n"
+			timeZoneId="GMT"/>
+	</appender-factory>
+	  
+  	<logger-service name="defaultLoggerService" count="1024" maxMessageSize="4096">
+		<appender-ref name="consoleAppenderFactory"/>
+	</logger-service>
+	
+	<logger-view name="com.db" 
+		service-ref="defaultLoggerService" logLevel="INFO"/>
+		
+	<logger-view-root 
+		service-ref="defaultLoggerService" logLevel="ERROR"/>
+
+</configuration>
