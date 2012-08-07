@@ -254,4 +254,88 @@ public class TestDefaultLoggerServiceImpl {
 		}
 
 	}
+
+	@Test
+	public void testAppendFormattedWithWithLastMessage() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		logger.info("say hello %% %s %").endWith("world");
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("say hello % world %", string);
+	}
+
+	@Test
+	public void testAppendFormattedWithLastMessage() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		logger.info("say %s hello %% %s %").with("a").endWith("world");
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("say a hello % world %", string);
+	}
+
+	@Test
+	public void testAppendFormattedWithWrongPlaceholder() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		try {
+			logger.info("say hello %d !").endWith("world");
+			fail();
+		} catch(IllegalArgumentException e){
+			// ok
+		}
+	}
+
+	@Test
+	public void testAppendFormattedWithAutoCommit() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		logger.info("say hello world");
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("say hello world", string);
+	}
 }

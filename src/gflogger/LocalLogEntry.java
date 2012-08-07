@@ -19,28 +19,30 @@ import java.nio.CharBuffer;
 
 /**
  * LocalLogEntry
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface LocalLogEntry extends LogEntry {
+public interface LocalLogEntry extends LogEntry, FormattedLogEntry {
 
 	LogLevel getLogLevel();
 
 	void setLogLevel(final LogLevel logLevel);
 
 	void setCategoryName(String categoryName);
-	
+
+	void setPattern(final String pattern);
+
 	String getCategoryName();
 
 	String getThreadName();
 
 	CharBuffer getCharBuffer();
-	
+
 	ByteBuffer getByteBuffer();
-	
+
 	boolean isCommited();
-	
+
 	void setCommited(boolean commited);
-	
+
 	Throwable getError();
 }

@@ -15,15 +15,15 @@
 package gflogger;
 
 /**
- * MockLogEntry
+ * NullLogEntry
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class MockLogEntry implements LogEntry {
+public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
-	public static final LogEntry INSTANCE = new MockLogEntry();
+	public static final NullLogEntry INSTANCE = new NullLogEntry();
 
-	public MockLogEntry() {
+	public NullLogEntry() {
 	}
 
 	@Override
@@ -150,4 +150,126 @@ public class MockLogEntry implements LogEntry {
 	public void commit() {
 		// nothing
 	}
+
+	@Override
+    public FormattedLogEntry with(char c) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(CharSequence csq) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(CharSequence csq, int start, int end) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(boolean b) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(byte i) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(short i) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(int i) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(long i) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(double i, int precision) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(Throwable e) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(Loggable loggable) {
+		return this;
+    }
+
+	@Override
+    public FormattedLogEntry with(Object o) {
+	    return this;
+    }
+
+	@Override
+    public void endWith(char c) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(CharSequence csq) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(CharSequence csq, int start, int end) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(boolean b) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(byte i) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(short i) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(int i) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(long i) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(double i, int precision) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(Throwable e) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(Loggable loggable) {
+		// nothing
+    }
+
+	@Override
+    public void endWith(Object o) {
+		// nothing
+    }
+
+
 }

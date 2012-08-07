@@ -25,6 +25,8 @@ public interface LoggerService {
 
 	LogEntry log(final LogLevel level, final String categoryName);
 
+	FormattedLogEntry formattedLog(final LogLevel level, final String categoryName, final String pattern);
+
 	void entryFlushed(final LocalLogEntry localEntry);
 
 	void stop();

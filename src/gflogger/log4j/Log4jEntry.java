@@ -18,6 +18,7 @@ import static gflogger.util.StackTraceUtils.*;
 
 import org.apache.commons.logging.Log;
 
+import gflogger.FormattedLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.Loggable;
@@ -28,7 +29,7 @@ import gflogger.formatter.BufferFormatter;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class Log4jEntry implements LogEntry {
+public class Log4jEntry implements LogEntry, FormattedLogEntry {
 
 	// 2k
 	private static final int DEFAULT_BUFFER_SIZE = 1 << 11;
@@ -38,6 +39,9 @@ public class Log4jEntry implements LogEntry {
 
 	private LogLevel logLevel;
 
+	private String pattern;
+	private int pPos;
+
 	public Log4jEntry(Log log) {
 		this.log = log;
 		this.builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
@@ -45,6 +49,42 @@ public class Log4jEntry implements LogEntry {
 
 	public void setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
+	}
+
+	public void setPattern(String pattern) {
+		if (pattern == null){
+			throw new IllegalArgumentException("expected not null pattern.");
+		}
+		this.pattern = pattern;
+		this.pPos = 0;
+		appendNextPatternChank();
+	}
+
+	protected void appendNextPatternChank(){
+		final int len = pattern.length();
+		for(; pPos < len; pPos++){
+			final char ch = pattern.charAt(pPos);
+			if (ch == '%' && (pPos + 1) < len){
+				if (pattern.charAt(pPos + 1) != '%') break;
+				pPos++;
+			}
+			append(ch);
+		}
+		if (this.pPos == len){
+			commit();
+		}
+	}
+
+	protected void checkPlaceholder(){
+		if (pPos + 2 >= pattern.length()){
+			throw new IllegalStateException("Illegal pattern '" + pattern + "' or position " + pPos);
+		}
+		final char ch1 = pattern.charAt(pPos);
+		final char ch2 = pattern.charAt(pPos + 1);
+		if (ch1 != '%' || ch2 != 's'){
+			throw new IllegalArgumentException("Illegal pattern placeholder '" + ch1 + "" + ch2 + " at " + pPos);
+		}
+		pPos += 2;
 	}
 
 	public void reset(){
@@ -162,7 +202,7 @@ public class Log4jEntry implements LogEntry {
 
 	@Override
 	public LogEntry append(Loggable loggable) {
-		loggable.append(this);
+		loggable.appendTo(this);
 		return this;
 	}
 
@@ -245,8 +285,181 @@ public class Log4jEntry implements LogEntry {
 	}
 
 	@Override
+	public FormattedLogEntry with(char c){
+		checkPlaceholder();
+		append(c);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(CharSequence csq){
+		checkPlaceholder();
+		append(csq);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(CharSequence csq, int start, int end){
+		checkPlaceholder();
+		append(csq, start, end);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(boolean b){
+		checkPlaceholder();
+		append(b);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(byte i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(short i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(int i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(long i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(double i, int precision){
+		checkPlaceholder();
+		append(i, precision);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(Throwable e){
+		checkPlaceholder();
+		append(e);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(Loggable loggable){
+		checkPlaceholder();
+		append(loggable);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedLogEntry with(Object o){
+		checkPlaceholder();
+		append(o);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public void endWith(char c){
+		with(c);
+		commit();
+	}
+
+	@Override
+	public void endWith(CharSequence csq){
+		with(csq);
+		commit();
+	}
+
+	@Override
+	public void endWith(CharSequence csq, int start, int end){
+		with(csq, start, end);
+		commit();
+	}
+
+	@Override
+	public void endWith(boolean b){
+		with(b);
+		commit();
+	}
+
+	@Override
+	public void endWith(byte i){
+		with(i);
+		commit();
+	}
+
+	@Override
+	public void  endWith(short i){
+		with(i);
+		commit();
+	}
+
+	@Override
+	public void  endWith(int i){
+		with(i);
+		commit();
+	}
+
+	@Override
+	public void  endWith(long i){
+		with(i);
+		commit();
+	}
+
+	@Override
+	public void endWith(double i, int precision){
+		with(i, precision);
+		commit();
+	}
+
+	@Override
+	public void endWith(Throwable e){
+		with(e);
+		commit();
+	}
+
+	@Override
+	public void endWith(Loggable loggable){
+		with(loggable);
+		commit();
+	}
+
+	@Override
+	public void endWith(Object o){
+		with(o);
+		commit();
+	}
+
+	@Override
 	public void commit() {
 		switch (logLevel) {
+		case TRACE:
+			if (log.isTraceEnabled()) {
+				log.trace(builder.toString());
+			}
+			break;
 		case DEBUG:
 			if (log.isDebugEnabled()) {
 				log.debug(builder.toString());
@@ -257,9 +470,19 @@ public class Log4jEntry implements LogEntry {
 				log.info(builder.toString());
 			}
 			break;
+		case WARN:
+			if (log.isWarnEnabled()) {
+				log.warn(builder.toString());
+			}
+			break;
 		case ERROR:
 			if (log.isErrorEnabled()) {
 				log.error(builder.toString());
+			}
+			break;
+		case FATAL:
+			if (log.isFatalEnabled()) {
+				log.fatal(builder.toString());
 			}
 			break;
 		}

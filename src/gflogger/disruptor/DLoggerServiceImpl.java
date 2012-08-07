@@ -18,6 +18,7 @@ import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static gflogger.formatter.BufferFormatter.*;
 import gflogger.ByteBufferLocalLogEntry;
 import gflogger.CharBufferLocalLogEntry;
+import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -272,6 +273,26 @@ public class DLoggerServiceImpl implements LoggerService {
 		entry.setCategoryName(categoryName);
 		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
 		b.clear();
+		return entry;
+	}
+
+	@Override
+	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern) {
+		if (!running) throw new IllegalStateException("Logger was stopped.");
+
+		final LocalLogEntry entry = logEntryThreadLocal.get();
+
+		if (!entry.isCommited()){
+			LogLog.error("ERROR! log message was not properly commited.");
+			entry.commit();
+		}
+
+		entry.setCommited(false);
+		entry.setLogLevel(level);
+		entry.setCategoryName(categoryName);
+		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
+		b.clear();
+		entry.setPattern(pattern);
 		return entry;
 	}
 

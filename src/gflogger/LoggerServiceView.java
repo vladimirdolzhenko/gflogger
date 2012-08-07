@@ -21,6 +21,11 @@ public class LoggerServiceView implements LoggerService {
 	}
 
 	@Override
+	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern) {
+		return service.formattedLog(level, categoryName, pattern);
+	}
+
+	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
 		service.entryFlushed(localEntry);
 	}

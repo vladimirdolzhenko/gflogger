@@ -21,20 +21,39 @@ package gflogger;
  */
 public interface Logger {
 
+	boolean isTraceEnabled();
+
+	LogEntry trace();
+
+	FormattedLogEntry trace(final String pattern);
+
 	boolean isDebugEnabled();
 
 	LogEntry debug();
+
+	FormattedLogEntry debug(final String pattern);
 
 	boolean isInfoEnabled();
 
 	LogEntry info();
 
+	FormattedLogEntry info(final String pattern);
+
 	boolean isWarnEnabled();
 
 	LogEntry warn();
+
+	FormattedLogEntry warn(final String pattern);
 
 	boolean isErrorEnabled();
 
 	LogEntry error();
 
+	FormattedLogEntry error(final String pattern);
+
+	boolean isFatalEnabled();
+
+	LogEntry fatal();
+
+	FormattedLogEntry fatal(final String pattern);
 }

@@ -25,12 +25,12 @@ public class LoggerView implements Logger {
 	private LogLevel level;
 	private volatile boolean valid;
 
-	private final LogEntry mockLogEntry;
+	private final NullLogEntry mockLogEntry;
 
 	private final String name;
 
 	public LoggerView(final String name) {
-		this.mockLogEntry = MockLogEntry.INSTANCE;
+		this.mockLogEntry = NullLogEntry.INSTANCE;
 		this.name = name;
 	}
 
@@ -64,6 +64,27 @@ public class LoggerView implements Logger {
 			mockLogEntry;
 	}
 
+	private FormattedLogEntry formattedLogEntry(final LogLevel logLevel, String pattern) {
+		return hasNecessaryLevel(logLevel) ?
+				loggerService.formattedLog(logLevel, name, pattern) :
+					mockLogEntry;
+	}
+
+	@Override
+	public boolean isTraceEnabled() {
+		return hasNecessaryLevel(LogLevel.TRACE);
+	}
+
+	@Override
+	public LogEntry trace() {
+		return logEntry(LogLevel.TRACE);
+	}
+
+	@Override
+	public FormattedLogEntry trace(String pattern) {
+		return formattedLogEntry(LogLevel.TRACE, pattern);
+	}
+
 	@Override
 	public boolean isDebugEnabled() {
 		return hasNecessaryLevel(LogLevel.DEBUG);
@@ -72,6 +93,11 @@ public class LoggerView implements Logger {
 	@Override
 	public LogEntry debug() {
 		return logEntry(LogLevel.DEBUG);
+	}
+
+	@Override
+	public FormattedLogEntry debug(String pattern) {
+		return formattedLogEntry(LogLevel.DEBUG, pattern);
 	}
 
 	@Override
@@ -85,6 +111,11 @@ public class LoggerView implements Logger {
 	}
 
 	@Override
+	public FormattedLogEntry info(String pattern) {
+		return formattedLogEntry(LogLevel.INFO, pattern);
+	}
+
+	@Override
 	public boolean isWarnEnabled() {
 		return hasNecessaryLevel(LogLevel.WARN);
 	}
@@ -95,6 +126,11 @@ public class LoggerView implements Logger {
 	}
 
 	@Override
+	public FormattedLogEntry warn(String pattern) {
+		return formattedLogEntry(LogLevel.WARN, pattern);
+	}
+
+	@Override
 	public boolean isErrorEnabled() {
 		return hasNecessaryLevel(LogLevel.ERROR);
 	}
@@ -102,5 +138,25 @@ public class LoggerView implements Logger {
 	@Override
 	public LogEntry error() {
 		return logEntry(LogLevel.ERROR);
+	}
+
+	@Override
+	public FormattedLogEntry error(String pattern) {
+		return formattedLogEntry(LogLevel.ERROR, pattern);
+	}
+
+	@Override
+	public boolean isFatalEnabled() {
+		return hasNecessaryLevel(LogLevel.ERROR);
+	}
+
+	@Override
+	public LogEntry fatal() {
+		return logEntry(LogLevel.FATAL);
+	}
+
+	@Override
+	public FormattedLogEntry fatal(String pattern) {
+		return formattedLogEntry(LogLevel.FATAL, pattern);
 	}
 }

@@ -17,6 +17,7 @@ package gflogger.base;
 import static gflogger.formatter.BufferFormatter.*;
 
 import gflogger.CharBufferLocalLogEntry;
+import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -160,6 +161,24 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.getCharBuffer().clear();
+		return entry;
+	}
+
+	@Override
+	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern) {
+		if (!running) throw new IllegalStateException("Logger was stopped.");
+		final LocalLogEntry entry = logEntryThreadLocal.get();
+
+		if (!entry.isCommited()){
+			LogLog.error("ERROR! log message was not properly commited.");
+			entry.commit();
+		}
+
+		entry.setCommited(false);
+		entry.setLogLevel(level);
+		entry.setCategoryName(categoryName);
+		entry.getCharBuffer().clear();
+		entry.setPattern(pattern);
 		return entry;
 	}
 

@@ -25,22 +25,14 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 /**
- * LocalLogEntry
+ * CharBufferLocalLogEntry
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class CharBufferLocalLogEntry implements LocalLogEntry {
+public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
-	private final String threadName;
 	private final ByteBuffer byteBuffer;
 	private final CharBuffer buffer;
-	private final LoggerService loggerService;
-
-	private String categoryName;
-	private LogLevel logLevel;
-
-	private boolean commited = true;
-	private Throwable error;
 
 	public CharBufferLocalLogEntry(final int maxMessageSize, final LoggerService loggerService) {
 		this(Thread.currentThread(), maxMessageSize, loggerService);
@@ -52,65 +44,20 @@ public final class CharBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	public CharBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService) {
-		/*
-		 * It worth to cache thread categoryName at thread local variable cause
-		 * thread.getName() creates new String(char[])
-		 */
-		this.threadName = owner.getName();
+		super(owner, loggerService);
 		this.byteBuffer = byteBuffer;
 		this.buffer = byteBuffer.asCharBuffer();
-		this.loggerService = loggerService;
-	}
-
-	@Override
-    public LogLevel getLogLevel() {
-		return logLevel;
-	}
-
-	@Override
-    public void setLogLevel(final LogLevel logLevel) {
-		this.logLevel = logLevel;
-	}
-
-	@Override
-    public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
-	}
-
-	@Override
-    public String getCategoryName() {
-		return categoryName;
-	}
-
-	@Override
-    public String getThreadName() {
-		return threadName;
 	}
 
 	@Override
 	public ByteBuffer getByteBuffer() {
-	    throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public CharBuffer getCharBuffer() {
 		return buffer;
 	}
-
-	@Override
-    public boolean isCommited() {
-	    return this.commited;
-    }
-
-	@Override
-    public void setCommited(boolean commited) {
-	    this.commited = commited;
-    }
-
-	@Override
-    public Throwable getError() {
-	    return this.error;
-    }
 
 	@Override
 	public CharBufferLocalLogEntry append(final char c) {
@@ -272,105 +219,8 @@ public final class CharBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Loggable loggable) {
-		loggable.append(this);
-		return this;
-	}
-
-	@Override
-	public LogEntry append(Object o) {
-		try {
-			if (o != null){
-				buffer.append(o.toString());
-			} else {
-				buffer.put('n').put('u').put('l').put('l');
-			}
-		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(Object o):" + e.getMessage(), e);
-		}
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final char c) {
-		if (condition) append(c);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq) {
-		if (condition) append(csq);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq, final int start, final int end) {
-		if (condition) append(csq, start, end);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final boolean b) {
-		if (condition) append(b);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final byte i) {
-		if (condition) append(i);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final short i) {
-		if (condition) append(i);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final int i) {
-		if (condition) append(i);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final long i) {
-		if (condition) append(i);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, final double i, final int precision) {
-		if (condition) append(i, precision);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, Throwable e) {
-		if (condition) append(e);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, Loggable loggable) {
-		if (condition) append(loggable);
-		return this;
-	}
-
-	@Override
-	public LogEntry appendIf(boolean condition, Object o) {
-		if (condition) append(o);
-		return this;
-	}
-
-	@Override
-	public void commit() {
+	protected void commit0() {
 		buffer.flip();
-		loggerService.entryFlushed(this);
-		commited = true;
-		error = null;
 	}
 
 	@Override

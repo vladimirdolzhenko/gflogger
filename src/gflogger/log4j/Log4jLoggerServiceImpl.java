@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 
+import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
@@ -28,18 +29,18 @@ import gflogger.LoggerService;
 
 /**
  * Log4jLoggerServiceImpl
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class Log4jLoggerServiceImpl implements LoggerService {
 
 	private final ThreadLocal<Map<String, Log4jEntry>> entries;
 	private final LogLevel level;
-	
+
 	public Log4jLoggerServiceImpl() {
 		this(LogLevel.DEBUG);
 	}
-	
+
 	public Log4jLoggerServiceImpl(final LogLevel level) {
 		this.level = level;
 		this.entries = new ThreadLocal<Map<String, Log4jEntry>>(){
@@ -50,7 +51,7 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 		};
 		BasicConfigurator.configure();
 	}
-	
+
 	@Override
 	public LogLevel getLevel() {
 		return level;
@@ -68,7 +69,21 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 		entry.reset();
 		return entry;
 	}
-	
+
+	@Override
+	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern) {
+		final Map<String, Log4jEntry> map = entries.get();
+		Log4jEntry entry = map.get(categoryName);
+		if (entry == null){
+			entry = new Log4jEntry(LogFactory.getLog(categoryName));
+			map.put(categoryName, entry);
+		}
+		entry.reset();
+		entry.setPattern(pattern);
+		entry.setLogLevel(level);
+		return entry;
+	}
+
 	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
 		// nothing
