@@ -5,7 +5,8 @@
 		logLevel="INFO">
 		<layout class="gflogger.PatternLayout"
 			pattern="%d{MMM d HH:mm:ss,SSS zzz} %p - %m [%c{2}] [%t]%n"
-			timeZoneId="GMT"/>
+			timeZoneId="GMT"
+			language="EN"/>
 	</appender-factory>
 	  
   	<logger-service name="defaultLoggerService" count="1024" maxMessageSize="4096">

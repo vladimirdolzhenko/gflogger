@@ -102,7 +102,8 @@ public class Configuration extends DefaultHandler {
 		final String clazz = getAttribute(attributes, "class");
 		final String pattern  = getAttribute(attributes, "pattern");
 		final String timeZoneId = getAttribute(attributes, "timeZoneId");
-		final Layout layout = (Layout)Class.forName(clazz).getConstructor(String.class, String.class).newInstance(pattern, timeZoneId);
+		final String language = getAttribute(attributes, "language");
+		final Layout layout = (Layout)Class.forName(clazz).getConstructor(String.class, String.class, String.class).newInstance(pattern, timeZoneId, language);
 		setProperty(stack.peek(), "layout", layout);
 	}
 
