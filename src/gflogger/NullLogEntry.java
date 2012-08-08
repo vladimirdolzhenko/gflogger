@@ -78,7 +78,7 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public LogEntry append(Loggable loggable) {
-	    return this;
+		return this;
 	}
 
 	@Override
@@ -87,63 +87,63 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final char c) {
-		return this;
+	public void appendLast(char c) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq) {
-		return this;
+	public void appendLast(CharSequence csq) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq, final int start, final int end) {
-		return this;
+	public void appendLast(CharSequence csq, int start, int end) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final boolean b) {
-		return this;
+	public void appendLast(boolean b) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final byte i) {
-		return this;
+	public void appendLast(byte i) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final short i) {
-		return this;
+	public void appendLast(short i) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final int i) {
-		return this;
+	public void appendLast(int i) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final long i) {
-		return this;
+	public void appendLast(long i) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final double i, final int precision) {
-		return this;
+	public void appendLast(double i, int precision) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Throwable e) {
-		return this;
+	public void appendLast(Throwable e) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Loggable loggable) {
-		return this;
+	public void appendLast(Loggable loggable) {
+		// nothing
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Object o) {
-		return this;
+	public void appendLast(Object o) {
+		// nothing
 	}
 
 	@Override
@@ -152,124 +152,124 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-    public FormattedLogEntry with(char c) {
+	public FormattedLogEntry with(char c) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(CharSequence csq) {
+	public FormattedLogEntry with(CharSequence csq) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(CharSequence csq, int start, int end) {
+	public FormattedLogEntry with(CharSequence csq, int start, int end) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(boolean b) {
+	public FormattedLogEntry with(boolean b) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(byte i) {
+	public FormattedLogEntry with(byte i) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(short i) {
+	public FormattedLogEntry with(short i) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(int i) {
+	public FormattedLogEntry with(int i) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(long i) {
+	public FormattedLogEntry with(long i) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(double i, int precision) {
+	public FormattedLogEntry with(double i, int precision) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(Throwable e) {
+	public FormattedLogEntry with(Throwable e) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(Loggable loggable) {
+	public FormattedLogEntry with(Loggable loggable) {
 		return this;
-    }
+	}
 
 	@Override
-    public FormattedLogEntry with(Object o) {
-	    return this;
-    }
+	public FormattedLogEntry with(Object o) {
+		return this;
+	}
 
 	@Override
-    public void endWith(char c) {
+	public void endWith(char c) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(CharSequence csq) {
+	public void endWith(CharSequence csq) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(CharSequence csq, int start, int end) {
+	public void endWith(CharSequence csq, int start, int end) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(boolean b) {
+	public void endWith(boolean b) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(byte i) {
+	public void endWith(byte i) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(short i) {
+	public void endWith(short i) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(int i) {
+	public void endWith(int i) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(long i) {
+	public void endWith(long i) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(double i, int precision) {
+	public void endWith(double i, int precision) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(Throwable e) {
+	public void endWith(Throwable e) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(Loggable loggable) {
+	public void endWith(Loggable loggable) {
 		// nothing
-    }
+	}
 
 	@Override
-    public void endWith(Object o) {
+	public void endWith(Object o) {
 		// nothing
-    }
+	}
 
 
 }

@@ -58,50 +58,47 @@ public interface LogEntry {
 	LogEntry append(Object o);
 
 	/**
-	 * appends a single char if condition is true
-	 * @param condition
+	 * appends last a single char
 	 * @param c char to add
 	 * @return a reference to this object.
 	 */
-	LogEntry appendIf(boolean condition, char c);
+	void appendLast(char c);
 
 	/**
-	 * appends char sequence if condition is true
-	 * @param condition
+	 * appends last char sequence
 	 * @param csq char sequence to add
 	 * @return a reference to this object.
 	 */
-	LogEntry appendIf(boolean condition, CharSequence csq);
+	void appendLast(CharSequence csq);
 
-	LogEntry appendIf(boolean condition, CharSequence csq, int start, int end);
+	void appendLast(CharSequence csq, int start, int end);
 
-	LogEntry appendIf(boolean condition, boolean b);
+	void appendLast(boolean b);
 
-	LogEntry appendIf(boolean condition, byte i);
+	void appendLast(byte i);
 
-	LogEntry appendIf(boolean condition, short i);
+	void appendLast(short i);
 
-	LogEntry appendIf(boolean condition, int i);
+	void appendLast(int i);
 
-	LogEntry appendIf(boolean condition, long i);
+	void appendLast(long i);
 
-	LogEntry appendIf(boolean condition, double i, int precision);
+	void appendLast(double i, int precision);
 
-	LogEntry appendIf(boolean condition, Throwable e);
+	void appendLast(Throwable e);
 
-	LogEntry appendIf(boolean condition, Loggable loggable);
+	void appendLast(Loggable loggable);
 
 	/**
-	 * appends string representation of an object  if condition is true
+	 * appends last string representation of an object
 	 * using <code>o.toString()</code> method
 	 *
 	 * Leads to garbage footprint !
 	 *
-	 * @param condition
 	 * @param o
 	 * @return
 	 */
-	LogEntry appendIf(boolean condition, Object o);
+	void appendLast(Object o);
 
 	/**
 	 * commit an entry

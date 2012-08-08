@@ -148,75 +148,75 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final char c) {
-		if (condition) append(c);
-		return this;
+	public void appendLast (final char c) {
+		append(c);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq) {
-		if (condition) append(csq);
-		return this;
+	public void appendLast (final CharSequence csq) {
+		append(csq);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final CharSequence csq, final int start, final int end) {
-		if (condition) append(csq, start, end);
-		return this;
+	public void appendLast (final CharSequence csq, final int start, final int end) {
+		append(csq, start, end);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final boolean b) {
-		if (condition) append(b);
-		return this;
+	public void appendLast (final boolean b) {
+		append(b);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final byte i) {
-		if (condition) append(i);
-		return this;
+	public void appendLast (final byte i) {
+		append(i);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final short i) {
-		if (condition) append(i);
-		return this;
+	public void appendLast (final short i) {
+		append(i);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final int i) {
-		if (condition) append(i);
-		return this;
+	public void appendLast (final int i) {
+		append(i);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final long i) {
-		if (condition) append(i);
-		return this;
+	public void appendLast (final long i) {
+		append(i);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, final double i, final int precision) {
-		if (condition) append(i, precision);
-		return this;
+	public void appendLast (final double i, final int precision) {
+		append(i, precision);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Throwable e) {
-		if (condition) append(e);
-		return this;
+	public void appendLast (Throwable e) {
+		append(e);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Loggable loggable) {
-		if (condition) append(loggable);
-		return this;
+	public void appendLast (Loggable loggable) {
+		append(loggable);
+		commit();
 	}
 
 	@Override
-	public LogEntry appendIf(boolean condition, Object o) {
-		if (condition) append(o);
-		return this;
+	public void appendLast (Object o) {
+		append(o);
+		commit();
 	}
 
 	@Override
