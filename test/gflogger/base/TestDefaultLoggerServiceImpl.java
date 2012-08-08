@@ -319,6 +319,31 @@ public class TestDefaultLoggerServiceImpl {
 	}
 
 	@Test
+	public void testAppendFormattedWithNoMorePlaceholder() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		try {
+			logger.info("say hello %s").with("world").with("world");
+			fail();
+		} catch(IllegalStateException e){
+			// ok
+		}
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("say hello world", string);
+	}
+
+	@Test
 	public void testAppendFormattedWithAutoCommit() throws Exception {
 		final int maxMessageSize = 64;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();

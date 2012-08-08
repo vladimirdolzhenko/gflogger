@@ -111,7 +111,10 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	protected void checkPlaceholder(){
-		if (pPos + 2 >= pattern.length()){
+		if (pattern == null){
+			throw new IllegalStateException("Entry has been commited.");
+		}
+		if (pPos + 1 >= pattern.length()){
 			throw new IllegalStateException("Illegal pattern '" + pattern + "' or position " + pPos);
 		}
 		final char ch1 = pattern.charAt(pPos);

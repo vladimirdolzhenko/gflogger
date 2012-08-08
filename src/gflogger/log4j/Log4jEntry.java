@@ -76,6 +76,9 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	protected void checkPlaceholder(){
+		if (pattern == null){
+			throw new IllegalStateException("Entry has been commited.");
+		}
 		if (pPos + 2 >= pattern.length()){
 			throw new IllegalStateException("Illegal pattern '" + pattern + "' or position " + pPos);
 		}
