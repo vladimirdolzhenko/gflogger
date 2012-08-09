@@ -212,62 +212,62 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public void endWith(char c) {
+	public void withLast(char c) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(CharSequence csq) {
+	public void withLast(CharSequence csq) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(CharSequence csq, int start, int end) {
+	public void withLast(CharSequence csq, int start, int end) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(boolean b) {
+	public void withLast(boolean b) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(byte i) {
+	public void withLast(byte i) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(short i) {
+	public void withLast(short i) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(int i) {
+	public void withLast(int i) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(long i) {
+	public void withLast(long i) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(double i, int precision) {
+	public void withLast(double i, int precision) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(Throwable e) {
+	public void withLast(Throwable e) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(Loggable loggable) {
+	public void withLast(Loggable loggable) {
 		// nothing
 	}
 
 	@Override
-	public void endWith(Object o) {
+	public void withLast(Object o) {
 		// nothing
 	}
 

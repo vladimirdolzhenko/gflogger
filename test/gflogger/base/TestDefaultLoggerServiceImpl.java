@@ -268,7 +268,7 @@ public class TestDefaultLoggerServiceImpl {
 		LogFactory.init("com.db", loggerService);
 
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
-		logger.info("say hello %% %s %").endWith("world");
+		logger.info("say hello %% %s %").withLast("world");
 
 		LogFactory.stop();
 
@@ -289,7 +289,7 @@ public class TestDefaultLoggerServiceImpl {
 		LogFactory.init("com.db", loggerService);
 
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
-		logger.info("say %s hello %% %s %").with("a").endWith("world");
+		logger.info("say %s hello %% %s %").with("a").withLast("world");
 
 		LogFactory.stop();
 
@@ -311,7 +311,7 @@ public class TestDefaultLoggerServiceImpl {
 
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 		try {
-			logger.info("say hello %d !").endWith("world");
+			logger.info("say hello %d !").withLast("world");
 			fail();
 		} catch(IllegalArgumentException e){
 			// ok
@@ -341,6 +341,33 @@ public class TestDefaultLoggerServiceImpl {
 
 		final String string = buffer.toString();
 		assertEquals("say hello world", string);
+	}
+
+	@Test
+	public void testAppendFormattedWithLessPlaceholdersThanRequired() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		try {
+			logger.info("say hello %s %s").withLast("world");
+
+			LogFactory.stop();
+			fail(buffer.toString());
+		} catch(IllegalStateException e){
+			// ok
+		}
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("", string);
 	}
 
 	@Test

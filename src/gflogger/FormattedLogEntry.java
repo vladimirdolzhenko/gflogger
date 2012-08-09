@@ -53,37 +53,37 @@ public interface FormattedLogEntry {
 
 
 	/**
-	 * appends with a last single char parameter
+	 * with a last single char parameter
 	 * @return a reference to this object.
 	 */
-	void endWith(char c);
+	void withLast(char c);
 
-	void endWith(CharSequence csq);
+	void withLast(CharSequence csq);
 
-	void endWith(CharSequence csq, int start, int end);
+	void withLast(CharSequence csq, int start, int end);
 
-	void endWith(boolean b);
+	void withLast(boolean b);
 
-	void endWith(byte i);
+	void withLast(byte i);
 
-	void endWith(short i);
+	void withLast(short i);
 
-	void endWith(int i);
+	void withLast(int i);
 
-	void endWith(long i);
+	void withLast(long i);
 
-	void endWith(double i, int precision);
+	void withLast(double i, int precision);
 
-	void endWith(Throwable e);
+	void withLast(Throwable e);
 
-	void endWith(Loggable loggable);
+	void withLast(Loggable loggable);
 
 	/**
-	 * appends with a last parameter string representation of an object using <code>o.toString()</code> method
+	 * with a last parameter string representation of an object using <code>o.toString()</code> method
 	 *
 	 * Leads to garbage footprint !
 	 *
 	 * @param o
 	 */
-	void endWith(Object o);
+	void withLast(Object o);
 }
