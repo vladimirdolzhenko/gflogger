@@ -47,16 +47,6 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final byte i) {
-		return this;
-	}
-
-	@Override
-	public LogEntry append(final short i) {
-		return this;
-	}
-
-	@Override
 	public LogEntry append(final int i) {
 		return this;
 	}
@@ -103,16 +93,6 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public void appendLast(boolean b) {
-		// nothing
-	}
-
-	@Override
-	public void appendLast(byte i) {
-		// nothing
-	}
-
-	@Override
-	public void appendLast(short i) {
 		// nothing
 	}
 
@@ -172,16 +152,6 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(byte i) {
-		return this;
-	}
-
-	@Override
-	public FormattedLogEntry with(short i) {
-		return this;
-	}
-
-	@Override
 	public FormattedLogEntry with(int i) {
 		return this;
 	}
@@ -228,16 +198,6 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public void withLast(boolean b) {
-		// nothing
-	}
-
-	@Override
-	public void withLast(byte i) {
-		// nothing
-	}
-
-	@Override
-	public void withLast(short i) {
 		// nothing
 	}
 

@@ -27,10 +27,6 @@ public interface FormattedLogEntry {
 
 	FormattedLogEntry with(boolean b);
 
-	FormattedLogEntry with(byte i);
-
-	FormattedLogEntry with(short i);
-
 	FormattedLogEntry with(int i);
 
 	FormattedLogEntry with(long i);
@@ -63,10 +59,6 @@ public interface FormattedLogEntry {
 	void withLast(CharSequence csq, int start, int end);
 
 	void withLast(boolean b);
-
-	void withLast(byte i);
-
-	void withLast(short i);
 
 	void withLast(int i);
 

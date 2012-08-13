@@ -127,18 +127,6 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(byte i) {
-		this.builder.append(i);
-		return null;
-	}
-
-	@Override
-	public LogEntry append(short i) {
-		this.builder.append(i);
-		return this;
-	}
-
-	@Override
 	public LogEntry append(int i) {
 		this.builder.append(i);
 		return this;
@@ -213,7 +201,11 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public LogEntry append(Loggable loggable) {
-		loggable.appendTo(this);
+		if (loggable != null){
+			loggable.appendTo(this);
+		} else {
+			append('n').append('u').append('l').append('l');
+		}
 		return this;
 	}
 
@@ -244,18 +236,6 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	@Override
 	public void appendLast(final boolean b) {
 		append(b);
-		commit();
-	}
-
-	@Override
-	public void appendLast(final byte i) {
-		append(i);
-		commit();
-	}
-
-	@Override
-	public void appendLast(final short i) {
-		append(i);
 		commit();
 	}
 
@@ -323,22 +303,6 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	public FormattedLogEntry with(boolean b){
 		checkPlaceholder();
 		append(b);
-		appendNextPatternChank();
-		return this;
-	}
-
-	@Override
-	public FormattedLogEntry with(byte i){
-		checkPlaceholder();
-		append(i);
-		appendNextPatternChank();
-		return this;
-	}
-
-	@Override
-	public FormattedLogEntry with(short i){
-		checkPlaceholder();
-		append(i);
 		appendNextPatternChank();
 		return this;
 	}
@@ -412,18 +376,6 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	@Override
 	public void withLast(boolean b){
 		with(b);
-		checkAndCommit();
-	}
-
-	@Override
-	public void withLast(byte i){
-		with(i);
-		checkAndCommit();
-	}
-
-	@Override
-	public void  withLast(short i){
-		with(i);
 		checkAndCommit();
 	}
 

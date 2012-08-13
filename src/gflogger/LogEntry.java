@@ -33,10 +33,6 @@ public interface LogEntry {
 
 	LogEntry append(boolean b);
 
-	LogEntry append(byte i);
-
-	LogEntry append(short i);
-
 	LogEntry append(int i);
 
 	LogEntry append(long i);
@@ -74,10 +70,6 @@ public interface LogEntry {
 	void appendLast(CharSequence csq, int start, int end);
 
 	void appendLast(boolean b);
-
-	void appendLast(byte i);
-
-	void appendLast(short i);
 
 	void appendLast(int i);
 

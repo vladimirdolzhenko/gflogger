@@ -105,30 +105,6 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final byte i) {
-		try{
-			BufferFormatter.append(buffer, i);
-		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(byte i):" + e.getMessage(), e);
-		}
-		return this;
-	}
-
-	@Override
-	public LogEntry append(final short i) {
-		try{
-			BufferFormatter.append(buffer, i);
-		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(short i):" + e.getMessage(), e);
-		}
-		return this;
-	}
-
-	@Override
 	public ByteBufferLocalLogEntry append(final int i){
 		try{
 			BufferFormatter.append(buffer, i);
