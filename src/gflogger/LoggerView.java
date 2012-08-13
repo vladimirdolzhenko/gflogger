@@ -43,7 +43,7 @@ public class LoggerView implements Logger {
 	LoggerService setLoggerService(LoggerService loggerService) {
 		this.loggerService = loggerService;
 		this.level = loggerService != null ? loggerService.getLevel() : LogLevel.ERROR;
-		this.valid = true;
+		this.valid = loggerService != null;
 		return this.loggerService;
 	}
 
