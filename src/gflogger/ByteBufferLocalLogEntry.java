@@ -15,11 +15,7 @@
 package gflogger;
 
 import static gflogger.formatter.BufferFormatter.*;
-import static gflogger.util.StackTraceUtils.*;
-
 import gflogger.formatter.BufferFormatter;
-import gflogger.helpers.LogLog;
-
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -46,6 +42,11 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		this.buffer = byteBuffer;
 	}
 
+	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService, String logErrorsMsg) {
+		super(owner, loggerService, logErrorsMsg);
+		this.buffer = byteBuffer;
+	}
+
 	@Override
 	public CharBuffer getCharBuffer() {
 		throw new UnsupportedOperationException();
@@ -57,13 +58,24 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
+	protected void moveAndAppendSilent(String message) {
+		final int length = message.length();
+		final int remaining = buffer.remaining();
+		if (remaining < length){
+			buffer.position(buffer.position() - (length - remaining));
+		}
+		try {
+			BufferFormatter.append(buffer, message);
+		} catch (BufferOverflowException e){
+		}
+	}
+
+	@Override
 	public ByteBufferLocalLogEntry append(final char c) {
 		try {
 			BufferFormatter.append(buffer, c);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(char c):" + e.getMessage(), e);
+			error("append(char c)", e);
 		}
 		return this;
 	}
@@ -73,9 +85,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, csq);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(CharSequence csq):" + e.getMessage(), e);
+			error("append(CharSequence csq)", e);
 		}
 		return this;
 	}
@@ -85,9 +95,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, csq, start, end);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(CharSequence csq, int start, int end):" + e.getMessage(), e);
+			error("append(CharSequence csq, int start, int end)", e);
 		}
 		return this;
 	}
@@ -97,9 +105,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, b);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(boolean b):" + e.getMessage(), e);
+			error("append(boolean b)", e);
 		}
 		return this;
 	}
@@ -109,9 +115,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, i);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(int i):" + e.getMessage(), e);
+			error("append(int i)", e);
 		}
 		return this;
 	}
@@ -121,9 +125,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, i);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(long i):" + e.getMessage(), e);
+			error("append(long i)", e);
 		}
 		return this;
 	}
@@ -133,60 +135,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		try{
 			BufferFormatter.append(buffer, i, precision);
 		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(double i, int precision):" + e.getMessage(), e);
-		}
-		return this;
-	}
-
-	@Override
-	public LogEntry append(Throwable e) {
-		if (e != null){
-			try {
-				append(e.getClass().getName());
-				String message = e.getLocalizedMessage();
-				if (message != null){
-					append(": ").append(message);
-				}
-				append('\n');
-				final StackTraceElement[] trace = e.getStackTrace();
-				for (int i = 0; i < trace.length; i++) {
-					append("\tat ").append(trace[i].getClassName()).append('.').
-						append(trace[i].getMethodName());
-					append('(');
-					if (trace[i].isNativeMethod()){
-						append("native");
-					} else {
-						final String fileName = trace[i].getFileName();
-						final int lineNumber = trace[i].getLineNumber();
-						if (fileName != null){
-							append(fileName);
-							if (lineNumber >= 0){
-								append(':').append(lineNumber);
-							}
-
-							final Class clazz =
-								loadClass(trace[i].getClassName());
-							if (clazz != null){
-								append('[').append(getCodeLocation(clazz));
-								final String implVersion = getImplementationVersion(clazz);
-								if (implVersion != null){
-									append(':').append(implVersion);
-								}
-								append(']');
-							}
-
-						} else {
-							append("unknown");
-						}
-					}
-					append(')').append('\n');
-				}
-			} catch (Throwable t){
-				// there is insufficient space in this buffer
-				LogLog.error("append(Throwable e):" + t.getMessage(), t);
-			}
+			error("append(double i, int precision)", e);
 		}
 		return this;
 	}

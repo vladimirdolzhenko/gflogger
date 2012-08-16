@@ -22,7 +22,7 @@ import java.util.Properties;
 
 /**
  * A convenience class to convert property values to specific types.
- * 
+ *
  * @author Ceki G&uuml;lc&uuml;
  * @author Simon Kitching;
  * @author Anders Kristensen
@@ -83,7 +83,7 @@ public class OptionConverter {
 	/**
 	 * Very similar to <code>System.getProperty</code> except that the
 	 * {@link SecurityException} is hidden.
-	 * 
+	 *
 	 * @param key
 	 *			The key to search for.
 	 * @param def
@@ -101,18 +101,19 @@ public class OptionConverter {
 			return def;
 		}
 	}
-	
+
 	public static String getStringProperty(final String name, final String defaultValue){
-		return System.getProperty(name, defaultValue);
+		final Properties properties = System.getProperties();
+		return (String) (properties.containsKey(name) ? properties.get(name) : defaultValue);
 	}
-	
+
 	public static boolean getBooleanProperty(final String name, final boolean defaultValue){
 		try {
 			return Boolean.parseBoolean(System.getProperty(name));
 		} catch (Throwable e){}
 		return defaultValue;
 	}
-	
+
 	public static int getIntProperty(final String name, final int defaultValue){
 		try {
 			return Integer.parseInt(System.getProperty(name));
@@ -137,7 +138,7 @@ public class OptionConverter {
 	 * If <code>value</code> is "true", then <code>true</code> is returned. If
 	 * <code>value</code> is "false", then <code>true</code> is returned.
 	 * Otherwise, <code>default</code> is returned.
-	 * 
+	 *
 	 * <p>
 	 * Case of value is unimportant.
 	 */
@@ -172,20 +173,20 @@ public class OptionConverter {
 	 * class' toLevel method is called to process the specified level string; if
 	 * no '#' character is present, then the default
 	 * {@link org.apache.log4j.Level} class is used to process the level value.
-	 * 
+	 *
 	 * <p>
 	 * As a special case, if the <code>value</code> parameter is equal to the
 	 * string "NULL", then the value <code>null</code> will be returned.
-	 * 
+	 *
 	 * <p>
 	 * If any error occurs while converting the value to a level, the
 	 * <code>defaultValue</code> parameter, which may be <code>null</code>, is
 	 * returned.
-	 * 
+	 *
 	 * <p>
 	 * Case of <code>value</code> is insignificant for the level level, but is
 	 * significant for the class name part, if present.
-	 * 
+	 *
 	 * @since 1.1
 	 */
 //	public static Level toLevel(String value, Level defaultValue) {
@@ -298,7 +299,7 @@ public class OptionConverter {
 	 * <code>className</code> is a subclass of <code>superClass</code>. If that
 	 * test fails or the object could not be instantiated, then
 	 * <code>defaultValue</code> is returned.
-	 * 
+	 *
 	 * @param className
 	 *			The fully qualified class name of the object to instantiate.
 	 * @param superClass
@@ -331,44 +332,44 @@ public class OptionConverter {
 	/**
 	 * Perform variable substitution in string <code>val</code> from the values
 	 * of keys found in the system propeties.
-	 * 
+	 *
 	 * <p>
 	 * The variable substitution delimeters are <b>${</b> and <b>}</b>.
-	 * 
+	 *
 	 * <p>
 	 * For example, if the System properties contains "key=value", then the call
-	 * 
+	 *
 	 * <pre>
 	 * String s = OptionConverter.substituteVars(&quot;Value of key is ${key}.&quot;);
 	 * </pre>
-	 * 
+	 *
 	 * will set the variable <code>s</code> to "Value of key is value.".
-	 * 
+	 *
 	 * <p>
 	 * If no value could be found for the specified key, then the
 	 * <code>props</code> parameter is searched, if the value could not be found
 	 * there, then substitution defaults to the empty string.
-	 * 
+	 *
 	 * <p>
 	 * For example, if system propeties contains no value for the key
 	 * "inexistentKey", then the call
-	 * 
+	 *
 	 * <pre>
 	 * String s = OptionConverter.subsVars(&quot;Value of inexistentKey is [${inexistentKey}]&quot;);
 	 * </pre>
-	 * 
+	 *
 	 * will set <code>s</code> to "Value of inexistentKey is []"
-	 * 
+	 *
 	 * <p>
 	 * An {@link java.lang.IllegalArgumentException} is thrown if
 	 * <code>val</code> contains a start delimeter "${" which is not balanced by
 	 * a stop delimeter "}".
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * <b>Author</b> Avy Sharell</a>
 	 * </p>
-	 * 
+	 *
 	 * @param val
 	 *			The string on which variable substitution is performed.
 	 * @throws IllegalArgumentException
@@ -425,17 +426,17 @@ public class OptionConverter {
 
 	/**
 	 * Configure log4j given a URL.
-	 * 
+	 *
 	 * <p>
 	 * The url must point to a file or resource which will be interpreted by a
 	 * new instance of a log4j configurator.
-	 * 
+	 *
 	 * <p>
 	 * All configurations steps are taken on the <code>hierarchy</code> passed
 	 * as a parameter.
-	 * 
+	 *
 	 * <p>
-	 * 
+	 *
 	 * @param url
 	 *			The location of the configuration file or resource.
 	 * @param clazz

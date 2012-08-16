@@ -13,6 +13,10 @@
  */
 package gflogger;
 
+import static gflogger.helpers.OptionConverter.getStringProperty;
+import static gflogger.util.StackTraceUtils.getCodeLocation;
+import static gflogger.util.StackTraceUtils.getImplementationVersion;
+import static gflogger.util.StackTraceUtils.loadClass;
 import gflogger.helpers.LogLog;
 
 import java.nio.BufferOverflowException;
@@ -26,6 +30,7 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 
 	protected final String threadName;
 	protected final LoggerService loggerService;
+	protected final String logErrorsMessage;
 
 	protected String categoryName;
 	protected LogLevel logLevel;
@@ -37,12 +42,17 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	protected int pPos;
 
 	public AbstractBufferLocalLogEntry(final Thread owner, LoggerService loggerService) {
+		this(owner, loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"));
+	}
+
+	public AbstractBufferLocalLogEntry(final Thread owner, LoggerService loggerService, String logErrorsMessage) {
 		/*
 		 * It worth to cache thread categoryName at thread local variable cause
 		 * thread.getName() creates new String(char[])
 		 */
 		this.threadName = owner.getName();
 		this.loggerService = loggerService;
+		this.logErrorsMessage = logErrorsMessage != null && logErrorsMessage.length() > 0 ? logErrorsMessage : null;
 	}
 
 	@Override
@@ -133,12 +143,75 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 		commit();
 	}
 
+	protected void error(String msg, BufferOverflowException e){
+		this.error = e;
+		// there is insufficient space in this buffer
+		if (logErrorsMessage == null) {
+			LogLog.error(msg + ":" + e.getMessage(), e);
+		} else {
+			moveAndAppendSilent(logErrorsMessage);
+		}
+	}
+
+	protected abstract void moveAndAppendSilent(String message);
+
 	@Override
 	public LogEntry append(Loggable loggable) {
 		if (loggable != null){
 			loggable.appendTo(this);
 		} else {
 			append('n').append('u').append('l').append('l');
+		}
+		return this;
+	}
+
+	@Override
+	public LogEntry append(Throwable e) {
+		if (e != null){
+			try {
+				append(e.getClass().getName());
+				String message = e.getLocalizedMessage();
+				if (message != null){
+					append(": ").append(message);
+				}
+				append('\n');
+				final StackTraceElement[] trace = e.getStackTrace();
+				for (int i = 0; i < trace.length; i++) {
+					append("\tat ").append(trace[i].getClassName()).append('.').
+						append(trace[i].getMethodName());
+					append('(');
+					if (trace[i].isNativeMethod()){
+						append("native)");
+					} else {
+						final String fileName = trace[i].getFileName();
+						final int lineNumber = trace[i].getLineNumber();
+						if (fileName != null){
+							append(fileName);
+							if (lineNumber >= 0){
+								append(':').append(lineNumber);
+							}
+							append(')');
+							final Class clazz =
+								loadClass(trace[i].getClassName());
+							if (clazz != null){
+								append('[').append(getCodeLocation(clazz));
+								final String implVersion = getImplementationVersion(clazz);
+								if (implVersion != null){
+									append(':').append(implVersion);
+								}
+								append(']');
+							}
+
+						} else {
+							append("unknown");
+						}
+					}
+					append('\n');
+				}
+			} catch (Throwable t){
+				// there is insufficient space in this buffer
+				LogLog.error("append(Throwable e):" + t.getMessage(), t);
+			}
 		}
 		return this;
 	}

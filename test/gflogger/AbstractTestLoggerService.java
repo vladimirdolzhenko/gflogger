@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -27,6 +28,11 @@ public abstract class AbstractTestLoggerService {
 	@AfterClass
 	public static void shutdown(){
 //		LogFactory.stop();
+	}
+
+	@Before
+	public void setUp(){
+		System.setProperty("gflogger.errorMessage", "");
 	}
 
 	protected abstract LoggerService createLoggerService(final int maxMessageSize, final AppenderFactory ... factories);
@@ -178,8 +184,48 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendLatinCharsFullMessageSizeWithTruncated() throws Exception {
+		final String placeholder = ">>>";
+		System.setProperty("gflogger.errorMessage", placeholder);
+
+		final String tooLongMessage = "too long message!";
+		final int maxMessageSize = tooLongMessage.length() - 1;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = createLoggerService(maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		{
+			final LogEntry info = logger.info().append(tooLongMessage);
+			assertTrue(info instanceof LocalLogEntry);
+
+			final LocalLogEntry localLogEntry = (LocalLogEntry)info;
+
+			assertNotNull(localLogEntry.getError());
+			assertEquals(BufferOverflowException.class, localLogEntry.getError().getClass());
+
+			info.commit();
+		}
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals(string, maxMessageSize, string.length());
+
+		final String expected =
+			tooLongMessage.substring(0, maxMessageSize - placeholder.length()) + placeholder;
+		assertEquals(expected, string);
+	}
+
+	@Test
     public void testAppendLatinCharsFullMessageSize() throws Exception {
-		final int maxMessageSize = 20;
+		final int maxMessageSize = 40;
 	    final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 	    factory.setLayoutPattern("%m");
 	    final StringBuffer buffer = new StringBuffer();
@@ -229,7 +275,7 @@ public abstract class AbstractTestLoggerService {
 
 	@Test
 	public void testAppendCyrillicCharsFullMessageSize() throws Exception {
-		final int maxMessageSize = 20;
+		final int maxMessageSize = 40;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();

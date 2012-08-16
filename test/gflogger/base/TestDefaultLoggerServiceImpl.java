@@ -13,7 +13,7 @@ public class TestDefaultLoggerServiceImpl extends AbstractTestLoggerService {
 
 	@Override
 	protected LoggerService createLoggerService(int maxMessageSize, AppenderFactory... factories) {
-	    final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize, factories);
+	    final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize << 1, factories);
 	    return loggerService;
     }
 }
