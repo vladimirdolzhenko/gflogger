@@ -63,11 +63,8 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 			if (charBuffer.position() > 0){
 				charBuffer.flip();
 				try {
-					while(charBuffer.hasRemaining()){
-						out.append(charBuffer.get());
-					}
-					if (flushable != null)
-						flushable.flush();
+					while(charBuffer.hasRemaining()) out.append(charBuffer.get());
+					if (flushable != null) flushable.flush();
 				} catch (IOException e){
 					LogLog.error("[" + Thread.currentThread().getName() +
 						"] exception at " + getName() + " - " + e.getMessage(), e);
@@ -79,11 +76,8 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 			if (byteBuffer.position() > 0){
 				byteBuffer.flip();
 				try {
-					while(byteBuffer.hasRemaining()){
-						out.append((char) byteBuffer.get());
-					}
-					if (flushable != null)
-						flushable.flush();
+					while(byteBuffer.hasRemaining()) out.append((char) byteBuffer.get());
+					if (flushable != null) flushable.flush();
 				} catch (IOException e){
 					LogLog.error("[" + Thread.currentThread().getName() +
 						"] exception at " + getName() + " - " + e.getMessage(), e);

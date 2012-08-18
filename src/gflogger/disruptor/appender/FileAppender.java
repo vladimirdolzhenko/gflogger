@@ -41,6 +41,8 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	protected boolean append = true;
 
+	protected int maxBytesPerChar;
+
 	public FileAppender() {
 		// 1M
 		this(1 << 20);
@@ -48,7 +50,6 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	public FileAppender(int bufferSize) {
 		this(bufferSize, false);
-		immediateFlush = false;
 	}
 
 	public FileAppender(int bufferSize, boolean multibyte) {
@@ -84,13 +85,9 @@ public class FileAppender extends AbstractAsyncAppender {
 		charBuffer.flip();
 		do{
 			result = encoder.encode(charBuffer, byteBuffer, true);
-			//*/
-//			if (result.isOverflow()){
-//				store("result.isOverflow()");
-//			}
-			/*/
-			store("force");
-			//*/
+			if (result.isOverflow()){
+				store("result.isOverflow()");
+			}
 		} while(result.isOverflow());
 		charBuffer.clear();
 	}
@@ -150,6 +147,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	public void onStart() {
 		try {
 			encoder = multibyte ? Charset.forName(codepage).newEncoder() : null;
+			maxBytesPerChar = multibyte ? (int) Math.floor(encoder.maxBytesPerChar()) : 1;
 			createFileChannel();
 		} catch (final FileNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);

@@ -53,7 +53,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBuffer getByteBuffer() {
-	    return buffer;
+		return buffer;
 	}
 
 	@Override

@@ -42,7 +42,7 @@ public class DefaultLoggerServiceFactory implements LoggerServiceFactory {
 	}
 
 	@Override
-    public void addAppenderFactory(AppenderFactory factory) {
+	public void addAppenderFactory(AppenderFactory factory) {
 		appenderFactories.add(factory);
 	}
 

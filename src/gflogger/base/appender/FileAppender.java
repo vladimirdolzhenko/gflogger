@@ -14,15 +14,12 @@
 
 package gflogger.base.appender;
 
-import static gflogger.formatter.BufferFormatter.allocate;
-
 import gflogger.Layout;
 import gflogger.helpers.LogLog;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
@@ -30,12 +27,10 @@ import java.nio.charset.CoderResult;
 
 /**
  * FileAppender
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class FileAppender extends AbstractAsyncAppender {
-
-	protected final ByteBuffer buffer;
 
 	protected String fileName;
 	protected String codepage = "UTF-8";
@@ -47,24 +42,23 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	protected int maxBytesPerChar;
 
-	public FileAppender() {
+	public FileAppender(final boolean multibyte) {
 		// 1M
-		this(1 << 20);
+		this(1 << 20, multibyte);
 	}
-	
-	public FileAppender(int bufferSize) {
-		super(bufferSize);
-		// unicode char has 2 bytes 
-		buffer = allocate(bufferSize << 1);
+
+	public FileAppender(final int bufferSize, final boolean multibyte) {
+		super(bufferSize, multibyte);
+		// unicode char has 2 bytes
 		immediateFlush = false;
 	}
 
-	public FileAppender(Layout layout, String filename) {
-		this(1 << 20, layout, filename);
+	public FileAppender(Layout layout, String filename, final boolean multibyte) {
+		this(1 << 20, layout, filename, multibyte);
 	}
-	
-	public FileAppender(int bufferSize, Layout layout, String filename) {
-		this(bufferSize);
+
+	public FileAppender(int bufferSize, Layout layout, String filename, final boolean multibyte) {
+		this(bufferSize, multibyte);
 		this.layout = layout;
 		this.fileName = filename;
 	}
@@ -83,9 +77,9 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	@Override
 	protected void processCharBuffer() {
-		final int remaining = buffer.remaining();
+		final int remaining = byteBuffer.remaining();
 		final int sizeOfBuffer = maxBytesPerChar * charBuffer.position();
-		
+
 		// store buffer if there it could be no enough space for message
 		if (remaining < sizeOfBuffer){
 			store("remaining < sizeOfBuffer");
@@ -94,7 +88,7 @@ public class FileAppender extends AbstractAsyncAppender {
 		CoderResult result;
 		charBuffer.flip();
 		do{
-			result = encoder.encode(charBuffer, buffer, true);
+			result = encoder.encode(charBuffer, byteBuffer, true);
 			//*/
 			if (result.isOverflow()){
 				store("result.isOverflow()");
@@ -107,7 +101,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	protected void flushCharBuffer() {
+	protected void flushBuffer() {
 		store("flushCharBuffer");
 	}
 
@@ -120,13 +114,12 @@ public class FileAppender extends AbstractAsyncAppender {
 	@Override
 	public void start() {
 		try {
-			encoder = Charset.forName(codepage).newEncoder();
+			encoder = multibyte ? Charset.forName(codepage).newEncoder() : null;
+			maxBytesPerChar = multibyte ? (int) Math.floor(encoder.maxBytesPerChar()) : 1;
 			createFileChannel();
 		} catch (final FileNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-
-		maxBytesPerChar = (int) Math.floor(encoder.maxBytesPerChar());
 
 		super.start();
 	}
@@ -135,40 +128,39 @@ public class FileAppender extends AbstractAsyncAppender {
 		final FileOutputStream fout = new FileOutputStream(fileName, append);
 		channel = fout.getChannel();
 	}
-	
+
 	protected void closeFile() {
 		try {
 			channel.force(true);
 			channel.close();
-			
 		} catch (IOException e) {
-			LogLog.error("[" + Thread.currentThread().getName() +  
+			LogLog.error("[" + Thread.currentThread().getName() +
 				"] exception at " + getName() + " - " + e.getMessage(), e);
 		}
 	}
 
 	protected boolean store(final String cause) {
-		if (buffer.position() == 0) return false;
-		buffer.flip();
+		if (byteBuffer.position() == 0) return false;
+		byteBuffer.flip();
 		try {
-			//*/
+			/*/
 			final int limit = buffer.limit();
 			final long start = System.nanoTime();
 			channel.write(buffer);
 			final long end = System.nanoTime();
 
 			final String msg = "[" + Thread.currentThread().getName() + "] " + getName() +
-				" " + cause + ":" + limit + " bytes stored in " + 
+				" " + cause + ":" + limit + " bytes stored in " +
 				((end - start) / 1000 / 1e3) + " ms";
 			LogLog.debug(msg);
 			/*/
-			channel.write(buffer);
+			channel.write(byteBuffer);
 			//*/
 		} catch (final IOException e) {
-			LogLog.error("[" + Thread.currentThread().getName() +  
+			LogLog.error("[" + Thread.currentThread().getName() +
 				"] exception at " + getName() + " - " + e.getMessage(), e);
 		} finally {
-			buffer.clear();
+			byteBuffer.clear();
 		}
 		return true;
 	}

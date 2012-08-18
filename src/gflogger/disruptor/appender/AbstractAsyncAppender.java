@@ -54,7 +54,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		// unicode char has 2 bytes
 		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
 		byteBuffer.clear();
-		charBuffer = multibyte ? byteBuffer.asCharBuffer() : null;
+		charBuffer = multibyte ? allocate(multibyte ? bufferSize << 1 : bufferSize).asCharBuffer() : null;
 	}
 
 	@Override
@@ -90,17 +90,17 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	@Override
 	public void onEvent(DLogEntryItem event, long sequence, boolean endOfBatch)
 			throws Exception {
-		// System.out.println(">" + getName() + " " + sequence + " " + endOfBatch);
 		// handle entry that has a log level equals or higher than required
 
 		final LogLevel entryLevel = event.getLogLevel();
 		assert entryLevel != null;
 		final boolean hasProperLevel = logLevel.compareTo(entryLevel) <= 0;
 
+		if (!hasProperLevel) return;
+
 		if (multibyte) {
 			final CharBuffer eventBuffer = event.getCharBuffer();
-			if (hasProperLevel) {
-				eventBuffer.flip();
+			synchronized (byteBuffer) {
 				final int size = layout.size(event);
 				final int position = charBuffer.position();
 				final int limit = charBuffer.limit();
@@ -108,18 +108,16 @@ public abstract class AbstractAsyncAppender implements DAppender {
 					flushBuffer();
 					charBuffer.clear();
 				}
-				formatMessage(event, eventBuffer);
+				formatMessage(event, eventBuffer, sequence);
 				processCharBuffer();
 
 				if (immediateFlush) {
 					flushBuffer();
 				}
 			}
-			eventBuffer.clear();
 		} else {
 			final ByteBuffer eventBuffer = event.getBuffer();
-			if (hasProperLevel) {
-				eventBuffer.flip();
+			synchronized (byteBuffer) {
 				final int size = layout.size(event);
 				final int position = byteBuffer.position();
 				final int limit = byteBuffer.limit();
@@ -127,20 +125,21 @@ public abstract class AbstractAsyncAppender implements DAppender {
 					flushBuffer();
 					byteBuffer.clear();
 				}
-				formatMessage(event, eventBuffer);
+				formatMessage(event, eventBuffer, sequence);
 
 				if (immediateFlush) {
 					flushBuffer();
 				}
 			}
-			eventBuffer.clear();
 		}
 	}
 
 	@Override
 	public void flush() {
 		try{
-			flushBuffer();
+			synchronized (byteBuffer) {
+				flushBuffer();
+			}
 		} catch (RuntimeException e){
 			LogLog.error("[" + Thread.currentThread().getName() +
 				"] exception at " + getName() + " - " + e.getMessage(), e);
@@ -156,37 +155,43 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		// empty
 	}
 
-	protected void formatMessage(DLogEntryItem entry, final ByteBuffer buffer) {
+	protected void formatMessage(DLogEntryItem entry, final ByteBuffer buffer, long sequence) {
 		final int position = buffer.position();
 		final int limit = buffer.limit();
 
+		buffer.flip();
 		try {
 			layout.format(byteBuffer, entry);
 		} catch (RuntimeException e){
 			LogLog.error("[" + Thread.currentThread().getName()
 				+ "] exception at " + getName() + " pos: " +
 				position + ", limit:" + limit +
-				" - " + e.getMessage(), e);
+				" - " + e.getMessage() + " this.pos:"
+				+ byteBuffer.position() + ", this.limit:" + byteBuffer.limit()
+				+ " sequence:" + sequence
+				, e);
 		} finally {
-			buffer.position(position);
-			buffer.limit(limit);
+			buffer.limit(limit).position(position);
 		}
 	}
 
-	protected void formatMessage(DLogEntryItem entry, final CharBuffer buffer) {
+	protected void formatMessage(DLogEntryItem entry, final CharBuffer buffer, long sequence) {
 		final int position = buffer.position();
 		final int limit = buffer.limit();
 
+		buffer.flip();
 		try {
 			layout.format(charBuffer, entry);
 		} catch (RuntimeException e){
 			LogLog.error("[" + Thread.currentThread().getName()
 					+ "] exception at " + getName() + " pos: " +
 					position + ", limit:" + limit +
-					" - " + e.getMessage(), e);
+					" - " + e.getMessage() + " this.pos:"
+					+ charBuffer.position() + ", this.limit:" + charBuffer.limit()
+					+ " sequence:" + sequence
+					, e);
 		} finally {
-			buffer.position(position);
-			buffer.limit(limit);
+			buffer.limit(limit).position(position);
 		}
 	}
 

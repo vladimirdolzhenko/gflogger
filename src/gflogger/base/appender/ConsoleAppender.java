@@ -21,57 +21,72 @@ import java.io.IOException;
 
 /**
  * ConsoleAppender
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class ConsoleAppender extends AbstractAsyncAppender implements Runnable {
 
 	private final Appendable out;
-	private final Flushable flushable; 
-	
+	private final Flushable flushable;
+
 	public ConsoleAppender() {
-		this(System.out);
+		this(false);
 	}
-	
-	public ConsoleAppender(final int bufferSize) {
-		this(bufferSize, System.out);
+
+	public ConsoleAppender(final boolean multibyte) {
+		this(System.out, multibyte);
 	}
-	
-	public ConsoleAppender(final Appendable out) {
+
+	public ConsoleAppender(final int bufferSize,final boolean multibyte) {
+		this(bufferSize, multibyte, System.out);
+	}
+
+	public ConsoleAppender(final Appendable out,final boolean multibyte) {
+		super(multibyte);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
-	
-	public ConsoleAppender(final int bufferSize, final Appendable out) {
-		super(bufferSize);
+
+	public ConsoleAppender(final int bufferSize, final boolean multibyte, final Appendable out) {
+		super(bufferSize, multibyte);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
-	}
-	
-	@Override
-	protected void processCharBuffer() {
-		flushCharBuffer();
 	}
 
 	@Override
-	protected void flushCharBuffer() {
-		if (charBuffer.position() > 0){
-			try {
+	protected void processCharBuffer() {
+		flushBuffer();
+	}
+
+	@Override
+	protected void flushBuffer() {
+		if (multibyte) {
+			if (charBuffer.position() > 0){
 				charBuffer.flip();
-				//*/
-				while(charBuffer.hasRemaining()){
-					out.append(charBuffer.get());
+				try {
+					while(charBuffer.hasRemaining()) out.append(charBuffer.get());
+
+					if (flushable != null) flushable.flush();
+				} catch (IOException e){
+					LogLog.error("[" + Thread.currentThread().getName() +
+						"] exception at " + getName() + " - " + e.getMessage(), e);
+				} finally {
+					charBuffer.clear();
 				}
-				//*/
-				//*/
-				if (flushable != null){
-					flushable.flush();
+			}
+		} else {
+			if (byteBuffer.position() > 0){
+				byteBuffer.flip();
+				try {
+					while(byteBuffer.hasRemaining()) out.append((char) byteBuffer.get());
+
+					if (flushable != null) flushable.flush();
+				} catch (IOException e){
+					LogLog.error("[" + Thread.currentThread().getName() +
+						"] exception at " + getName() + " - " + e.getMessage(), e);
+				} finally {
+					byteBuffer.clear();
 				}
-			} catch (IOException e){
-				LogLog.error("[" + Thread.currentThread().getName() +  
-					"] exception at " + getName() + " - " + e.getMessage(), e);
-			} finally {
-				charBuffer.clear();
 			}
 		}
 	}

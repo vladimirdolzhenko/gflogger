@@ -16,6 +16,7 @@ package gflogger.base;
 
 import static gflogger.formatter.BufferFormatter.*;
 
+import gflogger.ByteBufferLocalLogEntry;
 import gflogger.CharBufferLocalLogEntry;
 import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
@@ -29,6 +30,7 @@ import gflogger.ring.BlockingWaitStrategy;
 import gflogger.ring.RingBuffer;
 import gflogger.util.NamedThreadFactory;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +52,8 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	private final RingBuffer<LogEntryItemImpl> ringBuffer;
 	private final ExecutorService executorService;
+
+	private final boolean multibyte;
 
 	private volatile boolean running = false;
 
@@ -80,12 +84,16 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
 		this.appenders = appenders;
+		this.multibyte = multibyte(appenders);
+
+		// unicode char has 2 bytes
+		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
 
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
 		this.ringBuffer =
 			new RingBuffer<LogEntryItemImpl>(new BlockingWaitStrategy(),
-				initEnties(c, maxMessageSize));
+				initEnties(c, maxMessageSize0));
 		this.ringBuffer.setEntryProcessors(appenders);
 		this.level = initLogLevel(appenders);
 
@@ -93,7 +101,13 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry =
-					new CharBufferLocalLogEntry(maxMessageSize, DefaultLoggerServiceImpl.this);
+					multibyte ?
+					new CharBufferLocalLogEntry(Thread.currentThread(),
+						maxMessageSize0,
+						DefaultLoggerServiceImpl.this) :
+					new ByteBufferLocalLogEntry(Thread.currentThread(),
+						maxMessageSize0,
+						DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}
 		};
@@ -105,13 +119,25 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		running = true;
 	}
 
-	private LogLevel initLogLevel(final Appender... appenders) {
+	private LogLevel initLogLevel(final Appender ... appenders) {
 		LogLevel level = LogLevel.ERROR;
 		for (int i = 0; i < appenders.length; i++) {
 			final LogLevel l = appenders[i].getLogLevel();
 			level = level.isHigher(l) ? level : l;
 		}
 		return level;
+	}
+
+	private boolean multibyte(final Appender ... appenders) {
+		boolean multibyte = appenders[0].isMultibyte();
+		for (int i = 1; i < appenders.length; i++) {
+			if (appenders[i].isMultibyte() != multibyte){
+				throw new IllegalArgumentException(
+					"Expected " + (multibyte ? "multibyte" : "single byte") +
+					" mode for appender #" + i);
+			}
+		}
+		return multibyte;
 	}
 
 	private ExecutorService initExecutorService(final Appender... appenders){
@@ -125,7 +151,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 	private LogEntryItemImpl[] initEnties(int count, final int maxMessageSize) {
 		// unicode char has 2 bytes
-		final int bufferSize = maxMessageSize << 1;
+		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
 		final ByteBuffer buffer = allocate(count * bufferSize);
 
 		final LogEntryItemImpl[] entries = new LogEntryItemImpl[count];
@@ -133,7 +159,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			buffer.limit((i + 1) * bufferSize);
 			buffer.position(i * bufferSize);
 			final ByteBuffer subBuffer = buffer.slice();
-			entries[i] = new LogEntryItemImpl(subBuffer.asCharBuffer());
+			entries[i] = new LogEntryItemImpl(subBuffer, multibyte);
 		}
 		return entries;
 	}
@@ -160,7 +186,8 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
-		entry.getCharBuffer().clear();
+		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
+		b.clear();
 		return entry;
 	}
 
@@ -177,47 +204,36 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setCommited(false);
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
-		entry.getCharBuffer().clear();
+		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
+		b.clear();
 		entry.setPattern(pattern);
 		return entry;
 	}
 
-//	public static final ThreadLocal<MutableLong> commit = new ThreadLocal<MutableLong>(){
-//		@Override
-//		protected MutableLong initialValue() {
-//			return new MutableLong();
-//		}
-//	};
-//	public static final ThreadLocal<MutableLong> commitbytes = new ThreadLocal<MutableLong>(){
-//		@Override
-//		protected MutableLong initialValue() {
-//			return new MutableLong();
-//		}
-//	};
-
 	@Override
 	public void entryFlushed(final LocalLogEntry localEntry){
+		final ByteBuffer localByteBuffer = multibyte ? null : localEntry.getByteBuffer();
+		final CharBuffer localCharBuffer = multibyte ? localEntry.getCharBuffer() : null;
+
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
 
 		try {
+			final ByteBuffer byteBuffer = multibyte ? null : entry.getBuffer();
+			final CharBuffer charBuffer = multibyte ? entry.getCharBuffer() : null;
 
 			entry.setCategoryName(localEntry.getCategoryName());
 			entry.setLogLevel(localEntry.getLogLevel());
 			entry.setThreadName(localEntry.getThreadName());
 			entry.setTimestamp(System.currentTimeMillis());
-			final CharBuffer buffer = entry.getCharBuffer();
-			final CharBuffer localBuffer = localEntry.getCharBuffer();
-			buffer.clear();
-//			final long t1 = System.nanoTime();
-			buffer.put(localBuffer).flip();
-//			final long t2 = System.nanoTime();
-//
-//			final MutableLong cbLong = commitbytes.get();
-//			cbLong.set(cbLong.get() + buffer.length());
-//
-//			final MutableLong mutableLong = commit.get();
-//			mutableLong.set(mutableLong.get() + t2 - t1);
+
+			if (multibyte) {
+				charBuffer.clear();
+				charBuffer.put(localCharBuffer);
+			} else {
+				byteBuffer.clear();
+				byteBuffer.put(localByteBuffer);
+			}
 		} finally {
 			ringBuffer.publish(next);
 		}

@@ -36,7 +36,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 		preinit(loggerServiceClass);
 		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
 			final gflogger.base.appender.FileAppender appender =
-				new gflogger.base.appender.FileAppender(bufferSize);
+				new gflogger.base.appender.FileAppender(bufferSize, multibyte);
 
 			appender.setLogLevel(logLevel);
 			appender.setLayout(layout);

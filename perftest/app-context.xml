@@ -7,6 +7,12 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
+<!-- 
+<bean id="loggerService" class="gflogger.disruptor.DLoggerServiceImpl"> 
+-->
+<!--	
+<bean id="loggerService" class="gflogger.base.DefaultLoggerServiceImpl"> 
+-->
 	<bean id="loggerService" class="gflogger.base.DefaultLoggerServiceImpl">
 		<!-- count a number of items in the ring -->
 		<constructor-arg index="0" value="1024"/>
@@ -23,7 +29,7 @@
 					p:logLevel="INFO"/>
 				<bean class="gflogger.appender.DailyRollingFileAppenderFactory"
 					p:timeZoneId="GMT"
-					p:append="true"
+					p:append="false"
 					p:immediateFlush="false"
 					p:logLevel="INFO"
 					p:fileName="logs/logger.log"

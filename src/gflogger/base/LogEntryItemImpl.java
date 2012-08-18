@@ -28,19 +28,25 @@ import java.nio.CharBuffer;
  */
 public final class LogEntryItemImpl implements LogEntryItem {
 
-	private final CharBuffer buffer;
+	private final ByteBuffer buffer;
+	private final CharBuffer charBuffer;
 
 	private String categoryName;
 	private LogLevel logLevel;
 	private long timestamp;
 	private String threadName;
 
-	public LogEntryItemImpl(final int sizeInBytes) {
-		this(allocate(sizeInBytes).asCharBuffer());
+	public LogEntryItemImpl(final int size) {
+		this(size, false);
 	}
 
-	public LogEntryItemImpl(final CharBuffer buffer) {
+	public LogEntryItemImpl(final int size, final boolean multibyte) {
+		this(allocate(size), multibyte);
+	}
+
+	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte) {
 		this.buffer = buffer;
+		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;
 	}
 
 	@Override
@@ -68,13 +74,13 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	}
 
 	@Override
-	public CharBuffer getCharBuffer() {
+	public ByteBuffer getBuffer() {
 		return buffer;
 	}
 
 	@Override
-	public ByteBuffer getBuffer() {
-		throw new UnsupportedOperationException();
+	public CharBuffer getCharBuffer() {
+		return charBuffer;
 	}
 
 	public void setCategoryName(String name) {

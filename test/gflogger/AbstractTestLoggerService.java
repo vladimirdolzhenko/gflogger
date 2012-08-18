@@ -111,7 +111,11 @@ public abstract class AbstractTestLoggerService {
 
 		LogFactory.stop();
 
-		assertEquals("com.db.infocom.db.errorcom.debugcom.infocom.error", buffer.toString());
+		assertEquals("com.db.info" +
+				"com.db.error" +
+				"com.debug" +
+				"com.info" +
+				"com.error", buffer.toString());
 	}
 
 	@Test
@@ -184,7 +188,7 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
-	public void testAppendLatinCharsFullMessageSizeWithTruncated() throws Exception {
+	public void testAppendTruncatedMessage() throws Exception {
 		final String placeholder = ">>>";
 		System.setProperty("gflogger.errorMessage", placeholder);
 
@@ -224,8 +228,48 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendTruncatedMessageWithDigits() throws Exception {
+		final String placeholder = ">";
+		System.setProperty("gflogger.errorMessage", placeholder);
+
+		final String tooLongMessage = "value is %s%s";
+		final int maxMessageSize = "value is  ".length();
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = createLoggerService(maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		{
+			final FormattedLogEntry info = logger.info(tooLongMessage);
+			assertTrue(info instanceof LocalLogEntry);
+
+			final LocalLogEntry localLogEntry = (LocalLogEntry)info;
+			info.with(1234567890L);
+
+			assertNotNull(localLogEntry.getError());
+			assertEquals("failed on buffer.position", IllegalArgumentException.class, localLogEntry.getError().getClass());
+			info.withLast("");
+		}
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals(string, maxMessageSize, string.length());
+
+		final String expected = "value is >";
+		assertEquals(expected, string);
+	}
+
+	@Test
     public void testAppendLatinCharsFullMessageSize() throws Exception {
-		final int maxMessageSize = 40;
+		// abcdefghijklmnopqrstuvwxyz{|}
+		final int maxMessageSize = 29;
 	    final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 	    factory.setLayoutPattern("%m");
 	    final StringBuffer buffer = new StringBuffer();
@@ -265,18 +309,20 @@ public abstract class AbstractTestLoggerService {
 		LogFactory.stop();
 
 		final String string = buffer.toString();
+		System.out.println(string);
 		assertEquals(maxMessageSize, string.length());
 
 		for(int i = 0; i < maxMessageSize; i++){
 			char c = (char) ('a' + i);
-			assertEquals(c, string.charAt(i));
+			assertEquals(Character.toString(c), c, string.charAt(i));
 		}
     }
 
 	@Test
 	public void testAppendCyrillicCharsFullMessageSize() throws Exception {
-		final int maxMessageSize = 40;
+		final int maxMessageSize = 30;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setMultibyte(true);
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
 		factory.setOutputStream(buffer);

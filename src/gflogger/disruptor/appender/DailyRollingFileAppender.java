@@ -360,15 +360,15 @@ public class DailyRollingFileAppender extends FileAppender {
 	 * rollover.
 	 * */
 	@Override
-	protected void formatMessage(DLogEntryItem entry, ByteBuffer buffer) {
+	protected void formatMessage(DLogEntryItem entry, ByteBuffer buffer, long sequence) {
 		checkRollOver(entry);
-		super.formatMessage(entry, buffer);
+		super.formatMessage(entry, buffer, sequence);
 	}
 
 	@Override
-	protected void formatMessage(DLogEntryItem entry, CharBuffer buffer) {
+	protected void formatMessage(DLogEntryItem entry, CharBuffer buffer, long sequence) {
 		checkRollOver(entry);
-		super.formatMessage(entry, buffer);
+		super.formatMessage(entry, buffer, sequence);
 	}
 
 	private void checkRollOver(DLogEntryItem entry) {

@@ -106,10 +106,10 @@ public class DLoggerServiceImpl implements LoggerService {
 				final LocalLogEntry logEntry =
 					multibyte ?
 					new CharBufferLocalLogEntry(Thread.currentThread(),
-						maxMessageSize,
+						bufferSize,
 						DLoggerServiceImpl.this) :
 					new ByteBufferLocalLogEntry(Thread.currentThread(),
-						maxMessageSize,
+						bufferSize,
 						DLoggerServiceImpl.this);
 				return logEntry;
 			}
@@ -318,8 +318,10 @@ public class DLoggerServiceImpl implements LoggerService {
 			entry.setTimestamp(now);
 
 			if (multibyte) {
+				charBuffer.clear();
 				charBuffer.put(localCharBuffer);
 			} else {
+				byteBuffer.clear();
 				byteBuffer.put(localByteBuffer);
 			}
 		} finally {

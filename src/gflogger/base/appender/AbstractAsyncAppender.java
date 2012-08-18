@@ -25,6 +25,7 @@ import gflogger.ring.PaddedAtomicLong;
 import gflogger.ring.RingBuffer;
 import gflogger.ring.RingBufferAware;
 
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	// inner thread buffer
 	protected final CharBuffer charBuffer;
+	protected final ByteBuffer byteBuffer;
 
 	protected LogLevel logLevel = LogLevel.ERROR;
 	protected Layout layout;
@@ -47,6 +49,8 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	protected final PaddedAtomicLong cursor = new PaddedAtomicLong(RingBuffer.INITIAL_CURSOR_VALUE);
 
+	protected final boolean multibyte;
+
 	protected final ThreadLocal<MutableLong> idxLocal = new ThreadLocal<MutableLong>(){
 
 		@Override
@@ -55,19 +59,22 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		}
 	};
 
-	public AbstractAsyncAppender() {
+	public AbstractAsyncAppender(final boolean multibyte) {
 		// 4M
-		this(1 << 22);
+		this(1 << 22, multibyte);
 	}
 
-	public AbstractAsyncAppender(final int bufferSize) {
+	public AbstractAsyncAppender(final int bufferSize, final boolean multibyte) {
+		this.multibyte = multibyte;
 		// unicode char has 2 bytes
-		charBuffer = allocate(bufferSize << 1).asCharBuffer();
+		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
+		byteBuffer.clear();
+		charBuffer = multibyte ? allocate(multibyte ? bufferSize << 1 : bufferSize).asCharBuffer() : null;
 	}
 
 	@Override
 	public boolean isMultibyte() {
-		return true;
+		return multibyte;
 	}
 
 	@Override
@@ -128,17 +135,19 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 				releaseEntry(entry, idx);
 
 				if (hasProperLevel){
-					processCharBuffer();
+					if (multibyte) {
+						processCharBuffer();
+					}
 
 					if (immediateFlush){
-						flushCharBuffer();
+						flushBuffer();
 						loopCounter = 0;
 					}
 				}
 			}
 
 			if (loopCounter > bufferedIOThreshold){
-				flushCharBuffer();
+				flushBuffer();
 				loopCounter = 0;
 			}
 
@@ -152,24 +161,39 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		// empty
 	}
 
-	protected void flushCharBuffer(){
+	protected void flushBuffer(){
 		// empty
 	}
 
 	protected void workerIsAboutToFinish(){
-		flushCharBuffer();
+		flushBuffer();
 	}
 
 	protected void formatMessage(final LogEntryItemImpl entry) {
-		final CharBuffer buffer = entry.getCharBuffer();
-		synchronized (buffer) {
-			final int position = buffer.position();
-			final int limit = buffer.limit();
+		if (multibyte) {
+			final CharBuffer buffer = entry.getCharBuffer();
+			synchronized(buffer){
+				final int position = buffer.position();
+				final int limit = buffer.limit();
 
-			layout.format(charBuffer, entry);
+				buffer.flip();
 
-			buffer.position(position);
-			buffer.limit(limit);
+				layout.format(charBuffer, entry);
+
+				buffer.limit(limit).position(position);
+			}
+		} else {
+			final ByteBuffer buffer = entry.getBuffer();
+			synchronized(buffer){
+				final int position = buffer.position();
+				final int limit = buffer.limit();
+
+				buffer.flip();
+
+				layout.format(byteBuffer, entry);
+
+				buffer.limit(limit).position(position);
+			}
 		}
 	}
 
