@@ -16,7 +16,6 @@ package gflogger;
 
 import static gflogger.formatter.BufferFormatter.*;
 import gflogger.formatter.BufferFormatter;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
@@ -66,7 +65,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		}
 		try {
 			BufferFormatter.append(buffer, message);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 		}
 	}
 
@@ -74,7 +73,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public ByteBufferLocalLogEntry append(final char c) {
 		try {
 			BufferFormatter.append(buffer, c);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(char c)", e);
 		}
 		return this;
@@ -84,7 +83,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public ByteBufferLocalLogEntry append(final CharSequence csq) {
 		try{
 			BufferFormatter.append(buffer, csq);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(CharSequence csq)", e);
 		}
 		return this;
@@ -94,7 +93,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public ByteBufferLocalLogEntry append(final CharSequence csq, final int start, final int end) {
 		try{
 			BufferFormatter.append(buffer, csq, start, end);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(CharSequence csq, int start, int end)", e);
 		}
 		return this;
@@ -104,7 +103,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public LogEntry append(final boolean b) {
 		try{
 			BufferFormatter.append(buffer, b);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(boolean b)", e);
 		}
 		return this;
@@ -114,7 +113,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public ByteBufferLocalLogEntry append(final int i){
 		try{
 			BufferFormatter.append(buffer, i);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(int i)", e);
 		}
 		return this;
@@ -124,7 +123,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public LogEntry append(final long i) {
 		try{
 			BufferFormatter.append(buffer, i);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(long i)", e);
 		}
 		return this;
@@ -134,7 +133,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public LogEntry append(final double i, final int precision) {
 		try{
 			BufferFormatter.append(buffer, i, precision);
-		} catch (BufferOverflowException e){
+		} catch (Throwable e){
 			error("append(double i, int precision)", e);
 		}
 		return this;

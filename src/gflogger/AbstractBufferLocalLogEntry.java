@@ -19,8 +19,6 @@ import static gflogger.util.StackTraceUtils.getImplementationVersion;
 import static gflogger.util.StackTraceUtils.loadClass;
 import gflogger.helpers.LogLog;
 
-import java.nio.BufferOverflowException;
-
 /**
  * AbstractBufferLocalLogEntry
  *
@@ -143,7 +141,7 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 		commit();
 	}
 
-	protected void error(String msg, BufferOverflowException e){
+	protected void error(String msg, Throwable e){
 		this.error = e;
 		// there is insufficient space in this buffer
 		if (logErrorsMessage == null) {
@@ -158,7 +156,11 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	@Override
 	public LogEntry append(Loggable loggable) {
 		if (loggable != null){
-			loggable.appendTo(this);
+			try {
+				loggable.appendTo(this);
+			} catch(Throwable e){
+				error("append(Loggable loggable)", e);
+			}
 		} else {
 			append('n').append('u').append('l').append('l');
 		}
@@ -224,10 +226,8 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 			} else {
 				append('n').append('u').append('l').append('l');
 			}
-		} catch (BufferOverflowException e){
-			this.error = e;
-			// there is insufficient space in this buffer
-			LogLog.error("append(Object o):" + e.getMessage(), e);
+		} catch (Throwable e){
+			error("append(Object o)", e);
 		}
 		return this;
 	}
