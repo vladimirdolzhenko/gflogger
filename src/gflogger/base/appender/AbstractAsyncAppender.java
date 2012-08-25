@@ -19,6 +19,7 @@ import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.PatternLayout;
 import gflogger.base.LogEntryItemImpl;
+import gflogger.formatter.BufferFormatter;
 import gflogger.helpers.LogLog;
 import gflogger.ring.MutableLong;
 import gflogger.ring.PaddedAtomicLong;
@@ -167,6 +168,8 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	protected void workerIsAboutToFinish(){
 		flushBuffer();
+		BufferFormatter.purge(byteBuffer);
+		BufferFormatter.purge(charBuffer);
 	}
 
 	protected void formatMessage(final LogEntryItemImpl entry) {

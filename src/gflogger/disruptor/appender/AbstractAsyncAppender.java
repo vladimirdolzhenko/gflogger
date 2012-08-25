@@ -18,6 +18,7 @@ import static gflogger.formatter.BufferFormatter.allocate;
 import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.disruptor.DLogEntryItem;
+import gflogger.formatter.BufferFormatter;
 import gflogger.helpers.LogLog;
 
 import java.nio.ByteBuffer;
@@ -210,5 +211,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 			getName() + " is about to shutdown");
 		immediateFlush = true;
 		flushBuffer();
+		BufferFormatter.purge(byteBuffer);
+		BufferFormatter.purge(charBuffer);
 	}
 }

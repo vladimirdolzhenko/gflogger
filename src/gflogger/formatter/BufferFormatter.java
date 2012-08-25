@@ -14,12 +14,16 @@
 
 package gflogger.formatter;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
+import sun.misc.Cleaner;
+import sun.nio.ch.DirectBuffer;
+
 /**
  * BufferFormatter
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class BufferFormatter {
@@ -28,29 +32,46 @@ public class BufferFormatter {
 		final boolean direct = Boolean.parseBoolean(System.getProperty("gflogger.direct", "true"));
 		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
 	}
-	
+
+	public static void purge(Buffer buffer){
+		if(!(buffer instanceof DirectBuffer)) return;
+		DirectBuffer db = (DirectBuffer) buffer;
+
+		Cleaner cleaner = db.cleaner();
+		if (cleaner != null) {
+			cleaner.clean();
+		} else {
+			// char buffer doesn't have a cleaner
+			// it has reference to underlying byte buffer
+			final Object viewedBuffer = db.viewedBuffer();
+			if (viewedBuffer instanceof Buffer){
+				purge((Buffer) viewedBuffer);
+			}
+		}
+	}
+
 	public static int roundUpNextPower2(int x) {
 		// HD, Figure 3-3
-		x = x - 1; 
-		x = x | (x >> 1); 
-		x = x | (x >> 2); 
-		x = x | (x >> 4); 
-		x = x | (x >> 8); 
-		x = x | (x >>16); 
-		return x + 1; 
+		x = x - 1;
+		x = x | (x >> 1);
+		x = x | (x >> 2);
+		x = x | (x >> 4);
+		x = x | (x >> 8);
+		x = x | (x >>16);
+		return x + 1;
 	}
-	
+
 	public static ByteBuffer append1(final ByteBuffer buffer, CharSequence s){
 		final int length = s != null ? s.length() : 0;
 		buffer.put((byte) length);
 		if (length == 0) return buffer;
 		return append(buffer, s, 0, length);
 	}
-	
+
 	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s){
 		return append(buffer, s, 0, s != null ? s.length() : 0);
 	}
-	
+
 	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s, int start, int end){
 		if (s == null){
 			return buffer.put((byte) 'n').put((byte) 'u').put((byte) 'l').put((byte) 'l');
@@ -60,25 +81,25 @@ public class BufferFormatter {
 		}
 		return buffer;
 	}
-	
+
 	public static ByteBuffer append(final ByteBuffer buffer, boolean b){
 		if (b){
 			return buffer.put((byte) 't').put((byte) 'r').put((byte) 'u').put((byte) 'e');
 		}
 		return buffer.put((byte) 'f').put((byte) 'a').put((byte) 'l').put((byte) 's').put((byte) 'e');
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, boolean b){
 		if (b){
 			return buffer.put('t').put('r').put('u').put('e');
 		}
 		return buffer.put('f').put('a').put('l').put('s').put('e');
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, CharSequence s){
 		return append(buffer, s, 0, s != null ? s.length() : 0);
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, CharSequence s, int start, int end){
 		if (s != null){
 			for(int i = start; i < end; i++){
@@ -88,7 +109,7 @@ public class BufferFormatter {
 		}
 		return buffer.put('n').put('u').put('l').put('l');
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, byte b) {
 		int i = b;
 		if (i < 0) {
@@ -101,31 +122,31 @@ public class BufferFormatter {
 			buffer.put(DIGIT_ONES[1]);
 			i -= 100;
 		}
-		
+
 		if (i >= 10 || j >= 100){
 			buffer.put(DIGIT_TENS[i]);
 		}
-		
+
 		buffer.put(DIGIT_ONES[i]);
-		
+
 		return buffer;
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, int i) {
 		if (i == Integer.MIN_VALUE) {
 		 // uses java.lang.Integer string constant of MIN_VALUE
 			return append(buffer, Integer.toString(i));
 		}
-		
+
 		put(buffer, i);
 		return buffer;
 	}
-	
+
 	public static ByteBuffer append(final ByteBuffer buffer, char i) {
 		buffer.put((byte) i);
 		return buffer;
 	}
-	
+
 	public static ByteBuffer append(final ByteBuffer buffer, long i) {
 		if (i == Long.MIN_VALUE){
 			// uses java.lang.Long string constant of MIN_VALUE
@@ -134,7 +155,7 @@ public class BufferFormatter {
 		put(buffer, i);
 		return buffer;
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, long i) {
 		if (i == Long.MIN_VALUE){
 			// uses java.lang.Long string constant of MIN_VALUE
@@ -143,13 +164,13 @@ public class BufferFormatter {
 		put(buffer, i);
 		return buffer;
 	}
-	
-	
+
+
 	public static ByteBuffer append(final ByteBuffer buffer, double i, int precision) {
 		put(buffer, i, precision < 0 ? 4 : precision);
 		return buffer;
 	}
-	
+
 	public static CharBuffer append(final CharBuffer buffer, double i, int precision) {
 		put(buffer, i, precision < 0 ? 4 : precision);
 		return buffer;
@@ -166,8 +187,8 @@ public class BufferFormatter {
 		100000000,
 		1000000000,
 		Integer.MAX_VALUE };
-	
-	public final static long[] LONG_SIZE_TABLE = { 
+
+	public final static long[] LONG_SIZE_TABLE = {
 		10L,
 		100L,
 		1000L,
@@ -187,7 +208,7 @@ public class BufferFormatter {
 		100000000000000000L,
 		1000000000000000000L,
 		Long.MAX_VALUE};
-	
+
 	public final static char [] DIGIT_TENS = {
 		'0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
 		'1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
@@ -199,9 +220,9 @@ public class BufferFormatter {
 		'7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
 		'8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
 		'9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
-	} ; 
+	} ;
 
-	public final static char [] DIGIT_ONES = { 
+	public final static char [] DIGIT_ONES = {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -213,7 +234,7 @@ public class BufferFormatter {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	} ;
-		
+
 	/**
 	 * All possible chars for representing a number as a String
 	 */
@@ -225,7 +246,7 @@ public class BufferFormatter {
 		'o' , 'p' , 'q' , 'r' , 's' , 't' ,
 		'u' , 'v' , 'w' , 'x' , 'y' , 'z'
 	};
-	
+
 	// Requires positive x
 	public static int stringSize(int x) {
 		for (int i = 0; i < INT_SIZE_TABLE.length; i++)
@@ -233,7 +254,7 @@ public class BufferFormatter {
 				return i + 1;
 		return INT_SIZE_TABLE.length;
 	}
-	
+
 	// I use the "invariant division by multiplication" trick to
 	// accelerate Integer.toString.  In particular we want to
 	// avoid division by 10.
@@ -252,22 +273,22 @@ public class BufferFormatter {
 	//	  T Gralund, P Montgomery
 	//	  ACM PLDI 1994
 	//
-	
+
 	// based on java.lang.Integer.getChars(int i, int index, char[] buf)
 	private static void put(final CharBuffer buffer, int i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
-		
+
 		if (i < 0) {
 			buffer.put('-');
 			size--;
 			i = -i;
 		}
-		
+
 		int q, r;
 		int charPos = size;
-		
+
 		int oldPos = buffer.position();
-		
+
 		// Generate two digits per iteration
 		while (i >= 65536) {
 			q = i / 100;
@@ -280,8 +301,8 @@ public class BufferFormatter {
 
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
-		for (;;) { 
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1  
+		for (;;) {
+			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
 			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
 			/*/
 			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
@@ -293,10 +314,10 @@ public class BufferFormatter {
 			i = q;
 			if (i == 0) break;
 		}
-		
+
 		buffer.position(oldPos + size);
 	}
-	
+
 	// Requires positive x
 	public static int stringSize(long x) {
 		for (int i = 0; i < LONG_SIZE_TABLE.length; i++)
@@ -304,13 +325,13 @@ public class BufferFormatter {
 				return i + 1;
 		return LONG_SIZE_TABLE.length;
 	}
-	
+
 	// based on java.lang.Long.getChars(int i, int index, char[] buf)
 	private static void put(final CharBuffer buffer, long i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
-		
+
 		int oldPos = buffer.position();
-		
+
 		long q;
 		int r;
 		int charPos = size;
@@ -322,7 +343,7 @@ public class BufferFormatter {
 		}
 
 		// Get 2 digits/iteration using longs until quotient fits into an int
-		while (i > Integer.MAX_VALUE) { 
+		while (i > Integer.MAX_VALUE) {
 			q = i / 100;
 			// really: r = i - (q * 100);
 			r = (int)(i - ((q << 6) + (q << 5) + (q << 2)));
@@ -362,24 +383,24 @@ public class BufferFormatter {
 		}
 		buffer.position(oldPos + size);
 	}
-	
+
 	private static void put(final ByteBuffer buffer, long i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
-		
+
 		int oldPos = buffer.position();
-		
+
 		long q;
 		int r;
 		int charPos = size;
 		char sign = 0;
-		
+
 		if (i < 0) {
 			sign = '-';
 			i = -i;
 		}
-		
+
 		// Get 2 digits/iteration using longs until quotient fits into an int
-		while (i > Integer.MAX_VALUE) { 
+		while (i > Integer.MAX_VALUE) {
 			q = i / 100;
 			// really: r = i - (q * 100);
 			r = (int)(i - ((q << 6) + (q << 5) + (q << 2)));
@@ -387,7 +408,7 @@ public class BufferFormatter {
 			putAt(buffer, oldPos + (--charPos), DIGIT_ONES[r]);
 			putAt(buffer, oldPos + (--charPos), DIGIT_TENS[r]);
 		}
-		
+
 		// Get 2 digits/iteration using ints
 		int q2;
 		int i2 = (int)i;
@@ -399,7 +420,7 @@ public class BufferFormatter {
 			putAt(buffer, oldPos + (--charPos), DIGIT_ONES[r]);
 			putAt(buffer, oldPos + (--charPos), DIGIT_TENS[r]);
 		}
-		
+
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
@@ -419,17 +440,17 @@ public class BufferFormatter {
 		}
 		buffer.position(oldPos + size);
 	}
-	
+
 	private static void putAt(final CharBuffer buffer, int pos, char b){
 		buffer.position(pos);
 		buffer.append(b);
 	}
-	
+
 	private static void putAt(final ByteBuffer buffer, int pos, char b){
 		buffer.position(pos);
 		buffer.put((byte) b);
 	}
-	
+
 	private static void put(final ByteBuffer buffer, double i, int precision) {
 		long x = (long)i;
 		put(buffer, x);
@@ -437,7 +458,7 @@ public class BufferFormatter {
 		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
 		put(buffer, x < 0 ? -x : x);
 	}
-	
+
 	private static void put(final CharBuffer buffer, double i, int precision) {
 		long x = (long)i;
 		put(buffer, x);

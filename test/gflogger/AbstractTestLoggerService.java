@@ -1,19 +1,9 @@
 package gflogger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import gflogger.LocalLogEntry;
-import gflogger.LogEntry;
-import gflogger.LogFactory;
-import gflogger.LogLevel;
-import gflogger.Logger;
-import gflogger.LoggerService;
-import gflogger.LoggerServiceView;
+import static org.junit.Assert.*;
 import gflogger.appender.AppenderFactory;
 import gflogger.appender.ConsoleAppenderFactory;
+
 import java.nio.BufferOverflowException;
 import java.util.HashMap;
 import java.util.Map;
@@ -504,5 +494,26 @@ public abstract class AbstractTestLoggerService {
 
 		final String string = buffer.toString();
 		assertEquals("say hello world", string);
+	}
+
+	@Test
+	public void testMemoryConsumption() throws Exception {
+		for(int i = 0; i < 1000; i++){
+			final int maxMessageSize = 64;
+			final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+			factory.setLayoutPattern("%m");
+			final StringBuffer buffer = new StringBuffer();
+			factory.setOutputStream(buffer);
+			factory.setLogLevel(LogLevel.INFO);
+			factory.setMultibyte(true);
+			final LoggerService loggerService = createLoggerService(maxMessageSize, factory);
+
+			LogFactory.init("com.db", loggerService);
+
+			final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+			logger.info("say hello world");
+
+			LogFactory.stop();
+		}
 	}
 }
