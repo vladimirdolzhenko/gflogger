@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration xmlns="http://bitbucket.org/vladimir.dolzhenko/gflogger">
 
 	<appender-factory name="consoleAppenderFactory" class="gflogger.appender.ConsoleAppenderFactory"
 		logLevel="INFO">
@@ -9,7 +9,11 @@
 			language="EN"/>
 	</appender-factory>
 	  
-  	<logger-service name="defaultLoggerService" count="1024" maxMessageSize="4096">
+	<logger-service name="defaultLoggerService" count="1024" maxMessageSize="4096">
+		<object-formatter 
+			class="perftest.SomeObject"
+			formatter="perftest.SomeObjectFormatter"/>
+		
 		<appender-ref name="consoleAppenderFactory"/>
 	</logger-service>
 	

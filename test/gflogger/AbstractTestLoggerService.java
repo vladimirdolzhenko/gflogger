@@ -12,7 +12,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-
+/**
+ *
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
 public abstract class AbstractTestLoggerService {
 
 	@AfterClass
@@ -25,7 +28,14 @@ public abstract class AbstractTestLoggerService {
 		System.setProperty("gflogger.errorMessage", "");
 	}
 
-	protected abstract LoggerService createLoggerService(final int maxMessageSize, final AppenderFactory ... factories);
+	protected abstract LoggerService createLoggerService(final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final AppenderFactory ... factories);
+
+	protected LoggerService createLoggerService(final int maxMessageSize,
+		final AppenderFactory ... factories){
+		return createLoggerService(maxMessageSize, null, factories);
+	}
 
 	@Test
 	public void testLateInit() throws Exception {
@@ -202,7 +212,10 @@ public abstract class AbstractTestLoggerService {
 			final LocalLogEntry localLogEntry = (LocalLogEntry)info;
 
 			assertNotNull(localLogEntry.getError());
-			assertEquals(BufferOverflowException.class, localLogEntry.getError().getClass());
+			final Class errorClass = localLogEntry.getError().getClass();
+			assertTrue("failed on buffer.position:" + errorClass.getName(),
+				BufferOverflowException.class.equals(errorClass) ||
+				AssertionError.class.equals(errorClass));
 
 			info.commit();
 		}
@@ -243,7 +256,9 @@ public abstract class AbstractTestLoggerService {
 			info.with(1234567890L);
 
 			assertNotNull(localLogEntry.getError());
-			assertEquals("failed on buffer.position", IllegalArgumentException.class, localLogEntry.getError().getClass());
+			assertTrue("failed on buffer.position",
+				IllegalArgumentException.class.equals(localLogEntry.getError().getClass()) ||
+				AssertionError.class.equals(localLogEntry.getError().getClass()));
 			info.withLast("");
 		}
 
@@ -497,6 +512,31 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendObjectFormatter() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+
+		final DefaultObjectFormatterFactory defaultObjectFormatterFactory =
+			new DefaultObjectFormatterFactory();
+		defaultObjectFormatterFactory.registerObjectFormatter(Foo.class, new FooObjectFormatter());
+		final LoggerService loggerService = createLoggerService(maxMessageSize, defaultObjectFormatterFactory, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+		logger.info("say hello %s world").withLast(new Foo(5));
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("say hello v:5 world", string);
+	}
+
+	@Test
 	public void testMemoryConsumption() throws Exception {
 		for(int i = 0; i < 1000; i++){
 			final int maxMessageSize = 64;
@@ -514,6 +554,27 @@ public abstract class AbstractTestLoggerService {
 			logger.info("say hello world");
 
 			LogFactory.stop();
+		}
+	}
+
+	private static class Foo {
+		private final long v;
+
+		public Foo(long v) {
+			this.v = v;
+		}
+
+		@Override
+		public String toString() {
+			return "[" + v + "]";
+		}
+	}
+
+	private static class FooObjectFormatter implements ObjectFormatter<Foo>{
+
+		@Override
+		public void append(Foo obj, LogEntry entry) {
+			entry.append("v:").append(obj.v);
 		}
 	}
 }

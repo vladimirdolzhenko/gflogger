@@ -18,11 +18,13 @@ import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static gflogger.formatter.BufferFormatter.*;
 import gflogger.ByteBufferLocalLogEntry;
 import gflogger.CharBufferLocalLogEntry;
+import gflogger.DefaultObjectFormatterFactory;
 import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.LoggerService;
+import gflogger.ObjectFormatterFactory;
 import gflogger.appender.AppenderFactory;
 import gflogger.disruptor.appender.DAppender;
 import gflogger.helpers.LogLog;
@@ -65,8 +67,21 @@ public class DLoggerServiceImpl implements LoggerService {
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param appenders
 	 */
-	public DLoggerServiceImpl(final int count, final int maxMessageSize, final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, createAppenders(appenderFactories));
+	public DLoggerServiceImpl(final int count, final int maxMessageSize,
+		final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, null, createAppenders(appenderFactories));
+	}
+
+	/**
+	 * @param count a number of items in the ring
+	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param objectFormatterFactory
+	 * @param appenders
+	 */
+	public DLoggerServiceImpl(final int count, final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, objectFormatterFactory, createAppenders(appenderFactories));
 	}
 
 	private static DAppender[] createAppenders(AppenderFactory[] appenderFactories) {
@@ -80,10 +95,12 @@ public class DLoggerServiceImpl implements LoggerService {
 	/**
 	 * @param count a number of items in the ring
 	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
 	public DLoggerServiceImpl(final int count, final int maxMessageSize,
-			final DAppender ... appenders) {
+		final ObjectFormatterFactory objectFormatterFactory,
+		final DAppender ... appenders) {
 		if (appenders.length == 0){
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
@@ -96,6 +113,11 @@ public class DLoggerServiceImpl implements LoggerService {
 
 		this.level = initLevel(appenders);
 
+		final ObjectFormatterFactory formatterFactory =
+			objectFormatterFactory != null ?
+				objectFormatterFactory :
+				new DefaultObjectFormatterFactory();
+
 		// unicode char has 2 bytes
 		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
 		final ByteBuffer buffer = allocate(c * bufferSize);
@@ -107,9 +129,11 @@ public class DLoggerServiceImpl implements LoggerService {
 					multibyte ?
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						bufferSize,
+						formatterFactory,
 						DLoggerServiceImpl.this) :
 					new ByteBufferLocalLogEntry(Thread.currentThread(),
 						bufferSize,
+						formatterFactory,
 						DLoggerServiceImpl.this);
 				return logEntry;
 			}

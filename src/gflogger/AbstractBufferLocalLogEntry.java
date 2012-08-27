@@ -28,6 +28,7 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 
 	protected final String threadName;
 	protected final LoggerService loggerService;
+	protected final ObjectFormatterFactory	formatterFactory;
 	protected final String logErrorsMessage;
 
 	protected String categoryName;
@@ -39,16 +40,23 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	protected String pattern;
 	protected int pPos;
 
-	public AbstractBufferLocalLogEntry(final Thread owner, LoggerService loggerService) {
-		this(owner, loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"));
+	public AbstractBufferLocalLogEntry(final Thread owner,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService) {
+		this(owner, formatterFactory,
+			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"));
 	}
 
-	public AbstractBufferLocalLogEntry(final Thread owner, LoggerService loggerService, String logErrorsMessage) {
+	public AbstractBufferLocalLogEntry(final Thread owner,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService,
+			final String logErrorsMessage) {
 		/*
 		 * It worth to cache thread categoryName at thread local variable cause
 		 * thread.getName() creates new String(char[])
 		 */
 		this.threadName = owner.getName();
+		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
 		this.logErrorsMessage = logErrorsMessage != null && logErrorsMessage.length() > 0 ? logErrorsMessage : null;
 	}
@@ -222,7 +230,8 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	public LogEntry append(Object o) {
 		try {
 			if (o != null){
-				append(o.toString());
+				final ObjectFormatter formatter = formatterFactory.getObjectFormatter(o);
+				formatter.append(o, this);
 			} else {
 				append('n').append('u').append('l').append('l');
 			}

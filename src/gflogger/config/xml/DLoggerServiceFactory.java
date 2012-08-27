@@ -14,7 +14,9 @@
 
 package gflogger.config.xml;
 
+import gflogger.DefaultObjectFormatterFactory;
 import gflogger.LoggerService;
+import gflogger.ObjectFormatter;
 import gflogger.appender.AppenderFactory;
 import gflogger.disruptor.DLoggerServiceImpl;
 
@@ -35,6 +37,8 @@ public class DLoggerServiceFactory implements LoggerServiceFactory {
 
 	private final int maxMessageSize;
 
+	private final DefaultObjectFormatterFactory objectFormatterFactory = new DefaultObjectFormatterFactory();
+
 	public DLoggerServiceFactory(String name, int count, int maxMessageSize) {
 		this.name = name;
 		this.count = count;
@@ -47,6 +51,11 @@ public class DLoggerServiceFactory implements LoggerServiceFactory {
 	}
 
 	@Override
+	public void addObjectFormatter(Class clazz, ObjectFormatter objectFormatter) {
+		objectFormatterFactory.registerObjectFormatter(clazz, objectFormatter);
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -56,6 +65,7 @@ public class DLoggerServiceFactory implements LoggerServiceFactory {
 		return new DLoggerServiceImpl(
 				count,
 				maxMessageSize,
+				objectFormatterFactory,
 				appenderFactories.toArray(new AppenderFactory[appenderFactories.size()]));
 	}
 

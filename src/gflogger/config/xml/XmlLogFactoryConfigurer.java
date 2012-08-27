@@ -21,13 +21,11 @@ import java.io.InputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.helpers.DefaultHandler;
-
 /**
  *
  * @author Harald Wendel
  */
-public class XmlLogFactoryConfigurer extends DefaultHandler {
+public final class XmlLogFactoryConfigurer {
 
 	public static void configure(InputStream in) throws Exception {
 		new XmlLogFactoryConfigurer(in).init();
@@ -51,7 +49,16 @@ public class XmlLogFactoryConfigurer extends DefaultHandler {
 
 	public void init() throws Exception {
 		final SAXParserFactory factory = SAXParserFactory.newInstance();
+
+		factory.setNamespaceAware(true);
+		factory.setValidating(true);
+
 		final SAXParser saxParser = factory.newSAXParser();
+		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+                "http://www.w3.org/2001/XMLSchema");
+		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
+			getClass().getResourceAsStream("gflogger.xsd"));
+
 		saxParser.parse(in, configuration);
 
 		LogFactory.init(configuration.getLoggerViews());

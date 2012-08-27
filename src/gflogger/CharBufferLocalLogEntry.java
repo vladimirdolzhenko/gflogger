@@ -29,16 +29,21 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	private final ByteBuffer byteBuffer;
 	private final CharBuffer buffer;
 
-	public CharBufferLocalLogEntry(final int maxMessageSize, final LoggerService loggerService) {
-		this(Thread.currentThread(), maxMessageSize, loggerService);
+	public CharBufferLocalLogEntry(final int maxMessageSize,
+			ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService) {
+		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService);
 	}
 
-	public CharBufferLocalLogEntry(final Thread owner, final int maxMessageSize, final LoggerService loggerService) {
-		this(owner, allocate(maxMessageSize), loggerService);
+	public CharBufferLocalLogEntry(final Thread owner, final int maxMessageSize,
+			ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService) {
+		this(owner, allocate(maxMessageSize), formatterFactory, loggerService);
 	}
 
-	public CharBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService) {
-		super(owner, loggerService);
+	public CharBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
+			ObjectFormatterFactory formatterFactory, final LoggerService loggerService) {
+		super(owner, formatterFactory, loggerService);
 		this.byteBuffer = byteBuffer;
 		this.buffer = byteBuffer.asCharBuffer();
 	}

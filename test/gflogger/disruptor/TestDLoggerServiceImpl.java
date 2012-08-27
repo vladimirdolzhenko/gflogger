@@ -2,6 +2,7 @@ package gflogger.disruptor;
 
 import gflogger.AbstractTestLoggerService;
 import gflogger.LoggerService;
+import gflogger.ObjectFormatterFactory;
 import gflogger.appender.AppenderFactory;
 
 /**
@@ -12,8 +13,10 @@ import gflogger.appender.AppenderFactory;
 public class TestDLoggerServiceImpl extends AbstractTestLoggerService {
 
 	@Override
-	protected LoggerService createLoggerService(int maxMessageSize, AppenderFactory... factories) {
-	    return new DLoggerServiceImpl(4, maxMessageSize, factories);
+	protected LoggerService createLoggerService(int maxMessageSize,
+		ObjectFormatterFactory objectFormatterFactory,
+		AppenderFactory... factories) {
+	    return new DLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, factories);
 	}
 
 }

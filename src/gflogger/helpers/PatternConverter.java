@@ -25,12 +25,12 @@ import java.nio.CharBuffer;
  * <p>
  * PatternConverter is an abtract class that provides the formatting
  * functionality that derived classes need.
- * 
+ *
  * <p>
  * Conversion specifiers in a conversion patterns are parsed to individual
  * PatternConverters. Each of which is responsible for converting a logging
  * event in a converter specific manner.
- * 
+ *
  * @author <a href="mailto:cakalijp@Maritz.com">James P. Cakalic</a>
  * @author Ceki G&uuml;lc&uuml;
  * @since 0.8.2
@@ -51,18 +51,18 @@ public abstract class PatternConverter {
 	}
 
 	public abstract void format(ByteBuffer buffer, LogEntryItem entry);
-	
+
 	public abstract void format(CharBuffer buffer, LogEntryItem entry);
-	
+
 	public abstract int size(LogEntryItem entry);
 
-	static String[] SPACES = { 
-			" ",				// 1 space 
+	static String[] SPACES = {
+			" ",				// 1 space
 			"  ",			   // 2 spaces
-			"	",			 // 4 spaces
-			"		",		 // 8 spaces
-			"				", // 16 spaces
-			"								" }; // 32 spaces
+			"    ",			 // 4 spaces
+			"        ",		 // 8 spaces
+			"                ", // 16 spaces
+			"                                " }; // 32 spaces
 
 	/**
 	 * Fast space padding method.
@@ -79,13 +79,13 @@ public abstract class PatternConverter {
 			}
 		}
 	}
-	
+
 	public void spacePad(CharBuffer buffer, int length) {
 		while (length >= 32) {
 			buffer.append(SPACES[5]);
 			length -= 32;
 		}
-		
+
 		for (int i = 4; i >= 0; i--) {
 			if ((length & (1 << i)) != 0) {
 				buffer.append(SPACES[i]);

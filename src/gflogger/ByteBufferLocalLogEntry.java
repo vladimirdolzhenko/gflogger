@@ -28,21 +28,29 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	private final ByteBuffer buffer;
 
-	public ByteBufferLocalLogEntry(final int maxMessageSize, final LoggerService loggerService) {
-		this(Thread.currentThread(), maxMessageSize, loggerService);
+	public ByteBufferLocalLogEntry(final int maxMessageSize,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService) {
+		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService);
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final int maxMessageSize, final LoggerService loggerService) {
-		this(owner, allocate(maxMessageSize), loggerService);
+	public ByteBufferLocalLogEntry(final Thread owner, final int maxMessageSize,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService) {
+		this(owner, allocate(maxMessageSize), formatterFactory, loggerService);
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService) {
-		super(owner, loggerService);
+	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService) {
+		super(owner, formatterFactory, loggerService);
 		this.buffer = byteBuffer;
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer, final LoggerService loggerService, String logErrorsMsg) {
-		super(owner, loggerService, logErrorsMsg);
+	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService, String logErrorsMsg) {
+		super(owner, formatterFactory, loggerService, logErrorsMsg);
 		this.buffer = byteBuffer;
 	}
 

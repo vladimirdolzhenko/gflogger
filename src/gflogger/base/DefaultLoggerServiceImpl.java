@@ -18,11 +18,13 @@ import static gflogger.formatter.BufferFormatter.*;
 
 import gflogger.ByteBufferLocalLogEntry;
 import gflogger.CharBufferLocalLogEntry;
+import gflogger.DefaultObjectFormatterFactory;
 import gflogger.FormattedLogEntry;
 import gflogger.LocalLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.LoggerService;
+import gflogger.ObjectFormatterFactory;
 import gflogger.appender.AppenderFactory;
 import gflogger.base.appender.Appender;
 import gflogger.helpers.LogLog;
@@ -60,10 +62,26 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
 	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param objectFormatterFactory
 	 * @param appenderFactories
 	 */
-	public DefaultLoggerServiceImpl(final int count, final int maxMessageSize, final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, createAppenders(appenderFactories));
+	public DefaultLoggerServiceImpl(final int count,
+			final int maxMessageSize,
+			final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, null, createAppenders(appenderFactories));
+	}
+
+	/**
+	 * @param count a number of items in the ring, could be rounded up to the next power of 2
+	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param objectFormatterFactory
+	 * @param appenderFactories
+	 */
+	public DefaultLoggerServiceImpl(final int count,
+			final int maxMessageSize,
+			final ObjectFormatterFactory objectFormatterFactory,
+			final AppenderFactory ... appenderFactories) {
+		this(count, maxMessageSize, objectFormatterFactory, createAppenders(appenderFactories));
 	}
 
 	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
@@ -77,9 +95,13 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
 	 * @param maxMessageSize max message size in the ring (in chars)
+	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public DefaultLoggerServiceImpl(final int count, final int maxMessageSize, final Appender ... appenders) {
+	public DefaultLoggerServiceImpl(final int count,
+			final int maxMessageSize,
+			final ObjectFormatterFactory objectFormatterFactory,
+			final Appender ... appenders) {
 		if (appenders.length <= 0){
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
@@ -88,6 +110,11 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 
 		// unicode char has 2 bytes
 		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
+
+		final ObjectFormatterFactory formatterFactory =
+			objectFormatterFactory != null ?
+				objectFormatterFactory :
+				new DefaultObjectFormatterFactory();
 
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
@@ -104,9 +131,11 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 					multibyte ?
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
+						formatterFactory,
 						DefaultLoggerServiceImpl.this) :
 					new ByteBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
+						formatterFactory,
 						DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}

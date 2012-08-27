@@ -18,15 +18,18 @@ import gflogger.Layout;
 import gflogger.LogLevel;
 import gflogger.LoggerService;
 import gflogger.LoggerServiceView;
+import gflogger.ObjectFormatter;
 import gflogger.appender.AppenderFactory;
 import gflogger.helpers.LogLog;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import org.apache.commons.lang.StringUtils;
@@ -95,15 +98,18 @@ public class Configuration extends DefaultHandler {
 
 		appenderFactories.put(name, appenderFactory);
 
-		log("Created AppenderFactory '" + name + "'");
+		debug("Created AppenderFactory '" + name + "'");
 	}
 
 	private void startLayout(Attributes attributes) throws Exception{
-		final String clazz = getAttribute(attributes, "class");
+		final String className = getAttribute(attributes, "class");
 		final String pattern  = getAttribute(attributes, "pattern");
 		final String timeZoneId = getAttribute(attributes, "timeZoneId");
 		final String language = getAttribute(attributes, "language");
-		final Layout layout = (Layout)Class.forName(clazz).getConstructor(String.class, String.class, String.class).newInstance(pattern, timeZoneId, language);
+		final Class clazz = Class.forName(className);
+		final Constructor constructor = clazz.getConstructor(String.class,
+				String.class, String.class);
+		final Layout layout = (Layout)constructor.newInstance(pattern, timeZoneId, language);
 		setProperty(stack.peek(), "layout", layout);
 	}
 
@@ -112,18 +118,32 @@ public class Configuration extends DefaultHandler {
 		final String className = getAttribute(attributes, "class");
 		final int count = Integer.parseInt(getAttribute(attributes, "count"));
 		final int maxMessageSize = Integer.parseInt(getAttribute(attributes, "maxMessageSize"));
-		final Class clazz = className != null ? Class.forName(className) : DefaultLoggerServiceFactory.class;
+		final Class clazz = className != null ?
+				Class.forName(className) :
+				DefaultLoggerServiceFactory.class;
 		final LoggerServiceFactory loggerServiceFactory =
 				(LoggerServiceFactory)clazz.getConstructor(String.class, int.class, int.class).
 					newInstance(name, count, maxMessageSize);
 		stack.push(loggerServiceFactory);
 	}
 
+	private void startObjectFormatter(Attributes attributes) throws Exception {
+		final String className = getAttribute(attributes, "class");
+		final Class clazz = Class.forName(className);
+
+		final String formatterClassName = getAttribute(attributes, "formatter");
+		final Class formatterClass = Class.forName(formatterClassName);
+
+		final ObjectFormatter objectFormatter = (ObjectFormatter) formatterClass.newInstance();
+		((LoggerServiceFactory)stack.peek()).addObjectFormatter(clazz, objectFormatter);
+		debug("added ObjectFormatter '" + className + "'");
+	}
+
 	private void startAppenderRef(Attributes attributes) {
 		final String name = getAttribute(attributes, "name");
 		final AppenderFactory appenderFactory = appenderFactories.get(name);
 		if (appenderFactory == null) {
-			log("No AppenderFactory '" + name + "' found");
+			debug("No AppenderFactory '" + name + "' found");
 			return;
 		}
 		((LoggerServiceFactory)stack.peek()).addAppenderFactory(appenderFactory);
@@ -135,11 +155,11 @@ public class Configuration extends DefaultHandler {
 		final LogLevel logLevel = LogLevel.valueOf(getAttribute(attributes, "logLevel"));
 		final LoggerService loggerService = loggerServices.get(serviceRef);
 		if (loggerService == null) {
-			log("No LoggerService '" + serviceRef + "' found");
+			debug("No LoggerService '" + serviceRef + "' found");
 			return;
 		}
 		loggerViews.put(name, new LoggerServiceView(loggerService,logLevel));
-		log("Created LoggerServiceView '" + name + "'");
+		debug("Created LoggerServiceView '" + name + "'");
 	}
 
 	private void startLoggerViewRoot(Attributes attributes) {
@@ -147,11 +167,11 @@ public class Configuration extends DefaultHandler {
 		final LogLevel logLevel = LogLevel.valueOf(getAttribute(attributes, "logLevel"));
 		final LoggerService loggerService = loggerServices.get(serviceRef);
 		if (loggerService == null) {
-			log("No LoggerService '" + serviceRef + "' found");
+			debug("No LoggerService '" + serviceRef + "' found");
 			return;
 		}
 		loggerViews.put(null, new LoggerServiceView(loggerService,logLevel));
-		log("Created root LoggerServiceView");
+		debug("Created root LoggerServiceView");
 	}
 
 	private void endAppenderFactory() {
@@ -161,11 +181,12 @@ public class Configuration extends DefaultHandler {
 	private void endLoggerService() {
 		final LoggerServiceFactory factory = (LoggerServiceFactory)stack.pop();
 		loggerServices.put(factory.getName(), factory.getLoggerService());
-		log("Created LoggerService '" + factory.getName() + "'");
+		debug("Created LoggerService '" + factory.getName() + "'");
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	public void startElement(String uri, String localName, String qName, Attributes attributes)
+	throws SAXException {
 		try {
 			if (qName.equals("appender-factory")) {
 				startAppenderFactory(attributes);
@@ -173,6 +194,8 @@ public class Configuration extends DefaultHandler {
 				startLayout(attributes);
 			} else if (qName.equals("logger-service")) {
 				startLoggerService(attributes);
+			} else if (qName.equals("object-formatter")) {
+				startObjectFormatter(attributes);
 			} else if (qName.equals("appender-ref")) {
 				startAppenderRef(attributes);
 			} else if (qName.equals("logger-view")) {
@@ -194,7 +217,23 @@ public class Configuration extends DefaultHandler {
 		}
 	}
 
-	private static void log(String message) {
+	@Override
+	public void error(SAXParseException e) throws SAXException {
+		super.error(e);
+		error("error " + e.getMessage());
+	}
+
+	@Override
+	public void warning(SAXParseException e) throws SAXException {
+		super.warning(e);
+		error("warning " + e.getMessage());
+	}
+
+	private static void error(String message) {
+		System.err.println("[GFLogger-Init] " + message);
+	}
+
+	private static void debug(String message) {
 		LogLog.debug("[GFLogger-Init] " + message);
 	}
 

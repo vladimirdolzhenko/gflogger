@@ -11,24 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package gflogger.config.xml;
-
-import gflogger.LoggerService;
-import gflogger.ObjectFormatter;
-import gflogger.appender.AppenderFactory;
+package gflogger;
 
 /**
  *
- * @author Harald Wendel
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface LoggerServiceFactory {
+public interface ObjectFormatter<T> {
 
-	String getName();
+	/**
+	 * <b>Note</b>: do not invoke <code>commit()</code> within this method.
+	 *
+	 * @param obj
+	 * @param entry
+	 */
+	void append(T obj, LogEntry entry);
 
-	LoggerService getLoggerService();
-
-	void addAppenderFactory(AppenderFactory factory);
-
-	void addObjectFormatter(Class clazz, ObjectFormatter objectFormatter);
 }

@@ -17,6 +17,9 @@ public class XmlConfigurationTest {
 
 	    final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 
+	    logger.info().
+	    	append(new SomeObject(5)).commit();
+
 	    logger.info().append("test1").commit();
 
 	    logger.debug().append("testD").commit();
