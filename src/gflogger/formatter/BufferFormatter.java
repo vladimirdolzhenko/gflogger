@@ -74,8 +74,10 @@ public class BufferFormatter {
 
 	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s, int start, int end){
 		if (s == null){
+			assert !(buffer.remaining() < 4);
 			return buffer.put((byte) 'n').put((byte) 'u').put((byte) 'l').put((byte) 'l');
 		}
+		assert !(buffer.remaining() < (end - start));
 		for(int i = start; i < end; i++){
 			buffer.put((byte) s.charAt(i));
 		}
@@ -84,15 +86,19 @@ public class BufferFormatter {
 
 	public static ByteBuffer append(final ByteBuffer buffer, boolean b){
 		if (b){
+			assert !(buffer.remaining() < 4);
 			return buffer.put((byte) 't').put((byte) 'r').put((byte) 'u').put((byte) 'e');
 		}
+		assert !(buffer.remaining() < 5);
 		return buffer.put((byte) 'f').put((byte) 'a').put((byte) 'l').put((byte) 's').put((byte) 'e');
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, boolean b){
 		if (b){
+			assert !(buffer.remaining() < 4);
 			return buffer.put('t').put('r').put('u').put('e');
 		}
+		assert !(buffer.remaining() < 5);
 		return buffer.put('f').put('a').put('l').put('s').put('e');
 	}
 
@@ -102,21 +108,31 @@ public class BufferFormatter {
 
 	public static CharBuffer append(final CharBuffer buffer, CharSequence s, int start, int end){
 		if (s != null){
+			assert !(buffer.remaining() < (end - start));
 			for(int i = start; i < end; i++){
 				buffer.put(s.charAt(i));
 			}
 			return buffer;
 		}
+		assert !(buffer.remaining() < 4);
 		return buffer.put('n').put('u').put('l').put('l');
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, byte b) {
+		char sign = 0;
 		int i = b;
+		int size = 0;
 		if (i < 0) {
-			buffer.put('-');
+			sign = '-';
 			i = -i;
+			size++;
 		}
+		size += i > 100 ? 3 : i > 10 ? 2 : 1;
+		assert !(buffer.remaining() < size);
 		int j = i;
+		if (sign != 0){
+			buffer.put(sign);
+		}
 		// positive byte values is in 0 .. 128
 		if (i >= 100){
 			buffer.put(DIGIT_ONES[1]);
@@ -144,6 +160,16 @@ public class BufferFormatter {
 
 	public static ByteBuffer append(final ByteBuffer buffer, char i) {
 		buffer.put((byte) i);
+		return buffer;
+	}
+
+	public static ByteBuffer append(final ByteBuffer buffer, int i) {
+		if (i == Integer.MIN_VALUE) {
+		 // uses java.lang.Integer string constant of MIN_VALUE
+			return append(buffer, Integer.toString(i));
+		}
+
+		put(buffer, i);
 		return buffer;
 	}
 
@@ -278,6 +304,8 @@ public class BufferFormatter {
 	private static void put(final CharBuffer buffer, int i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
 
+		assert !(buffer.remaining() < size);
+
 		if (i < 0) {
 			buffer.put('-');
 			size--;
@@ -318,6 +346,57 @@ public class BufferFormatter {
 		buffer.position(oldPos + size);
 	}
 
+	// based on java.lang.Integer.getChars(int i, int index, char[] buf)
+	private static void put(final ByteBuffer buffer, int i) {
+		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+
+		assert !(buffer.remaining() < size);
+
+		int q, r;
+		int charPos = size;
+
+		int oldPos = buffer.position();
+
+		char sign = 0;
+
+		if (i < 0) {
+			sign = '-';
+			i = -i;
+		}
+
+		// Generate two digits per iteration
+		while (i >= 65536) {
+			q = i / 100;
+			// really: r = i - (q * 100);
+			r = i - ((q << 6) + (q << 5) + (q << 2));
+			i = q;
+			putAt(buffer, oldPos + (--charPos), DIGIT_ONES[r]);
+			putAt(buffer, oldPos + (--charPos), DIGIT_TENS[r]);
+		}
+
+		// Fall thru to fast mode for smaller numbers
+		// assert(i <= 65536, i);
+		for (;;) {
+			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
+			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
+			/*/
+			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
+			/*/
+			q = (i * 52429) >>> (16+3);
+			//*/
+			r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
+			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
+			i = q;
+			if (i == 0) break;
+		}
+
+		if (sign != 0) {
+			putAt(buffer, oldPos + (--charPos), sign);
+		}
+
+		buffer.position(oldPos + size);
+	}
+
 	// Requires positive x
 	public static int stringSize(long x) {
 		for (int i = 0; i < LONG_SIZE_TABLE.length; i++)
@@ -329,6 +408,8 @@ public class BufferFormatter {
 	// based on java.lang.Long.getChars(int i, int index, char[] buf)
 	private static void put(final CharBuffer buffer, long i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+
+		assert !(buffer.remaining() < size);
 
 		int oldPos = buffer.position();
 
@@ -386,6 +467,8 @@ public class BufferFormatter {
 
 	private static void put(final ByteBuffer buffer, long i) {
 		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+
+		assert !(buffer.remaining() < size);
 
 		int oldPos = buffer.position();
 
