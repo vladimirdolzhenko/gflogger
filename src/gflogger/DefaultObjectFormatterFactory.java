@@ -13,6 +13,8 @@
  */
 package gflogger;
 
+import static gflogger.DefaultObjectFormatter.DEFAULT_OBJECT_FORMATTER;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,8 +29,6 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		new ConcurrentHashMap<Class, ObjectFormatter>();
 
 	public DefaultObjectFormatterFactory() {
-		registerObjectFormatter(Object.class,
-			new DefaultObjectFormatter());
 	}
 
 	public <T> void registerObjectFormatter(final Class<T> clazz, final ObjectFormatter<T> formatter){
@@ -56,12 +56,13 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		// lookup over classes: class - super class - super - super class and so on
 		while (classFormatter == null){
 			classClazz = classClazz.getSuperclass();
+			if (classClazz == null) {
+				classLength = Integer.MAX_VALUE;
+				break;
+			}
 			classFormatter = formatters.get(classClazz);
 			classLength++;
 		}
-
-		// Object class formatter (default) has a low priority
-		classLength += Object.class.equals(classClazz) ? 1 << 10 : 0;
 
 		// after lookup for interfaces
 		while (interfaceFormatter == null){
@@ -77,6 +78,13 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		// the nearest class has more priority than interface
 		Class clazz = classLength <= intefaceLength ? classClazz : interfaceClazz;
 		formatter = classLength <= intefaceLength ? classFormatter : interfaceFormatter;
+
+		// there is no any registered for this type of object formatter
+		// use the default one
+		if (clazz == null){
+			clazz = Object.class;
+			formatter = DEFAULT_OBJECT_FORMATTER;
+		}
 
 		if (!origClass.equals(clazz)){
 			formatters.put(clazz, formatter);
@@ -96,22 +104,5 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 			if (formatter != null) break;
 		}
 		return formatter;
-	}
-
-	private static class DefaultObjectFormatter implements ObjectFormatter<Object> {
-
-		@Override
-		public void append(Object obj, LogEntry entry) {
-			if (obj != null){
-				entry.append(obj.toString());
-			} else {
-				entry.append('n').append('u').append('l').append('l');
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "DefaultObjectFormatter";
-		}
 	}
 }
