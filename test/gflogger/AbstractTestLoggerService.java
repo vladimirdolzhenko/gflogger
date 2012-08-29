@@ -397,6 +397,34 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendFormattedWithLimitedAppenderBufferSize() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		final String targetMsg = "say hello % world %";
+		factory.setBufferSize(targetMsg.length() + 2);
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = createLoggerService(maxMessageSize, factory);
+
+		LogFactory.init("com.db", loggerService);
+
+		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+		final StringBuilder expected = new StringBuilder();
+		for(int i = 0; i < 10; i++){
+			logger.info("say hello %% %s %").withLast("world");
+			expected.append(targetMsg);
+		}
+
+		LogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals(expected.toString(), string);
+	}
+
+	@Test
 	public void testAppendFormattedWithLastMessage() throws Exception {
 		final int maxMessageSize = 64;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();

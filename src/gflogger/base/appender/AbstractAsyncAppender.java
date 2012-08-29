@@ -128,12 +128,15 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 				// handle entry that has a log level equals or higher than required
 				final boolean hasProperLevel =
 					logLevel.compareTo(entry.getLogLevel()) <= 0;
-				if (hasProperLevel){
-					formatMessage(entry);
-				}
 
-				// release entry anyway
-				releaseEntry(entry, idx);
+				try {
+					if (hasProperLevel){
+						formatMessage(entry);
+					}
+				} finally {
+					// release entry anyway
+					releaseEntry(entry, idx);
+				}
 
 				if (hasProperLevel){
 					if (multibyte) {
@@ -178,6 +181,11 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 			synchronized(buffer){
 				final int position = buffer.position();
 				final int limit = buffer.limit();
+				final int size = layout.size(entry);
+				if (position + size >= limit){
+					flushBuffer();
+					charBuffer.clear();
+				}
 
 				buffer.flip();
 
@@ -190,6 +198,11 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 			synchronized(buffer){
 				final int position = buffer.position();
 				final int limit = buffer.limit();
+				final int size = layout.size(entry);
+				if (position + size >= limit){
+					flushBuffer();
+					byteBuffer.clear();
+				}
 
 				buffer.flip();
 
