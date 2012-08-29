@@ -229,6 +229,11 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 					}
 					append('\n');
 				}
+				Throwable cause = e.getCause();
+				if (cause != null) {
+					append("\n caused by: \n");
+					append(cause);
+				}
 			} catch (Throwable t){
 				// there is insufficient space in this buffer
 				LogLog.error("append(Throwable e):" + t.getMessage(), t);
