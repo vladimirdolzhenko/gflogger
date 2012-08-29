@@ -363,6 +363,7 @@ public class DLoggerServiceImpl implements LoggerService {
 		if (!running) return;
 
 		running = false;
+		logEntryThreadLocal.remove();
 
 		executorService.shutdown();
 		disruptor.halt();

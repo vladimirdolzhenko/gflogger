@@ -26,7 +26,6 @@ import java.nio.CharBuffer;
  */
 public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
-	private final ByteBuffer byteBuffer;
 	private final CharBuffer buffer;
 
 	public CharBufferLocalLogEntry(final int maxMessageSize,
@@ -43,8 +42,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	public CharBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
 			ObjectFormatterFactory formatterFactory, final LoggerService loggerService) {
-		super(owner, formatterFactory, loggerService);
-		this.byteBuffer = byteBuffer;
+		super(owner, formatterFactory, loggerService, byteBuffer);
 		this.buffer = byteBuffer.asCharBuffer();
 	}
 

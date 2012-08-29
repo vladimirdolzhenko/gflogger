@@ -13,10 +13,13 @@
  */
 package gflogger;
 
+import java.nio.ByteBuffer;
+
 import static gflogger.helpers.OptionConverter.getStringProperty;
 import static gflogger.util.StackTraceUtils.getCodeLocation;
 import static gflogger.util.StackTraceUtils.getImplementationVersion;
 import static gflogger.util.StackTraceUtils.loadClass;
+import gflogger.formatter.BufferFormatter;
 import gflogger.helpers.LogLog;
 
 /**
@@ -25,6 +28,8 @@ import gflogger.helpers.LogLog;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
+
+	protected final ByteBuffer byteBuffer;
 
 	protected final String threadName;
 	protected final LoggerService loggerService;
@@ -42,15 +47,18 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 
 	public AbstractBufferLocalLogEntry(final Thread owner,
 			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService) {
+			final LoggerService loggerService,
+			final ByteBuffer byteBuffer) {
 		this(owner, formatterFactory,
-			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"));
+			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), byteBuffer);
 	}
 
 	public AbstractBufferLocalLogEntry(final Thread owner,
 			final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
-			final String logErrorsMessage) {
+			final String logErrorsMessage,
+			final ByteBuffer byteBuffer) {
+		this.byteBuffer = byteBuffer;
 		/*
 		 * It worth to cache thread categoryName at thread local variable cause
 		 * thread.getName() creates new String(char[])
@@ -59,6 +67,9 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
 		this.logErrorsMessage = logErrorsMessage != null && logErrorsMessage.length() > 0 ? logErrorsMessage : null;
+
+		// there is no reason to register in Cleaner as direct byte buffer registers in it by its own
+		// Cleaner.create(this, new BufferPurger(this.byteBuffer));
 	}
 
 	@Override
@@ -453,4 +464,17 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 
 	protected abstract void commit0();
 
+	protected static class BufferPurger implements Runnable {
+		private final ByteBuffer buffer;
+
+		public BufferPurger(ByteBuffer buffer) {
+			this.buffer = buffer;
+		}
+
+		@Override
+		public void run() {
+			BufferFormatter.purge(buffer);
+		}
+
+	}
 }

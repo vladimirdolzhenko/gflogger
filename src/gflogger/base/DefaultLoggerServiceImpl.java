@@ -139,6 +139,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 						DefaultLoggerServiceImpl.this);
 				return logEntry;
 			}
+
 		};
 
 		executorService = initExecutorService(appenders);
@@ -276,6 +277,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	@Override
 	public void stop(){
 		running = false;
+		//logEntryThreadLocal.remove();
 		for(int i = 0; i < appenders.length; i++){
 			appenders[i].stop();
 		}

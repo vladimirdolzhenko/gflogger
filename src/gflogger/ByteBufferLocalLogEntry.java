@@ -26,8 +26,6 @@ import java.nio.CharBuffer;
  */
 public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
-	private final ByteBuffer buffer;
-
 	public ByteBufferLocalLogEntry(final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService) {
@@ -43,15 +41,13 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService) {
-		super(owner, formatterFactory, loggerService);
-		this.buffer = byteBuffer;
+		super(owner, formatterFactory, loggerService, byteBuffer);
 	}
 
 	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService, String logErrorsMsg) {
-		super(owner, formatterFactory, loggerService, logErrorsMsg);
-		this.buffer = byteBuffer;
+		super(owner, formatterFactory, loggerService, logErrorsMsg, byteBuffer);
 	}
 
 	@Override
@@ -61,18 +57,18 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBuffer getByteBuffer() {
-		return buffer;
+		return byteBuffer;
 	}
 
 	@Override
 	protected void moveAndAppendSilent(String message) {
 		final int length = message.length();
-		final int remaining = buffer.remaining();
+		final int remaining = byteBuffer.remaining();
 		if (remaining < length){
-			buffer.position(buffer.position() - (length - remaining));
+			byteBuffer.position(byteBuffer.position() - (length - remaining));
 		}
 		try {
-			BufferFormatter.append(buffer, message);
+			BufferFormatter.append(byteBuffer, message);
 		} catch (Throwable e){
 		}
 	}
@@ -80,7 +76,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final char c) {
 		try {
-			BufferFormatter.append(buffer, c);
+			BufferFormatter.append(byteBuffer, c);
 		} catch (Throwable e){
 			error("append(char c)", e);
 		}
@@ -90,7 +86,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq) {
 		try{
-			BufferFormatter.append(buffer, csq);
+			BufferFormatter.append(byteBuffer, csq);
 		} catch (Throwable e){
 			error("append(CharSequence csq)", e);
 		}
@@ -100,7 +96,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq, final int start, final int end) {
 		try{
-			BufferFormatter.append(buffer, csq, start, end);
+			BufferFormatter.append(byteBuffer, csq, start, end);
 		} catch (Throwable e){
 			error("append(CharSequence csq, int start, int end)", e);
 		}
@@ -110,7 +106,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public LogEntry append(final boolean b) {
 		try{
-			BufferFormatter.append(buffer, b);
+			BufferFormatter.append(byteBuffer, b);
 		} catch (Throwable e){
 			error("append(boolean b)", e);
 		}
@@ -120,7 +116,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final int i){
 		try{
-			BufferFormatter.append(buffer, i);
+			BufferFormatter.append(byteBuffer, i);
 		} catch (Throwable e){
 			error("append(int i)", e);
 		}
@@ -130,7 +126,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public LogEntry append(final long i) {
 		try{
-			BufferFormatter.append(buffer, i);
+			BufferFormatter.append(byteBuffer, i);
 		} catch (Throwable e){
 			error("append(long i)", e);
 		}
@@ -140,7 +136,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public LogEntry append(final double i, final int precision) {
 		try{
-			BufferFormatter.append(buffer, i, precision);
+			BufferFormatter.append(byteBuffer, i, precision);
 		} catch (Throwable e){
 			error("append(double i, int precision)", e);
 		}
@@ -149,16 +145,16 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	protected void commit0() {
-		buffer.flip();
+		byteBuffer.flip();
 	}
 
 	@Override
 	public String toString() {
 		return "[local of " + threadName +
 			" " + logLevel +
-			" pos:" + buffer.position() +
-			" limit:" + buffer.limit() +
-			" capacity:" + buffer.capacity() +
+			" pos:" + byteBuffer.position() +
+			" limit:" + byteBuffer.limit() +
+			" capacity:" + byteBuffer.capacity() +
 			"]";
 	}
 
