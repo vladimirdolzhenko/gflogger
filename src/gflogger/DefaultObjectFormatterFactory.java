@@ -66,13 +66,19 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 
 		// after lookup for interfaces
 		while (interfaceFormatter == null){
-			intefaceLength++;
-			interfaceClazz = interfaceClazz != null ? interfaceClazz : Object.class;
 
-			interfaceFormatter = depthSearchOverInterfaces(interfaceClazz.getInterfaces());
-			if (interfaceFormatter != null) break;
+			final int len =
+				depthSearchOverInterfacesLength(interfaceClazz.getInterfaces());
+			if (len != Integer.MAX_VALUE){
+				interfaceFormatter = depthSearchOverInterfaces(interfaceClazz.getInterfaces());
+				if (interfaceFormatter != null) {
+					intefaceLength += len;
+					break;
+				}
+			}
 
 			interfaceClazz = interfaceClazz.getSuperclass();
+			if (interfaceClazz == null) break;
 		}
 
 		// the nearest class has more priority than interface
@@ -90,6 +96,20 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 			formatters.put(clazz, formatter);
 		}
 		return formatter;
+	}
+
+	private int depthSearchOverInterfacesLength(Class ... interfaces){
+		for (int i = 0; i < interfaces.length; i++) {
+			ObjectFormatter formatter = formatters.get(interfaces[i]);
+			if (formatter != null) {
+				return 1;
+			}
+			int length = depthSearchOverInterfacesLength(interfaces[i].getInterfaces());
+			if (length != Integer.MAX_VALUE) {
+				return length + 1;
+			}
+		}
+		return Integer.MAX_VALUE;
 	}
 
 	private ObjectFormatter depthSearchOverInterfaces(Class ... interfaces){

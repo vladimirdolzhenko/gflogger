@@ -13,7 +13,7 @@
  */
 package gflogger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 
@@ -73,6 +73,30 @@ public class TestDefaultObjectFormatterFactory {
 	}
 
 	@Test
+	public void testABC2ObjectFormatter() throws Exception {
+		final DefaultObjectFormatterFactory objectFormatterFactory = new DefaultObjectFormatterFactory();
+
+		final ObjectFormatter<A> aObjectFormatter = new ObjectFormatter<A>(){
+			@Override
+			public void append(A obj, LogEntry entry) {
+				entry.append("A");
+			}
+
+			@Override
+			public String toString() {
+				return "AFormatter";
+			}
+
+		};
+		objectFormatterFactory.registerObjectFormatter(A.class, aObjectFormatter);
+
+		final ObjectFormatter objectFormatter =
+				objectFormatterFactory.getObjectFormatter(new ABC2(){});
+
+		assertSame(aObjectFormatter, objectFormatter);
+	}
+
+	@Test
 	public void testABCImpl2ABCImplObjectFormatter() throws Exception {
 		final DefaultObjectFormatterFactory objectFormatterFactory = new DefaultObjectFormatterFactory();
 
@@ -116,6 +140,8 @@ public class TestDefaultObjectFormatterFactory {
 	private static interface D {}
 
 	private static interface ABC extends A, B, C {}
+
+	private static interface ABC2 extends ABC {}
 
 	private static class ABCImpl implements ABC {}
 	private static class ABCImpl2 extends ABCImpl implements D {}
