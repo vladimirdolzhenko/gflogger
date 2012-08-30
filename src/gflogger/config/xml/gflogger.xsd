@@ -23,6 +23,10 @@
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="class" type="xs:string" use="required"/>
 		<xs:attribute name="logLevel" type="log-level" use="required"/>
+		<xs:attribute name="append" type="xs:boolean" use="optional"/>
+		<xs:attribute name="immediateFlush" type="xs:boolean" use="optional"/>
+		<xs:attribute name="datePattern" type="xs:string" use="optional"/>
+		<xs:attribute name="fileName" type="xs:string" use="optional"/>
 	</xs:complexType>
 
 	<xs:complexType name="layoutType">
