@@ -37,5 +37,7 @@ public class XmlConfigurationTest {
 	    logger2.debug().append("org.spring.debug").commit();
 
 	    logger2.error().append("org.spring.error").commit();
+
+	    Thread.sleep(1000L);
     }
 }

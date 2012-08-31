@@ -57,7 +57,7 @@ public final class XmlLogFactoryConfigurer {
 		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
                 "http://www.w3.org/2001/XMLSchema");
 		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
-			getClass().getResourceAsStream("gflogger.xsd"));
+			getClass().getResourceAsStream("/gflogger.xsd"));
 
 		saxParser.parse(in, configuration);
 

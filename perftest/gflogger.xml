@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration xmlns="http://bitbucket.org/vladimir.dolzhenko/gflogger">
+<configuration 
+	xmlns="http://bitbucket.org/vladimir.dolzhenko/gflogger"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://bitbucket.org/vladimir.dolzhenko/gflogger 
+		https://bitbucket.org/vladimir.dolzhenko/gflogger/raw/0.0.9.6/src/gflogger.xsd">
 
 	<appender-factory name="consoleAppenderFactory" class="gflogger.appender.ConsoleAppenderFactory"
 		logLevel="INFO">

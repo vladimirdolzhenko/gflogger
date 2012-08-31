@@ -54,6 +54,8 @@
 			<xs:element name="appender-ref" type="appender-refType" minOccurs="1" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="class" type="xs:string" use="optional" 
+			default="gflogger.config.xml.DefaultLoggerServiceFactory"/>
 		<xs:attribute name="count" type="xs:integer" use="required"/>
 		<xs:attribute name="maxMessageSize" type="xs:integer" use="required"/>
 	</xs:complexType>
