@@ -45,4 +45,6 @@ public interface LocalLogEntry extends LogEntry, FormattedLogEntry {
 	void setCommited(boolean commited);
 
 	Throwable getError();
+
+	String stringValue();
 }

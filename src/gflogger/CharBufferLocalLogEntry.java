@@ -146,6 +146,18 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
+	public String stringValue() {
+		final int pos = buffer.position();
+		final int limit = buffer.limit();
+		buffer.flip();
+		final char[] bs = new char[pos];
+		buffer.get(bs);
+		buffer.position(pos);
+		buffer.limit(limit);
+		return new String(bs);
+	}
+
+	@Override
 	public String toString() {
 		return "[local of " + threadName +
 			" " + logLevel +

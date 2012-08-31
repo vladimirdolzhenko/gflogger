@@ -149,6 +149,18 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
+	public String stringValue() {
+		final int pos = byteBuffer.position();
+		final int limit = byteBuffer.limit();
+		byteBuffer.flip();
+		final byte[] bs = new byte[pos];
+		byteBuffer.get(bs);
+		byteBuffer.position(pos);
+		byteBuffer.limit(limit);
+		return new String(bs);
+	}
+
+	@Override
 	public String toString() {
 		return "[local of " + threadName +
 			" " + logLevel +

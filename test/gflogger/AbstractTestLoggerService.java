@@ -38,6 +38,31 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testCommitUncommited() throws Exception {
+		for(boolean multibyte : new boolean[]{false, true}){
+			final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
+
+			final int maxMessageSize = 32;
+			final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+			factory.setLayoutPattern("%m");
+			factory.setMultibyte(multibyte);
+			final StringBuffer buffer = new StringBuffer();
+			factory.setOutputStream(buffer);
+			factory.setLogLevel(LogLevel.INFO);
+			final LoggerService loggerService = createLoggerService(maxMessageSize, factory);
+
+			LogFactory.init("com.db", loggerService);
+
+			logger.info().append("uncommited");
+			logger.info().append("commited").commit();
+
+			LogFactory.stop();
+
+			assertEquals("uncommitedcommited", buffer.toString());
+		}
+	}
+
+	@Test
 	public void testLateInit() throws Exception {
 		final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 		logger.info().append("info").commit();

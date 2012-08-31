@@ -16,6 +16,7 @@ package gflogger.disruptor;
 
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static gflogger.formatter.BufferFormatter.*;
+
 import gflogger.ByteBufferLocalLogEntry;
 import gflogger.CharBufferLocalLogEntry;
 import gflogger.DefaultObjectFormatterFactory;
@@ -28,6 +29,7 @@ import gflogger.ObjectFormatterFactory;
 import gflogger.appender.AppenderFactory;
 import gflogger.disruptor.appender.DAppender;
 import gflogger.helpers.LogLog;
+import gflogger.util.NamedThreadFactory;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -139,7 +141,7 @@ public class DLoggerServiceImpl implements LoggerService {
 			}
 		};
 
-		executorService = Executors.newFixedThreadPool(appenders.length);
+		executorService = initExecutorService(appenders);
 
 		disruptor = new Disruptor<DLogEntryItem>(new EventFactory<DLogEntryItem>() {
 			int i = 0;
@@ -269,6 +271,16 @@ public class DLoggerServiceImpl implements LoggerService {
 		return level;
 	}
 
+	private ExecutorService initExecutorService(final DAppender... appenders){
+		final String[] names = new String[appenders.length];
+		for (int i = 0; i < appenders.length; i++) {
+			names[i] = appenders[i].getName();
+		}
+
+		return Executors.newFixedThreadPool(appenders.length,
+			new NamedThreadFactory("appender", names));
+	}
+
 	private boolean multibyte(final DAppender... appenders) {
 		boolean multibyte = appenders[0].isMultibyte();
 		for (int i = 1; i < appenders.length; i++) {
@@ -288,7 +300,8 @@ public class DLoggerServiceImpl implements LoggerService {
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
 		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message was not properly commited.");
+			LogLog.error("ERROR! log message '" + entry.stringValue()
+					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
 			entry.commit();
 		}
 

@@ -24,4 +24,6 @@ public interface Appender {
 	boolean isMultibyte();
 
 	LogLevel getLogLevel();
+
+	String getName();
 }

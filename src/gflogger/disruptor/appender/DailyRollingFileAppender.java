@@ -480,4 +480,9 @@ public class DailyRollingFileAppender extends FileAppender {
 			return getTime();
 		}
 	}
+
+	@Override
+	public String getName() {
+		return "rollFile";
+	}
 }

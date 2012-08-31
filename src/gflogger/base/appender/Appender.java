@@ -23,5 +23,4 @@ public interface Appender<T extends LogEntryItem> extends gflogger.Appender, Ent
 
 	void stop();
 
-	String getName();
 }

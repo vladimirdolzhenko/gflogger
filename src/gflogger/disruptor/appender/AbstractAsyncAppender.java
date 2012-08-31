@@ -196,9 +196,6 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		}
 	}
 
-
-	protected abstract String getName();
-
 	@Override
 	public void onStart() {
 		LogLog.debug("[" + Thread.currentThread().getName() + "] " +

@@ -89,7 +89,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	protected String getName() {
+	public String getName() {
 		return "console";
 	}
 }

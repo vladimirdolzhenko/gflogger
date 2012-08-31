@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * NamedThreadFactory
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class NamedThreadFactory implements ThreadFactory {
 	private static final AtomicInteger poolNumber = new AtomicInteger(1);
-	
+
 	private final ThreadGroup group;
 	private final AtomicInteger threadNumber = new AtomicInteger(0);
 	private final String namePrefix;
@@ -28,9 +28,7 @@ public class NamedThreadFactory implements ThreadFactory {
 		final int idx = this.threadNumber.getAndIncrement();
 		final String threadName = this.namePrefix + (idx < names.length ? names[idx] + "-" : "") + idx;
 		final Thread t = new Thread(this.group, r, threadName, 0);
-		if (t.isDaemon()) {
-			t.setDaemon(false);
-		}
+		t.setDaemon(true);
 		if (t.getPriority() != Thread.NORM_PRIORITY) {
 			t.setPriority(Thread.NORM_PRIORITY);
 		}
