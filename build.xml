@@ -2,12 +2,18 @@
 <project name="gflogger" default="jar">
 
 	<property name="build.dir" value="build" />
+	<property name="manifest.author" value="Vladimir Dolzhenko" />
+	<property name="manifest.title" value="Garbage Free Logger" />
+	<property name="manifest.repository.url" value="https://bitbucket.org/vladimir.dolzhenko/gflogger/" />
 	<path id="jars">
 		<fileset dir="libs" includes="**/*.jar" />
 	</path>
 
 	<target name="clear">
 		<delete dir="${build.dir}" />
+		<delete>
+			<fileset dir="libs" includes="gflogger**"/>
+		</delete>
 	</target>
 
 	<target name="compile">
@@ -29,28 +35,54 @@
 
 		<copy todir="${build.dir}">
 			<fileset dir="perftest" includes="**/*.xml" />
+			<fileset dir="src" includes="**/*.xsd" />
 		</copy>
 	</target>
 
 	<target name="jar" depends="clear, compile">
-		<jar destfile="libs/gflogger.jar">
+		<tstamp>
+			<format property="build.time" timezone="GMT" locale="en,UK" pattern="yyyy-MM-dd HH:mm:ss,SSS z"/>
+		</tstamp>
+
+		<jar destfile="libs/gflogger-${build.version}.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Built-At" value="${build.time}"/>
 				
-				<attribute name="Author" value="Vladimir Dolzhenko"/>
-				<attribute name="Implementation-Title" value="Garbage Free Logger"/>
+				<attribute name="Author" value="${manifest.author}"/>
+				<attribute name="Implementation-Vendor" value="${manifest.author}"/>
+				<attribute name="Implementation-Title" value="${manifest.title}"/>
 				<attribute name="Implementation-Version" value="${build.version}"/>
+				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
 			</manifest>	
 			<fileset dir="${build.dir}">
 				<include name="gflogger/**/*.class" />
+				<include name="gflogger/**/*.xsd" />
 			</fileset>
 		</jar>
+		<copy file="libs/gflogger-${build.version}.jar" tofile="libs/gflogger.jar"/>
 		<zip destfile="libs/gflogger-src.zip">
 			<fileset dir="src">
 				<include name="**/*.java" />
 				<include name="**/*.xml" />
 			</fileset>
 		</zip>
+		<jar destfile="libs/gflogger-${build.version}-sources.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Built-At" value="${build.time}"/>
+				
+				<attribute name="Author" value="${manifest.author}"/>
+				<attribute name="Implementation-Vendor" value="${manifest.author}"/>
+				<attribute name="Implementation-Title" value="${manifest.title}"/>
+				<attribute name="Implementation-Version" value="${build.version}"/>
+				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
+			</manifest>	
+			<fileset dir="src">
+				<include name="**/*.java" />
+				<include name="**/*.xml" />
+			</fileset>
+		</jar>
 		<jar destfile="libs/gflogger-perftests.jar">
 			<fileset dir="${build.dir}">
 				<include name="perftest/**/*.class" />
