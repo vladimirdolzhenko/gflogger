@@ -23,26 +23,30 @@ import gflogger.appender.AppenderFactory;
 import gflogger.helpers.LogLog;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TimeZone;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.reflect.MethodUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
-
 /**
  *
  * @author Harald Wendel
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class Configuration extends DefaultHandler {
 
 	private final Stack<Object> stack = new Stack<Object>();
+
+	private final Set<String> disabledAppenderFactories = new HashSet<String>();
 
 	private final Map<String, AppenderFactory> appenderFactories = new HashMap<String, AppenderFactory>();
 
@@ -59,22 +63,78 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private String getAttribute(Attributes attributes, String name) {
-		return StrSubstitutor.replaceSystemProperties(attributes.getValue(name));
+		String value = attributes.getValue(name);
+		if (value != null){
+			final int s = value.indexOf("${");
+			final int e = s >= 0 ? value.indexOf("}") : -1;
+			if (s >= 0 && e > s){
+				final String sysPropName = value.substring(s + 2, e);
+				final String sysPropertyValue = System.getProperty(sysPropName);
+				if (s == 0 && e == value.length() - 1 && sysPropertyValue == null){
+					value = null;
+				} else if (sysPropertyValue != null){
+					value =
+						value.substring(0, s) +
+						sysPropertyValue +
+						(e + 1 < value.length() ? value.substring(e + 1) : "" );
+				}
+			}
+		}
+		return value;
 	}
 
 	private void setProperty(Object bean, String property, Object value) throws Exception {
-		MethodUtils.invokeMethod(bean, "set" + StringUtils.capitalize(property), value);
+		final String setterMethodName = "set" +
+			Character.toTitleCase(property.charAt(0)) + property.substring(1);
+		final Class<? extends Object> clazz = bean.getClass();
+		final Method[] methods = clazz.getMethods();
+
+		final Class<? extends Object> valueClass = value.getClass();
+		Method targetMethod = null;
+		for (final Method method : methods) {
+			if (setterMethodName.equals(method.getName()) &&
+				method.getParameterTypes().length == 1){
+				Class paramClass = method.getParameterTypes()[0];
+
+				if (paramClass.isPrimitive()){
+					// there is no reason to register all mapping
+					if (boolean.class.equals(paramClass) && (Boolean.class.equals(valueClass)))
+						paramClass = valueClass;
+
+					if (int.class.equals(paramClass) && (Integer.class.equals(valueClass)))
+						paramClass = valueClass;
+
+					if (long.class.equals(paramClass) && (Long.class.equals(valueClass)))
+						paramClass = valueClass;
+				}
+
+				if (paramClass.equals(valueClass) ||
+						paramClass.isAssignableFrom(valueClass)){
+					targetMethod = method;
+					break;
+				}
+			}
+		}
+		if (targetMethod == null){
+			throw new IllegalArgumentException("there is no proper setter for property "
+				+ property + " at " + clazz.getName());
+		}
+		targetMethod.invoke(bean, value);
 	}
 
 	private void startAppenderFactory(Attributes attributes) throws Exception {
-
+		final String enabled = getAttribute(attributes, "enabled");
 		final String name = getAttribute(attributes, "name");
 		final String clazz = getAttribute(attributes, "class");
+		final String bufferSize = getAttribute(attributes, "bufferSize");
 		final String datePattern = getAttribute(attributes, "datePattern");
 		final String append = getAttribute(attributes, "append");
+		final String multibyte = getAttribute(attributes, "multibyte");
 		final String immediateFlush = getAttribute(attributes, "immediateFlush");
 		final String logLevel = getAttribute(attributes, "logLevel");
 		final String fileName = getAttribute(attributes, "fileName");
+		final String timeZone = getAttribute(attributes, "timeZone");
+		final String locale = getAttribute(attributes, "locale");
 
 		final AppenderFactory appenderFactory = (AppenderFactory)Class.forName(clazz).newInstance();
 
@@ -84,14 +144,30 @@ public class Configuration extends DefaultHandler {
 		if (append != null) {
 			setProperty(appenderFactory, "append", Boolean.parseBoolean(append));
 		}
+		if (bufferSize != null) {
+			setProperty(appenderFactory, "bufferSize", Integer.parseInt(bufferSize));
+		}
+		if (multibyte != null) {
+			setProperty(appenderFactory, "multibyte", Boolean.parseBoolean(multibyte));
+		}
 		if (immediateFlush != null) {
 			setProperty(appenderFactory, "immediateFlush", Boolean.parseBoolean(immediateFlush));
 		}
 		if (logLevel != null) {
 			setProperty(appenderFactory, "logLevel", LogLevel.valueOf(logLevel));
 		}
+		if (timeZone != null) {
+			setProperty(appenderFactory, "timeZone", TimeZone.getTimeZone(timeZone) );
+		}
+		if (locale != null) {
+			setProperty(appenderFactory, "locale", new Locale(locale) );
+		}
 		if (fileName != null) {
 			setProperty(appenderFactory, "fileName", fileName);
+		}
+
+		if (!Boolean.parseBoolean(enabled)){
+			disabledAppenderFactories.add(name);
 		}
 
 		stack.push(appenderFactory);
@@ -141,6 +217,10 @@ public class Configuration extends DefaultHandler {
 
 	private void startAppenderRef(Attributes attributes) {
 		final String name = getAttribute(attributes, "name");
+		if (disabledAppenderFactories.contains(name)){
+			debug("AppenderFactory '" + name + "' is disabled.");
+			return;
+		}
 		final AppenderFactory appenderFactory = appenderFactories.get(name);
 		if (appenderFactory == null) {
 			debug("No AppenderFactory '" + name + "' found");

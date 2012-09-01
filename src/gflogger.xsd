@@ -20,12 +20,17 @@
 		<xs:sequence>
 			<xs:element name="layout" type="layoutType" minOccurs="0" maxOccurs="1"/>
 		</xs:sequence>
+		<xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="class" type="xs:string" use="required"/>
+		<xs:attribute name="bufferSize" type="xs:int" use="optional"/>
 		<xs:attribute name="logLevel" type="log-level" use="required"/>
 		<xs:attribute name="append" type="xs:boolean" use="optional"/>
+		<xs:attribute name="multibyte" type="xs:boolean" use="optional" default="false"/>
 		<xs:attribute name="immediateFlush" type="xs:boolean" use="optional"/>
 		<xs:attribute name="datePattern" type="xs:string" use="optional"/>
+		<xs:attribute name="timeZone" type="xs:string" use="optional"/>
+		<xs:attribute name="locale" type="xs:string" use="optional"/>
 		<xs:attribute name="fileName" type="xs:string" use="optional"/>
 	</xs:complexType>
 

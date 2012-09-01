@@ -24,11 +24,12 @@ import javax.xml.parsers.SAXParserFactory;
 /**
  *
  * @author Harald Wendel
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public final class XmlLogFactoryConfigurer {
 
 	public static void configure(InputStream in) throws Exception {
-		new XmlLogFactoryConfigurer(in).init();
+		new XmlLogFactoryConfigurer(in);
 	}
 
 	public static void configure(final String xmlFileName) throws Exception {
@@ -39,28 +40,25 @@ public final class XmlLogFactoryConfigurer {
 		configure(System.getProperty("gflogger.configuration", "/gflogger.xml"));
 	}
 
-	private final Configuration configuration = new Configuration();
+	private XmlLogFactoryConfigurer(final InputStream in) throws Exception {
+		try {
+			final SAXParserFactory factory = SAXParserFactory.newInstance();
 
-	private final InputStream in;
+			factory.setNamespaceAware(true);
+			factory.setValidating(true);
 
-	private XmlLogFactoryConfigurer(InputStream in) {
-		this.in = in;
-	}
+			final SAXParser saxParser = factory.newSAXParser();
+			saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+	                "http://www.w3.org/2001/XMLSchema");
+			saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
+				getClass().getResourceAsStream("/gflogger.xsd"));
 
-	public void init() throws Exception {
-		final SAXParserFactory factory = SAXParserFactory.newInstance();
+			final Configuration configuration = new Configuration();
+			saxParser.parse(in, configuration);
 
-		factory.setNamespaceAware(true);
-		factory.setValidating(true);
-
-		final SAXParser saxParser = factory.newSAXParser();
-		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
-                "http://www.w3.org/2001/XMLSchema");
-		saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
-			getClass().getResourceAsStream("/gflogger.xsd"));
-
-		saxParser.parse(in, configuration);
-
-		LogFactory.init(configuration.getLoggerViews());
+			LogFactory.init(configuration.getLoggerViews());
+		} finally {
+			in.close();
+		}
 	}
 }
