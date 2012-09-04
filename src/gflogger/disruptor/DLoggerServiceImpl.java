@@ -37,7 +37,6 @@ import java.nio.CharBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 
@@ -151,87 +150,81 @@ public class DLoggerServiceImpl implements LoggerService {
 				buffer.position(i * bufferSize);
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
-				// System.out.println("item at " + i + " has capacity " + subBuffer.capacity());
 				return new DLogEntryItem(subBuffer, multibyte);
 			}
 		},
 		executorService,
 		new MultiThreadedClaimStrategy(c),
 		new WaitStrategy() {
-			private static final int SPIN_TRIES = 100;
+			private final Object lock = new Object();
+		    private volatile int numWaiters = 0;
+		    private boolean signalled;
 
-			@Override
-			public long waitFor(final long sequence,
-					final Sequence cursor, final Sequence[] dependents,
-					final SequenceBarrier barrier)
-					throws AlertException, InterruptedException {
-				long availableSequence;
-				int counter = SPIN_TRIES;
+		    @Override
+		    public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier)
+		        throws AlertException, InterruptedException {
+		        long availableSequence;
+		        if ((availableSequence = cursor.get()) < sequence) {
+		        	flush();
+		            synchronized (lock) {
+		                ++numWaiters;
+		                while ((availableSequence = cursor.get()) < sequence) {
+		                    barrier.checkAlert();
+		                    lock.wait();
+		                }
+		                --numWaiters;
+		            }
+		        }
 
-				if (0 == dependents.length) {
-					while ((availableSequence = cursor.get()) < sequence) {
-						counter = applyWaitMethod(barrier, counter);
-					}
-				} else {
-					while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-						counter = applyWaitMethod(barrier, counter);
-					}
-				}
+		        if (0 != dependents.length) {
+		            while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
+		                barrier.checkAlert();
+		            }
+		        }
 
-				return availableSequence;
-			}
+		        return availableSequence;
+		    }
 
-			@Override
-			public long waitFor(final long sequence,
-					final Sequence cursor, final Sequence[] dependents,
-					final SequenceBarrier barrier, final long timeout,
-					final TimeUnit sourceUnit) throws AlertException,
-					InterruptedException {
-				final long timeoutMs = sourceUnit.toMillis(timeout);
-				final long startTime = System.currentTimeMillis();
-				long availableSequence;
-				int counter = SPIN_TRIES;
-
-				if (0 == dependents.length) {
-					while ((availableSequence = cursor.get()) < sequence) {
-						counter = applyWaitMethod(barrier, counter);
-
-						final long elapsedTime = System.currentTimeMillis() - startTime;
-						if (elapsedTime > timeoutMs) {
-							break;
-						}
-					}
-				} else {
-					while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-						counter = applyWaitMethod(barrier, counter);
-
-						final long elapsedTime = System.currentTimeMillis() - startTime;
-						if (elapsedTime > timeoutMs) {
-							break;
-						}
-					}
-				}
-
-				return availableSequence;
-			}
-
-			@Override
-			public void signalAllWhenBlocking() {
-				// nothing
-			}
-
-			private int applyWaitMethod(final SequenceBarrier barrier, int counter)
-			throws AlertException {
-				barrier.checkAlert();
-
-				if (0 == counter) {
+		    @Override
+		    public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier,
+		                        final long timeout, final TimeUnit sourceUnit)
+		        throws AlertException, InterruptedException {
+		        long availableSequence;
+		        if ((availableSequence = cursor.get()) < sequence) {
+		        	final long timeoutMs = sourceUnit.toMillis(timeout);
+					final long startTime = System.currentTimeMillis() ;
 					flush();
-				} else {
-					--counter;
-				}
+		            synchronized (lock) {
+		                ++numWaiters;
+		                while ((availableSequence = cursor.get()) < sequence) {
+		                    barrier.checkAlert();
 
-				return counter;
-			}
+		                    lock.wait(timeoutMs);
+
+							if (!signalled || (System.currentTimeMillis() - startTime) > timeoutMs) break;
+		                }
+		                --numWaiters;
+		            }
+		        }
+
+		        if (0 != dependents.length) {
+		            while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
+		                barrier.checkAlert();
+		            }
+		        }
+
+		        return availableSequence;
+		    }
+
+		    @Override
+		    public void signalAllWhenBlocking() {
+		        if (0 != numWaiters) {
+		            synchronized (lock) {
+		            	signalled = true;
+						lock.notifyAll();
+					}
+		        }
+		    }
 		});
 
 		disruptor.handleExceptionsWith(new ExceptionHandler() {
