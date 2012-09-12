@@ -2,7 +2,7 @@ package perftest;
 
 import gflogger.LogFactory;
 import gflogger.Logger;
-import gflogger.config.xml.XmlLogFactoryConfigurer;
+import gflogger.config.xml.XmlLogFactoryConfigurator;
 
 
 /**
@@ -13,7 +13,7 @@ import gflogger.config.xml.XmlLogFactoryConfigurer;
 public class XmlConfigurationTest {
 
 	public static void main(String[] args) throws Exception {
-		XmlLogFactoryConfigurer.configure();
+		XmlLogFactoryConfigurator.configure();
 
 	    final Logger logger = LogFactory.getLog("com.db.fxpricing.Logger");
 

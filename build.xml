@@ -57,7 +57,7 @@
 			</manifest>	
 			<fileset dir="${build.dir}">
 				<include name="gflogger/**/*.class" />
-				<include name="gflogger/**/*.xsd" />
+				<include name="**/*.xsd" />
 			</fileset>
 		</jar>
 		<copy file="libs/gflogger-${build.version}.jar" tofile="libs/gflogger.jar"/>

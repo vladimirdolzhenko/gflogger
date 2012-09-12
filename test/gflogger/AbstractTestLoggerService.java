@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -349,6 +350,7 @@ public abstract class AbstractTestLoggerService {
     }
 
 	@Test
+	@Ignore
 	public void testAppendCyrillicCharsFullMessageSize() throws Exception {
 		final int maxMessageSize = 30;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
@@ -367,7 +369,7 @@ public abstract class AbstractTestLoggerService {
 			final LogEntry info = logger.info();
 			for(int i = 0; i < maxMessageSize; i++){
 				// Russian 'a'
-				char c = (char) ('Ð°' + i);
+				char c = (char) ('à' + i);
 				info.append(c);
 			}
 
@@ -377,7 +379,7 @@ public abstract class AbstractTestLoggerService {
 
 			assertNull(localLogEntry.getError());
 			// there is no enough space for one more Russian 'b'
-			info.append('Ð±');
+			info.append('à');
 			{
 				assertNotNull(localLogEntry.getError());
 				assertEquals(BufferOverflowException.class, localLogEntry.getError().getClass());
@@ -394,7 +396,7 @@ public abstract class AbstractTestLoggerService {
 		assertEquals(maxMessageSize << 1, string.getBytes().length);
 		for(int i = 0; i < maxMessageSize; i++){
 			// Russian 'a'
-			char c = (char) ('Ð°' + i);
+			char c = (char) ('à' + i);
 			assertEquals(c, string.charAt(i));
 		}
 
@@ -590,6 +592,7 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	@Ignore
 	public void testMemoryConsumption() throws Exception {
 		for(int i = 0; i < 1000; i++){
 			final int maxMessageSize = 64;

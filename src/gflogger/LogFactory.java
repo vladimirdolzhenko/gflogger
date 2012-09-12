@@ -36,6 +36,9 @@ public final class LogFactory {
 		services = new HashMap<String, LoggerService>();
 		namedLogger = new HashMap<String, LoggerView>();
 		classedLogger = new HashMap<Class, LoggerView>();
+
+		final String implementationVersion = LogFactory.class.getPackage().getImplementationVersion();
+		System.out.println("GFLogger version " + implementationVersion);
 	}
 
 	private Logger get(final String name){
