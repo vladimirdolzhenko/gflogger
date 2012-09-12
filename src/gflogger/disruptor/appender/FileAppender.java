@@ -125,7 +125,7 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	@Override
 	public String getName() {
-		return "file";
+		return "file:" + fileName;
 	}
 
 	protected void createFileChannel() throws FileNotFoundException {

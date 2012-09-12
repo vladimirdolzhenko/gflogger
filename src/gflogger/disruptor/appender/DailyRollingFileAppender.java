@@ -483,6 +483,6 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	@Override
 	public String getName() {
-		return "rollFile";
+		return "rollFile:" + fileName;
 	}
 }
