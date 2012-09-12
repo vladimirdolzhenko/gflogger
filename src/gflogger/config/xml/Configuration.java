@@ -25,10 +25,8 @@ import gflogger.helpers.LogLog;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
 
@@ -46,8 +44,6 @@ public class Configuration extends DefaultHandler {
 
 	private final Stack<Object> stack = new Stack<Object>();
 
-	private final Set<String> disabledAppenderFactories = new HashSet<String>();
-
 	private final Map<String, AppenderFactory> appenderFactories = new HashMap<String, AppenderFactory>();
 
 	private final Map<String, LoggerService> loggerServices = new HashMap<String, LoggerService>();
@@ -64,7 +60,8 @@ public class Configuration extends DefaultHandler {
 
 	private String getAttribute(Attributes attributes, String name) {
 		String value = attributes.getValue(name);
-		if (value != null){
+		if (value == null) return value;
+		for(;;){
 			final int s = value.indexOf("${");
 			final int e = s >= 0 ? value.indexOf("}") : -1;
 			if (s >= 0 && e > s){
@@ -78,6 +75,8 @@ public class Configuration extends DefaultHandler {
 						sysPropertyValue +
 						(e + 1 < value.length() ? value.substring(e + 1) : "" );
 				}
+			} else {
+				break;
 			}
 		}
 		return value;
@@ -165,9 +164,8 @@ public class Configuration extends DefaultHandler {
 		if (fileName != null) {
 			setProperty(appenderFactory, "fileName", fileName);
 		}
-
-		if (!Boolean.parseBoolean(enabled)){
-			disabledAppenderFactories.add(name);
+		if (enabled != null) {
+			setProperty(enabled, "enabled", Boolean.parseBoolean(enabled));
 		}
 
 		stack.push(appenderFactory);
@@ -217,10 +215,6 @@ public class Configuration extends DefaultHandler {
 
 	private void startAppenderRef(Attributes attributes) {
 		final String name = getAttribute(attributes, "name");
-		if (disabledAppenderFactories.contains(name)){
-			debug("AppenderFactory '" + name + "' is disabled.");
-			return;
-		}
 		final AppenderFactory appenderFactory = appenderFactories.get(name);
 		if (appenderFactory == null) {
 			debug("No AppenderFactory '" + name + "' found");

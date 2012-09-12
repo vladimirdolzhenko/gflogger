@@ -26,32 +26,39 @@ import javax.xml.parsers.SAXParserFactory;
  * @author Harald Wendel
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class XmlLogFactoryConfigurer {
+public final class XmlLogFactoryConfigurator {
 
 	public static void configure(InputStream in) throws Exception {
-		new XmlLogFactoryConfigurer(in);
+		new XmlLogFactoryConfigurator(in);
 	}
 
 	public static void configure(final String xmlFileName) throws Exception {
-		configure(XmlLogFactoryConfigurer.class.getResourceAsStream(xmlFileName));
+		configure(XmlLogFactoryConfigurator.class.getResourceAsStream(xmlFileName));
 	}
 
 	public static void configure() throws Exception {
 		configure(System.getProperty("gflogger.configuration", "/gflogger.xml"));
 	}
 
-	private XmlLogFactoryConfigurer(final InputStream in) throws Exception {
+	private XmlLogFactoryConfigurator(final InputStream in) throws Exception {
 		try {
 			final SAXParserFactory factory = SAXParserFactory.newInstance();
+			final SAXParser saxParser;
 
-			factory.setNamespaceAware(true);
-			factory.setValidating(true);
+			final InputStream is = getClass().getResourceAsStream("/gflogger.xsd");
 
-			final SAXParser saxParser = factory.newSAXParser();
-			saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
-	                "http://www.w3.org/2001/XMLSchema");
-			saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
-				getClass().getResourceAsStream("/gflogger.xsd"));
+			if (is != null){
+				factory.setNamespaceAware(true);
+				factory.setValidating(true);
+
+				saxParser = factory.newSAXParser();
+				saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage",
+					"http://www.w3.org/2001/XMLSchema");
+				saxParser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource",
+					is);
+			} else {
+				saxParser = factory.newSAXParser();
+			}
 
 			final Configuration configuration = new Configuration();
 			saxParser.parse(in, configuration);
