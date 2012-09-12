@@ -41,6 +41,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	protected boolean immediateFlush = false;
 	protected int bufferedIOThreshold = 100;
 	protected long awaitTimeout = 10L;
+	protected boolean enabled;
 
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 
@@ -103,6 +104,10 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		this.awaitTimeout = awaitTimeout;
 	}
 
+	public void setEnabled(boolean enabled) {
+	    this.enabled = enabled;
+    }
+
 	@Override
 	public long getSequence() {
 		return cursor.get();
@@ -126,7 +131,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 			while ((maxIndex > idx.get()) || ((maxIndex = ringBuffer.getCursor()) > idx.get())){
 				final LogEntryItemImpl entry = ringBuffer.get(idx.get() + 1);
 				// handle entry that has a log level equals or higher than required
-				final boolean hasProperLevel =
+				final boolean hasProperLevel = enabled &&
 					logLevel.compareTo(entry.getLogLevel()) <= 0;
 
 				try {

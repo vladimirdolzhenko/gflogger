@@ -40,6 +40,7 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			return appender;
 		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
@@ -51,6 +52,7 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			return appender;
 		}

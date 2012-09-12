@@ -45,6 +45,7 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
@@ -61,6 +62,7 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);

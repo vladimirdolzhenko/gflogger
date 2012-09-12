@@ -45,6 +45,7 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	protected boolean immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
 	protected int bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
 	protected long awaitTimeout = getIntProperty("gflogger.awaitTimeout", 10);
+	protected boolean enabled = true;
 
 	protected void preinit(Class<? extends LoggerService> loggerServiceClass) {
 		if (layout == null){
@@ -142,5 +143,13 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	public void setAwaitTimeout(long awaitTimeout) {
 		this.awaitTimeout = awaitTimeout;
 	}
+
+	public boolean isEnabled() {
+    	return enabled;
+    }
+
+	public void setEnabled(boolean enabled) {
+    	this.enabled = enabled;
+    }
 
 }

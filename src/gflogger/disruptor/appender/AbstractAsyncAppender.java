@@ -40,6 +40,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	protected int bufferedIOThreshold = 50;
 	protected long awaitTimeout = 100;
 	protected boolean multibyte;
+	protected boolean enabled;
 
 	public AbstractAsyncAppender() {
 		// 4M
@@ -88,9 +89,14 @@ public abstract class AbstractAsyncAppender implements DAppender {
 		this.awaitTimeout = awaitTimeout;
 	}
 
+	public void setEnabled(boolean enabled) {
+	    this.enabled = enabled;
+    }
+
 	@Override
 	public void onEvent(DLogEntryItem event, long sequence, boolean endOfBatch)
 			throws Exception {
+		if (!enabled) return;
 		// handle entry that has a log level equals or higher than required
 
 		final LogLevel entryLevel = event.getLogLevel();

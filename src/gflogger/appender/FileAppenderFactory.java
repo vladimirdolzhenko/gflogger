@@ -43,6 +43,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
@@ -57,6 +58,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 			appender.setImmediateFlush(immediateFlush);
 			appender.setBufferedIOThreshold(bufferedIOThreshold);
 			appender.setAwaitTimeout(awaitTimeout);
+			appender.setEnabled(enabled);
 
 			appender.setFileName(fileName);
 			appender.setCodepage(codepage);
