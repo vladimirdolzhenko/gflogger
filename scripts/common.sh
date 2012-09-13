@@ -10,6 +10,10 @@ run(){
 	
 	echo ${NAME} number of threads: "${THREADS}" messages: ${MESSAGES}
 	
+	JAVA_ASSEMBLY=""
+	
+	#JAVA_ASSEMBLY="-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly"
+	
 	JAVA_OPTS="
 	${JAVA_EXTRA_OPTS}
 	-Xss2m
@@ -17,6 +21,8 @@ run(){
 	-Xmx512m
 
 	-XX:CompileThreshold=5000
+	
+	${JAVA_ASSEMBLY}
 	
 	-XX:-UseBiasedLocking
 

@@ -56,8 +56,8 @@
 				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
 			</manifest>	
 			<fileset dir="${build.dir}">
-				<include name="gflogger/**/*.class" />
-				<include name="gflogger/**/*.xsd" />
+				<include name="org/gflogger/**/*.class" />
+				<include name="**/*.xsd" />
 			</fileset>
 		</jar>
 		<copy file="libs/gflogger-${build.version}.jar" tofile="libs/gflogger.jar"/>
@@ -85,7 +85,7 @@
 		</jar>
 		<jar destfile="libs/gflogger-perftests.jar">
 			<fileset dir="${build.dir}">
-				<include name="perftest/**/*.class" />
+				<include name="org/gflogger/perftest/**/*.class" />
 				<include name="**/*.xml" />
 			</fileset>
 		</jar>
