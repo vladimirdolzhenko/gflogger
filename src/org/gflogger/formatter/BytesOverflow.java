@@ -11,44 +11,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.gflogger;
-
-import java.nio.Buffer;
+package org.gflogger.formatter;
 
 /**
- * LocalLogEntry
+ * BytesOverflow
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface LocalLogEntry extends LogEntry, FormattedLogEntry {
+public class BytesOverflow extends RuntimeException {
 
-	LogLevel getLogLevel();
+	private static final long	serialVersionUID	= 1L;
 
-	void setLogLevel(final LogLevel logLevel);
+	public static final BytesOverflow BYTES_OVERFLOW = new BytesOverflow();
 
-	void setCategoryName(String categoryName);
+	private BytesOverflow() {
+	}
 
-	void setPattern(final String pattern);
-
-	void setAppenderMask(final long mask);
-
-	String getCategoryName();
-
-	String getThreadName();
-
-	long getAppenderMask();
-
-	<T extends Buffer> void copyTo(T buffer);
-
-	void clear();
-
-	boolean isCommited();
-
-	void setCommited(boolean commited);
-
-	Throwable getError();
-
-	String stringValue();
-
+	@Override
+	public Throwable fillInStackTrace() {
+		return this;
+	}
 }

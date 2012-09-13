@@ -14,31 +14,16 @@
 
 package org.gflogger.base;
 
-import static org.gflogger.formatter.BufferFormatter.*;
+import static org.gflogger.formatter.BufferFormatter.allocate;
+import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
-
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.ByteBufferLocalLogEntry;
-import org.gflogger.CharBufferLocalLogEntry;
-import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.FormattedLogEntry;
-import org.gflogger.GFLogger;
-import org.gflogger.LocalLogEntry;
-import org.gflogger.LogEntry;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
-import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.base.appender.Appender;
 import org.gflogger.helpers.LogLog;
@@ -248,8 +233,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.setAppenderMask(appenderMask);
-		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
-		b.clear();
+		entry.clear();
 		return entry;
 	}
 
@@ -267,24 +251,17 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.setAppenderMask(appenderMask);
-		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
-		b.clear();
+		entry.clear();
 		entry.setPattern(pattern);
 		return entry;
 	}
 
 	@Override
 	public void entryFlushed(final LocalLogEntry localEntry){
-		final ByteBuffer localByteBuffer = multibyte ? null : localEntry.getByteBuffer();
-		final CharBuffer localCharBuffer = multibyte ? localEntry.getCharBuffer() : null;
-
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
 
 		try {
-			final ByteBuffer byteBuffer = multibyte ? null : entry.getBuffer();
-			final CharBuffer charBuffer = multibyte ? entry.getCharBuffer() : null;
-
 			entry.setCategoryName(localEntry.getCategoryName());
 			entry.setLogLevel(localEntry.getLogLevel());
 			entry.setThreadName(localEntry.getThreadName());
@@ -293,11 +270,9 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 			entry.setAppenderMask(localEntry.getAppenderMask());
 
 			if (multibyte) {
-				charBuffer.clear();
-				charBuffer.put(localCharBuffer);
+				localEntry.copyTo(entry.getCharBuffer());
 			} else {
-				byteBuffer.clear();
-				byteBuffer.put(localByteBuffer);
+				localEntry.copyTo(entry.getBuffer());
 			}
 		} finally {
 			ringBuffer.publish(next);

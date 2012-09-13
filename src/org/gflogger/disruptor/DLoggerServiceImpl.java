@@ -14,46 +14,23 @@
 
 package org.gflogger.disruptor;
 
+import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
-import static com.lmax.disruptor.util.Util.getMinimumSequence;
 
-
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.ByteBufferLocalLogEntry;
-import org.gflogger.CharBufferLocalLogEntry;
-import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.FormattedLogEntry;
-import org.gflogger.GFLogger;
-import org.gflogger.LocalLogEntry;
-import org.gflogger.LogEntry;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
-import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.appender.DAppender;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.util.NamedThreadFactory;
 
-import com.lmax.disruptor.AlertException;
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.ExceptionHandler;
-import com.lmax.disruptor.MultiThreadedClaimStrategy;
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.Sequence;
-import com.lmax.disruptor.SequenceBarrier;
-import com.lmax.disruptor.WaitStrategy;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 
 /**
@@ -157,10 +134,17 @@ public class DLoggerServiceImpl implements LoggerService {
 						bufferSize,
 						formatterFactory,
 						DLoggerServiceImpl.this) :
+					/*/
 					new ByteBufferLocalLogEntry(Thread.currentThread(),
 						bufferSize,
 						formatterFactory,
 						DLoggerServiceImpl.this);
+					/*/
+					new ByteLocalLogEntry(Thread.currentThread(),
+						bufferSize,
+						formatterFactory,
+						DLoggerServiceImpl.this);
+					//*/
 				return logEntry;
 			}
 		};
@@ -279,8 +263,7 @@ public class DLoggerServiceImpl implements LoggerService {
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.setAppenderMask(appenderMask);
-		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
-		b.clear();
+		entry.clear();
 		return entry;
 	}
 
@@ -300,17 +283,13 @@ public class DLoggerServiceImpl implements LoggerService {
 		entry.setLogLevel(level);
 		entry.setCategoryName(categoryName);
 		entry.setAppenderMask(appenderMask);
-		final Buffer b = multibyte ? entry.getCharBuffer() : entry.getByteBuffer();
-		b.clear();
+		entry.clear();
 		entry.setPattern(pattern);
 		return entry;
 	}
 
 	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
-		final ByteBuffer localByteBuffer = multibyte ? null : localEntry.getByteBuffer();
-		final CharBuffer localCharBuffer = multibyte ? localEntry.getCharBuffer() : null;
-
 		final String categoryName = localEntry.getCategoryName();
 		final LogLevel logLevel = localEntry.getLogLevel();
 		final String threadName = localEntry.getThreadName();
@@ -319,9 +298,6 @@ public class DLoggerServiceImpl implements LoggerService {
 		long sequence = ringBuffer.next();
 		final DLogEntryItem entry = ringBuffer.get(sequence);
 		try {
-			final ByteBuffer byteBuffer = multibyte ? null : entry.getBuffer();
-			final CharBuffer charBuffer = multibyte ? entry.getCharBuffer() : null;
-
 			entry.setCategoryName(categoryName);
 			entry.setLogLevel(logLevel);
 			entry.setThreadName(threadName);
@@ -330,11 +306,9 @@ public class DLoggerServiceImpl implements LoggerService {
 			entry.setAppenderMask(localEntry.getAppenderMask());
 
 			if (multibyte) {
-				charBuffer.clear();
-				charBuffer.put(localCharBuffer);
+				localEntry.copyTo(entry.getCharBuffer());
 			} else {
-				byteBuffer.clear();
-				byteBuffer.put(localByteBuffer);
+				localEntry.copyTo(entry.getBuffer());
 			}
 		} finally {
 			ringBuffer.publish(sequence);

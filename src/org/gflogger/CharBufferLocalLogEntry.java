@@ -14,7 +14,7 @@
 
 package org.gflogger;
 
-import static org.gflogger.formatter.BufferFormatter.*;
+import static org.gflogger.formatter.BufferFormatter.allocate;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -49,13 +49,14 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public ByteBuffer getByteBuffer() {
-		throw new UnsupportedOperationException();
+	public void clear() {
+		buffer.clear();
 	}
 
 	@Override
-	public CharBuffer getCharBuffer() {
-		return buffer;
+	public <T extends java.nio.Buffer> void copyTo(T buffer) {
+		buffer.clear();
+		((CharBuffer)buffer).put(this.buffer);
 	}
 
 	@Override
