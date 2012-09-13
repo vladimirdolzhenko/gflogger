@@ -15,6 +15,7 @@
 package gflogger.base.appender;
 
 import gflogger.Layout;
+import gflogger.PatternLayout;
 import gflogger.base.LogEntryItemImpl;
 import gflogger.helpers.LogLog;
 
@@ -183,7 +184,7 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	SimpleDateFormat sdf;
 
-	RollingCalendar rc = new RollingCalendar();
+	RollingCalendar rc;
 
 	Troubles checkPeriod = Troubles.TOP_OF_TROUBLE;
 
@@ -377,6 +378,14 @@ public class DailyRollingFileAppender extends FileAppender {
 		sdf = new SimpleDateFormat(datePattern);
 		Troubles type = computeCheckPeriod();
 		printPeriodicity(type);
+
+		TimeZone timeZone = null;
+		if (layout instanceof PatternLayout){
+			final PatternLayout patternLayout = (PatternLayout) layout;
+			timeZone = patternLayout.getTimeZone();
+		}
+		rc = new RollingCalendar(timeZone);
+
 		rc.setType(type);
 
 		super.start();
@@ -392,8 +401,8 @@ public class DailyRollingFileAppender extends FileAppender {
 
 		Troubles type = Troubles.TOP_OF_TROUBLE;
 
-		RollingCalendar() {
-			super();
+		RollingCalendar(TimeZone tz) {
+			super(tz);
 		}
 
 		RollingCalendar(TimeZone tz, Locale locale) {
