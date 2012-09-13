@@ -21,6 +21,7 @@ import gflogger.LoggerServiceView;
 import gflogger.ObjectFormatter;
 import gflogger.appender.AppenderFactory;
 import gflogger.helpers.LogLog;
+import gflogger.helpers.OptionConverter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -59,52 +60,54 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private String getAttribute(Attributes attributes, String name) {
-		String value = attributes.getValue(name);
-		if (value == null) return value;
-		for(;;){
-			final int s = value.indexOf("${");
-			final int e = s >= 0 ? value.indexOf("}") : -1;
-			if (s >= 0 && e > s){
-				final String sysPropName = value.substring(s + 2, e);
-				final String sysPropertyValue = System.getProperty(sysPropName);
-				if (s == 0 && e == value.length() - 1 && sysPropertyValue == null){
-					value = null;
-				} else if (sysPropertyValue != null){
-					value =
-						value.substring(0, s) +
-						sysPropertyValue +
-						(e + 1 < value.length() ? value.substring(e + 1) : "" );
-				}
-			} else {
-				break;
-			}
-		}
-		return value;
+		return OptionConverter.substVars(attributes.getValue(name), System.getProperties());
 	}
 
 	private void setProperty(Object bean, String property, Object value) throws Exception {
+		if (value == null) return;
 		final String setterMethodName = "set" +
 			Character.toTitleCase(property.charAt(0)) + property.substring(1);
 		final Class<? extends Object> clazz = bean.getClass();
 		final Method[] methods = clazz.getMethods();
 
-		final Class<? extends Object> valueClass = value.getClass();
+		Class<? extends Object> valueClass = value.getClass();
 		Method targetMethod = null;
+
+		// there is no reason to register all mapping
+		final Class[] mappings = new Class[]{
+			boolean.class, Boolean.class,
+			int.class, Integer.class,
+			long.class, Long.class
+		};
+
 		for (final Method method : methods) {
 			if (setterMethodName.equals(method.getName()) &&
 				method.getParameterTypes().length == 1){
 				Class paramClass = method.getParameterTypes()[0];
 
+
 				if (paramClass.isPrimitive()){
-					// there is no reason to register all mapping
-					if (boolean.class.equals(paramClass) && (Boolean.class.equals(valueClass)))
-						paramClass = valueClass;
+					for(int i = 0; i < mappings.length; i+= 2){
+						if (mappings[i].equals(paramClass) && (mappings[i + 1].equals(valueClass))){
+							paramClass = valueClass;
+							break;
+						}
 
-					if (int.class.equals(paramClass) && (Integer.class.equals(valueClass)))
-						paramClass = valueClass;
+						if (mappings[i].equals(paramClass) && (String.class.equals(valueClass))){
+							paramClass = mappings[i + 1];
+							break;
+						}
+					}
+				}
 
-					if (long.class.equals(paramClass) && (Long.class.equals(valueClass)))
-						paramClass = valueClass;
+				// handle valueOf(String) case
+				if (value != null &&
+					String.class.equals(valueClass) &&
+					!String.class.equals(paramClass)){
+					final Method valueOfMethod =
+						paramClass.getMethod("valueOf", new Class[]{String.class});
+					value = valueOfMethod.invoke(null, new Object[]{value});
+					valueClass = value.getClass();
 				}
 
 				if (paramClass.equals(valueClass) ||
@@ -122,50 +125,23 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private void startAppenderFactory(Attributes attributes) throws Exception {
-		final String enabled = getAttribute(attributes, "enabled");
 		final String name = getAttribute(attributes, "name");
 		final String clazz = getAttribute(attributes, "class");
-		final String bufferSize = getAttribute(attributes, "bufferSize");
-		final String datePattern = getAttribute(attributes, "datePattern");
-		final String append = getAttribute(attributes, "append");
-		final String multibyte = getAttribute(attributes, "multibyte");
-		final String immediateFlush = getAttribute(attributes, "immediateFlush");
-		final String logLevel = getAttribute(attributes, "logLevel");
-		final String fileName = getAttribute(attributes, "fileName");
 		final String timeZone = getAttribute(attributes, "timeZone");
 		final String locale = getAttribute(attributes, "locale");
 
 		final AppenderFactory appenderFactory = (AppenderFactory)Class.forName(clazz).newInstance();
 
-		if (datePattern != null) {
-			setProperty(appenderFactory, "datePattern", datePattern);
+		for(final String attributeName : new String[]{"datePattern", "patternLayout",
+				"append", "bufferSize", "multibyte", "immediateFlush", "fileName", "logLevel", "enabled"}){
+			setProperty(appenderFactory, attributeName, getAttribute(attributes, attributeName));
 		}
-		if (append != null) {
-			setProperty(appenderFactory, "append", Boolean.parseBoolean(append));
-		}
-		if (bufferSize != null) {
-			setProperty(appenderFactory, "bufferSize", Integer.parseInt(bufferSize));
-		}
-		if (multibyte != null) {
-			setProperty(appenderFactory, "multibyte", Boolean.parseBoolean(multibyte));
-		}
-		if (immediateFlush != null) {
-			setProperty(appenderFactory, "immediateFlush", Boolean.parseBoolean(immediateFlush));
-		}
-		if (logLevel != null) {
-			setProperty(appenderFactory, "logLevel", LogLevel.valueOf(logLevel));
-		}
+
 		if (timeZone != null) {
 			setProperty(appenderFactory, "timeZone", TimeZone.getTimeZone(timeZone) );
 		}
 		if (locale != null) {
 			setProperty(appenderFactory, "locale", new Locale(locale) );
-		}
-		if (fileName != null) {
-			setProperty(appenderFactory, "fileName", fileName);
-		}
-		if (enabled != null) {
-			setProperty(enabled, "enabled", Boolean.parseBoolean(enabled));
 		}
 
 		stack.push(appenderFactory);

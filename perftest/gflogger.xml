@@ -13,13 +13,26 @@
 			timeZoneId="${TZ}"
 			language="EN"/>
 	</appender-factory>
+
+	<appender-factory name="dailyRollingFileAppenderFactory" class="gflogger.appender.DailyRollingFileAppenderFactory"
+		fileName="${logs}/${app}.log"
+		logLevel="INFO">
+		<layout class="gflogger.PatternLayout"
+			pattern="%d{MMM d HH:mm:ss,SSS zzz} %p - %m [%c{2}] [%t]%n"
+			timeZoneId="${TZ}"
+			language="EN"/>
+	</appender-factory>
+
 	  
-	<logger-service name="defaultLoggerService" count="1024" maxMessageSize="4096">
+	<logger-service name="defaultLoggerService" 
+		class="gflogger.config.xml.DLoggerServiceFactory" 
+		count="1024" maxMessageSize="4096">
 		<object-formatter 
 			class="perftest.SomeObject"
 			formatter="perftest.SomeObjectFormatter"/>
 		
 		<appender-ref name="consoleAppenderFactory"/>
+		<appender-ref name="dailyRollingFileAppenderFactory"/>
 	</logger-service>
 	
 	<logger-view name="com.db" 

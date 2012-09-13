@@ -452,7 +452,7 @@ public class PatternLayout extends Layout {
 	public PatternLayout(final String pattern, final TimeZone timeZone, final Locale locale) {
 		this.pattern = pattern;
 		this.locale = locale;
-		this.timeZone = timeZone;
+		this.timeZone = timeZone != null ? timeZone : TimeZone.getDefault();
 		head = createPatternParser(pattern == null ? DEFAULT_CONVERSION_PATTERN : pattern).parse();
 	}
 
@@ -472,6 +472,14 @@ public class PatternLayout extends Layout {
 	public String getConversionPattern() {
 		return pattern;
 	}
+
+	public Locale getLocale() {
+	    return locale;
+    }
+
+	public TimeZone getTimeZone() {
+	    return timeZone;
+    }
 
 	/**
 	 * Does not do anything as options become effective
