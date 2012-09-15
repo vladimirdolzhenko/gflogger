@@ -85,15 +85,19 @@ public final class Bytes {
 		bs[pos++] = (byte) c;
 	}
 
+	private void putNull(final int remaining) {
+		if (remaining < 4) throw BYTES_OVERFLOW;
+		bs[pos + 0] = 'n';
+		bs[pos + 1] = 'u';
+		bs[pos + 2] = 'l';
+		bs[pos + 3] = 'l';
+		pos+=4;
+	}
+
 	public void put(CharSequence s){
 		final int remaining = remaining();
 		if (s == null){
-			if (remaining < 4) throw BYTES_OVERFLOW;
-			bs[pos + 0] = 'n';
-			bs[pos + 1] = 'u';
-			bs[pos + 2] = 'l';
-			bs[pos + 3] = 'l';
-			pos+=4;
+			putNull(remaining);
 			return;
 		}
 		final int len = s.length();
@@ -106,12 +110,7 @@ public final class Bytes {
 	public void put(CharSequence s, int start, int end){
 		final int remaining = remaining();
 		if (s == null){
-			if (remaining < 4) throw BYTES_OVERFLOW;
-			bs[pos + 0] = 'n';
-			bs[pos + 1] = 'u';
-			bs[pos + 2] = 'l';
-			bs[pos + 3] = 'l';
-			pos+=4;
+			putNull(remaining);
 			return;
 		}
 		if (remaining < (end - start)) throw BYTES_OVERFLOW;

@@ -370,7 +370,7 @@ public class DailyRollingFileAppender extends FileAppender {
 				LogLog.error("rollOver() failed.", ioe);
 			}
 		}
-	    super.process(entry);
+		super.process(entry);
 	}
 
 	@Override

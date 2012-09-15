@@ -7,14 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.gflogger.GFLog;
-import org.gflogger.GFLogFactory;
-import org.gflogger.GFLogger;
-import org.gflogger.GFLoggerImpl;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
+import org.gflogger.*;
 import org.gflogger.appender.FileAppenderFactory;
-import org.gflogger.base.DefaultLoggerServiceImpl;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,55 +45,55 @@ public class TestZODDefaultLoggerServiceImpl {
 	public static void init(){
 
 		final ThreadLocal<StringBuilder> local = new ThreadLocal<StringBuilder>(){
-            @Override
-            public StringBuilder get() {
-                return new StringBuilder(1 << 10);
-            }
-        };
+			@Override
+			public StringBuilder get() {
+				return new StringBuilder(1 << 10);
+			}
+		};
 
-        final ThreadLocal<String> threadName = new ThreadLocal<String>(){
-            @Override
-            protected String initialValue() {
-                return Thread.currentThread().getName();
-            }
-        };
+		final ThreadLocal<String> threadName = new ThreadLocal<String>(){
+			@Override
+			protected String initialValue() {
+				return Thread.currentThread().getName();
+			}
+		};
 
-        // pre init
-        local.get();
-        threadName.get();
+		// pre init
+		local.get();
+		threadName.get();
 
-        AllocationRecorder.addSampler(new Sampler() {
+		AllocationRecorder.addSampler(new Sampler() {
 
-            @Override
-            public void sampleAllocation(int count, String desc, Object newObj, long size) {
-              if (!objectCounting.get()) return;
+			@Override
+			public void sampleAllocation(int count, String desc, Object newObj, long size) {
+			  if (!objectCounting.get()) return;
 
-              objectCount.incrementAndGet();
-              objectSize.addAndGet(size);
+			  objectCount.incrementAndGet();
+			  objectSize.addAndGet(size);
 
-              final StringBuilder builder = local.get();
-              builder.setLength(0);
-              if (count != -1) {
-                  builder.append("an array of ").
-                    append(newObj.getClass().getComponentType().getName()).
-                    append("[").append(count).append("]");
-              } else {
-                  if (newObj instanceof String){
-                      builder.append("just allocated the string '").append(newObj).
-                          append('\'');
-                    } else {
-                        builder.append("I just allocated the object ").append(newObj).
-                        append(" of type ").append(desc).append(" whose size is ").append(size);
-                    }
-              }
-              builder.append('[').append(threadName.get()).append(']');
+			  final StringBuilder builder = local.get();
+			  builder.setLength(0);
+			  if (count != -1) {
+				  builder.append("an array of ").
+					append(newObj.getClass().getComponentType().getName()).
+					append("[").append(count).append("]");
+			  } else {
+				  if (newObj instanceof String){
+					  builder.append("just allocated the string '").append(newObj).
+						  append('\'');
+					} else {
+						builder.append("I just allocated the object ").append(newObj).
+						append(" of type ").append(desc).append(" whose size is ").append(size);
+					}
+			  }
+			  builder.append('[').append(threadName.get()).append(']');
 
-              if (!detailedAllocation.get()) return;
-              System.out.println(builder);
-              /*/
-              //*/
-            }
-          });
+			  if (!detailedAllocation.get()) return;
+			  System.out.println(builder);
+			  /*/
+			  //*/
+			}
+		  });
 	}
 
 	@AfterClass
@@ -112,7 +106,7 @@ public class TestZODDefaultLoggerServiceImpl {
 	}
 
 	@Test
-    public void testGFLoggerAppendLong() throws Exception {
+	public void testGFLoggerAppendLong() throws Exception {
 
 		resetObjectCounting();
 		objectCounting.set(true);
@@ -121,8 +115,8 @@ public class TestZODDefaultLoggerServiceImpl {
 		final FileAppenderFactory factory = new FileAppenderFactory();
 		factory.setFileName("./logs/gflogger.log");
 		factory.setAppend(false);
-	    factory.setLayoutPattern("%m%n");
-	    factory.setLogLevel(LogLevel.INFO);
+		factory.setLayoutPattern("%m%n");
+		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new DefaultLoggerServiceImpl(1 << 10, maxMessageSize,
 			new GFLogger[]{new GFLoggerImpl("com.db", factory)},
 			factory);
@@ -135,15 +129,19 @@ public class TestZODDefaultLoggerServiceImpl {
 			log.info().append("warmup:").append(i).commit();
 		Thread.sleep(1000L);
 
-		assertTrue(objectCount.get() > 0);
+		assertTrue("have to run with jvm option -javaagent:libs/allocation.jar",
+				objectCount.get() > 0);
 		System.out.println(objectCount.get());
 
 		resetObjectCounting();
 		objectCounting.set(true);
 		//detailedAllocation.set(true);
 
-		for(long i = 0; i < TEST_COUNT; i++)
-			log.info().append("value:").append(i).commit();
+		for(long v = 0; v < TEST_COUNT; v++)
+			log.info().append("value:").append(v).commit();
+
+		for(long v = 0; v < TEST_COUNT; v++)
+			log.info("value: %s").withLast(v);
 
 		Thread.sleep(500L);
 

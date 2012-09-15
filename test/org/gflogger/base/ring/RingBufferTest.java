@@ -19,7 +19,7 @@ import org.junit.Test;
 public class RingBufferTest {
 
 	@Test
-    public void testPublish() throws Exception {
+	public void testPublish() throws Exception {
 		RingBuffer<MutableLong> ringBuffer = 
 			new RingBuffer<MutableLong>(new BlockingWaitStrategy(), 
 				new MutableLong[]{
@@ -36,7 +36,7 @@ public class RingBufferTest {
 		ringBuffer.publish(next);
 		
 		assertEquals(RingBuffer.INITIAL_CURSOR_VALUE + 1, ringBuffer.getCursor());
-    }
+	}
 	
 	@Test
 	public void testWaitForTimeout() throws Exception {

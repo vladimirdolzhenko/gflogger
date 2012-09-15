@@ -107,17 +107,17 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	public void setEnabled(boolean enabled) {
-	    this.enabled = enabled;
-    }
+		this.enabled = enabled;
+	}
 
 	@Override
-    public int getIndex() {
-    	return index;
-    }
+	public int getIndex() {
+		return index;
+	}
 
 	public void setIndex(int index) {
-    	this.index = index;
-    }
+		this.index = index;
+	}
 
 	@Override
 	public long getSequence() {
@@ -182,33 +182,33 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		if (multibyte) {
 			final CharBuffer buffer = entry.getCharBuffer();
 			final int position = buffer.position();
-            final int limit = buffer.limit();
-            final int size = layout.size(entry);
-            if (position + size >= limit){
-            	flush();
-            	charBuffer.clear();
-            }
+			final int limit = buffer.limit();
+			final int size = layout.size(entry);
+			if (position + size >= limit){
+				flush();
+				charBuffer.clear();
+			}
 
-            buffer.flip();
+			buffer.flip();
 
-            layout.format(charBuffer, entry);
+			layout.format(charBuffer, entry);
 
-            buffer.limit(limit).position(position);
+			buffer.limit(limit).position(position);
 		} else {
 			final ByteBuffer buffer = entry.getBuffer();
 			final int position = buffer.position();
-            final int limit = buffer.limit();
-            final int size = layout.size(entry);
-            if (position + size >= limit){
-            	flush();
-            	byteBuffer.clear();
-            }
+			final int limit = buffer.limit();
+			final int size = layout.size(entry);
+			if (position + size >= limit){
+				flush();
+				byteBuffer.clear();
+			}
 
-            buffer.flip();
+			buffer.flip();
 
-            layout.format(byteBuffer, entry);
+			layout.format(byteBuffer, entry);
 
-            buffer.limit(limit).position(position);
+			buffer.limit(limit).position(position);
 		}
 	}
 
@@ -217,7 +217,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
-    public void workerIsAboutToFinish(){
+	public void workerIsAboutToFinish(){
 		flush();
 		BufferFormatter.purge(byteBuffer);
 		BufferFormatter.purge(charBuffer);

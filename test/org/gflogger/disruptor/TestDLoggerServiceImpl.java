@@ -20,7 +20,7 @@ public class TestDLoggerServiceImpl extends AbstractTestLoggerService {
 		ObjectFormatterFactory objectFormatterFactory,
 		GFLogger[] loggers,
 		AppenderFactory... factories) {
-	    return new DLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
+		return new DLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
 	}
 
 }

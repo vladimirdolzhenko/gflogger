@@ -87,7 +87,7 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public GFLogger[] lookupLoggers(String name) {
-	    return GFLogger.EMPTY;
+		return GFLogger.EMPTY;
 	}
 
 	@Override

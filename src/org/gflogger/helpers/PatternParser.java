@@ -75,9 +75,9 @@ public class PatternParser {
 	PatternConverter		  tail;
 	protected FormattingInfo  formattingInfo			= new FormattingInfo();
 
-	protected final String    pattern;
-	protected final Locale      locale;
-	protected final TimeZone    timeZone;
+	protected final String	pattern;
+	protected final Locale	  locale;
+	protected final TimeZone	timeZone;
 
 	public PatternParser(String pattern, Locale locale, TimeZone timeZone) {
 		this.pattern = pattern;

@@ -482,12 +482,12 @@ public class PatternLayout extends Layout {
 	}
 
 	public TimeZone getTimeZone() {
-	    return timeZone;
-    }
+		return timeZone;
+	}
 
 	public Locale getLocale() {
-	    return locale;
-    }
+		return locale;
+	}
 
 	/**
 	 * The PatternLayout does not handle the throwable contained within

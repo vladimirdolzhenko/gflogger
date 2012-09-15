@@ -80,11 +80,11 @@ public class EntryHandler implements Runnable, EntryProcessor, RingBufferAware<L
 				} finally {
 					// release entry anyway
 					final long id = idx.get();
-                    final long leftIdx = cursor.get();
-                    if (leftIdx < id){
-                    	cursor.set(id);
-                    }
-                    idx.set(id + 1);
+					final long leftIdx = cursor.get();
+					if (leftIdx < id){
+						cursor.set(id);
+					}
+					idx.set(id + 1);
 				}
 
 				if (immediateFlush){

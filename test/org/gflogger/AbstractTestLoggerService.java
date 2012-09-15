@@ -370,14 +370,14 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
-    public void testAppendLatinCharsFullMessageSize() throws Exception {
+	public void testAppendLatinCharsFullMessageSize() throws Exception {
 		// abcdefghijklmnopqrstuvwxyz{|}
 		final int maxMessageSize = 29;
-	    final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
-	    factory.setLayoutPattern("%m");
-	    final StringBuffer buffer = new StringBuffer();
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
 		factory.setOutputStream(buffer);
-	    factory.setLogLevel(LogLevel.INFO);
+		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerImpl("com.db", factory), factory);
 
 		GFLogFactory.init(loggerService);
@@ -421,10 +421,9 @@ public abstract class AbstractTestLoggerService {
 			char c = (char) ('a' + i);
 			assertEquals(Character.toString(c), c, string.charAt(i));
 		}
-    }
+	}
 
 	@Test
-	@Ignore
 	public void testAppendCyrillicCharsFullMessageSize() throws Exception {
 		final int maxMessageSize = 30;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
@@ -446,7 +445,7 @@ public abstract class AbstractTestLoggerService {
 			final LogEntry info = log.info();
 			for(int i = 0; i < maxMessageSize; i++){
 				// Russian 'a'
-				char c = (char) ('�' + i);
+				char c = (char) ('\u0430' + i);
 				info.append(c);
 			}
 
@@ -456,7 +455,7 @@ public abstract class AbstractTestLoggerService {
 
 			assertNull(localLogEntry.getError());
 			// there is no enough space for one more Russian 'b'
-			info.append('�');
+			info.append('\u0431');
 			{
 				assertNotNull(localLogEntry.getError());
 				assertEquals(BufferOverflowException.class, localLogEntry.getError().getClass());
@@ -477,7 +476,7 @@ public abstract class AbstractTestLoggerService {
 		assertEquals(maxMessageSize << 1, bytes.length);
 		for(int i = 0; i < maxMessageSize; i++){
 			// Russian 'a'
-			char c = (char) ('�' + i);
+			char c = (char) ('\u0430' + i);
 			assertEquals(c, string.charAt(i));
 		}
 

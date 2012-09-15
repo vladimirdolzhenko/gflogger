@@ -39,19 +39,19 @@ import org.gflogger.util.NamedThreadFactory;
  */
 public class DefaultLoggerServiceImpl implements LoggerService {
 
-	private final LogLevel                    level;
-	private final Appender[]                   appenders;
-	private final GFLogger[]                   loggers;
+	private final LogLevel					level;
+	private final Appender[]				   appenders;
+	private final GFLogger[]				   loggers;
 
 	private final ThreadLocal<LocalLogEntry>   logEntryThreadLocal;
 
 	private final RingBuffer<LogEntryItemImpl> ringBuffer;
-	private final ExecutorService              executorService;
-	private final EntryHandler                 entryHandler;
+	private final ExecutorService			  executorService;
+	private final EntryHandler				 entryHandler;
 
-	private final boolean                     multibyte;
+	private final boolean					 multibyte;
 
-	private volatile boolean                  running = false;
+	private volatile boolean				  running = false;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2

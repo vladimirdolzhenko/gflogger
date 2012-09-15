@@ -33,7 +33,7 @@ public class LoggerServiceView implements LoggerService {
 
 	@Override
 	public GFLogger[] lookupLoggers(String name) {
-	    return service.lookupLoggers(name);
+		return service.lookupLoggers(name);
 	}
 
 	@Override

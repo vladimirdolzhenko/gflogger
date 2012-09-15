@@ -84,14 +84,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-    public long getAppenderMask() {
-    	return appenderMask;
-    }
+	public long getAppenderMask() {
+		return appenderMask;
+	}
 
 	@Override
-    public void setAppenderMask(long appenderMask) {
-    	this.appenderMask = appenderMask;
-    }
+	public void setAppenderMask(long appenderMask) {
+		this.appenderMask = appenderMask;
+	}
 
 	@Override
 	public Throwable getError() {

@@ -40,25 +40,25 @@ import com.lmax.disruptor.dsl.Disruptor;
  */
 public class DLoggerServiceImpl implements LoggerService {
 
-	private final LogLevel                   level;
+	private final LogLevel				   level;
 
-	private final DAppender[]                appenders;
+	private final DAppender[]				appenders;
 
-	private final GFLogger[]                 loggers;
+	private final GFLogger[]				 loggers;
 
 	private final ThreadLocal<LocalLogEntry> logEntryThreadLocal;
 
 	private final Disruptor<DLogEntryItem>   disruptor;
 
-	private final ExecutorService            executorService;
+	private final ExecutorService			executorService;
 
 	private final RingBuffer<DLogEntryItem>  ringBuffer;
 
-	private final boolean                    multibyte;
+	private final boolean					multibyte;
 
-	private final WaitStrategyImpl           strategy;
+	private final WaitStrategyImpl		   strategy;
 
-	private volatile boolean                 running = false;
+	private volatile boolean				 running = false;
 
 	/**
 	 * @param count a number of items in the ring
@@ -383,82 +383,82 @@ public class DLoggerServiceImpl implements LoggerService {
 
 	private class WaitStrategyImpl implements WaitStrategy {
 
-	    private volatile int numWaiters = 0;
-	    private boolean signalled;
-	    private final Object lock = new Object();
+		private volatile int numWaiters = 0;
+		private boolean signalled;
+		private final Object lock = new Object();
 
-	    @Override
-	    public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier)
-	        throws AlertException, InterruptedException {
-	        long availableSequence;
-	        if ((availableSequence = cursor.get()) < sequence) {
-	        	flush();
-	            synchronized (lock) {
-	                ++numWaiters;
-	                while ((availableSequence = cursor.get()) < sequence) {
-	                	if (!running){
-	                		disruptor.halt();
-	                		throw AlertException.INSTANCE;
-	                	}
-	                    barrier.checkAlert();
-	                    lock.wait();
-	                }
-	                --numWaiters;
-	            }
-	        }
+		@Override
+		public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier)
+			throws AlertException, InterruptedException {
+			long availableSequence;
+			if ((availableSequence = cursor.get()) < sequence) {
+				flush();
+				synchronized (lock) {
+					++numWaiters;
+					while ((availableSequence = cursor.get()) < sequence) {
+						if (!running){
+							disruptor.halt();
+							throw AlertException.INSTANCE;
+						}
+						barrier.checkAlert();
+						lock.wait();
+					}
+					--numWaiters;
+				}
+			}
 
-	        if (0 != dependents.length) {
-	            while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-	                barrier.checkAlert();
-	            }
-	        }
+			if (0 != dependents.length) {
+				while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
+					barrier.checkAlert();
+				}
+			}
 
-	        return availableSequence;
-	    }
+			return availableSequence;
+		}
 
-	    @Override
-	    public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier,
-	                        final long timeout, final TimeUnit sourceUnit)
-	        throws AlertException, InterruptedException {
-	        long availableSequence;
-	        if ((availableSequence = cursor.get()) < sequence) {
-	        	final long timeoutMs = sourceUnit.toMillis(timeout);
+		@Override
+		public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier,
+							final long timeout, final TimeUnit sourceUnit)
+			throws AlertException, InterruptedException {
+			long availableSequence;
+			if ((availableSequence = cursor.get()) < sequence) {
+				final long timeoutMs = sourceUnit.toMillis(timeout);
 				final long startTime = System.currentTimeMillis() ;
 				flush();
-	            synchronized (lock) {
-	                ++numWaiters;
-	                while ((availableSequence = cursor.get()) < sequence) {
-	                    barrier.checkAlert();
-	                    if (!running){
-	                    	disruptor.halt();
-	                		throw AlertException.INSTANCE;
-	                	}
-	                    lock.wait(timeoutMs);
+				synchronized (lock) {
+					++numWaiters;
+					while ((availableSequence = cursor.get()) < sequence) {
+						barrier.checkAlert();
+						if (!running){
+							disruptor.halt();
+							throw AlertException.INSTANCE;
+						}
+						lock.wait(timeoutMs);
 
 						if (!signalled || (System.currentTimeMillis() - startTime) > timeoutMs) break;
-	                }
-	                --numWaiters;
-	            }
-	        }
+					}
+					--numWaiters;
+				}
+			}
 
-	        if (0 != dependents.length) {
-	            while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-	                barrier.checkAlert();
-	            }
-	        }
+			if (0 != dependents.length) {
+				while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
+					barrier.checkAlert();
+				}
+			}
 
-	        return availableSequence;
-	    }
+			return availableSequence;
+		}
 
-	    @Override
-	    public void signalAllWhenBlocking() {
-	        if (0 != numWaiters) {
-	            synchronized (lock) {
-	            	signalled = true;
+		@Override
+		public void signalAllWhenBlocking() {
+			if (0 != numWaiters) {
+				synchronized (lock) {
+					signalled = true;
 					lock.notifyAll();
 				}
-	        }
-	    }
+			}
+		}
 
 	}
 

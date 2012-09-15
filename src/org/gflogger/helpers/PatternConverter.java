@@ -60,10 +60,10 @@ public abstract class PatternConverter {
 	static String[] SPACES = {
 			" ",				// 1 space
 			"  ",			   // 2 spaces
-			"    ",			 // 4 spaces
-			"        ",		 // 8 spaces
-			"                ", // 16 spaces
-			"                                " }; // 32 spaces
+			"	",			 // 4 spaces
+			"		",		 // 8 spaces
+			"				", // 16 spaces
+			"								" }; // 32 spaces
 
 	/**
 	 * Fast space padding method.

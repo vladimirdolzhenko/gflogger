@@ -92,17 +92,17 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	}
 
 	public void setEnabled(boolean enabled) {
-	    this.enabled = enabled;
-    }
+		this.enabled = enabled;
+	}
 
 	@Override
-    public int getIndex() {
-    	return index;
-    }
+	public int getIndex() {
+		return index;
+	}
 
 	public void setIndex(int index) {
-    	this.index = index;
-    }
+		this.index = index;
+	}
 
 	@Override
 	public void onEvent(DLogEntryItem event, long sequence, boolean endOfBatch)

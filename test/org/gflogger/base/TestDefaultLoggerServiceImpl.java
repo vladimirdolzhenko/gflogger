@@ -20,8 +20,8 @@ public class TestDefaultLoggerServiceImpl extends AbstractTestLoggerService {
 			ObjectFormatterFactory objectFormatterFactory,
 			GFLogger[] loggers,
 			AppenderFactory... factories) {
-	    final LoggerService loggerService =
-	    	new DefaultLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
-	    return loggerService;
-    }
+		final LoggerService loggerService =
+			new DefaultLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
+		return loggerService;
+	}
 }

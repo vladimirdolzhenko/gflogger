@@ -75,7 +75,7 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	}
 
 	@Override
-    public LogLevel getLogLevel() {
+	public LogLevel getLogLevel() {
 		return this.logLevel;
 	}
 
@@ -148,22 +148,22 @@ public abstract class AbstractAppenderFactory implements AppenderFactory {
 	}
 
 	public boolean isEnabled() {
-    	return enabled;
-    }
+		return enabled;
+	}
 
 	public void setEnabled(boolean enabled) {
-    	this.enabled = enabled;
-    }
+		this.enabled = enabled;
+	}
 
 	@Override
-    public int getIndex() {
-    	return index;
-    }
+	public int getIndex() {
+		return index;
+	}
 
 	@Override
-    public void setIndex(int index) {
-    	this.index = index;
-    }
+	public void setIndex(int index) {
+		this.index = index;
+	}
 
 
 }

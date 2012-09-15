@@ -98,12 +98,12 @@ public final class LogEntryItemImpl implements LogEntryItem {
 	}
 
 	public long getAppenderMask() {
-	    return appenderMask;
-    }
+		return appenderMask;
+	}
 
 	public void setAppenderMask(long appenderMask) {
-	    this.appenderMask = appenderMask;
-    }
+		this.appenderMask = appenderMask;
+	}
 
 	@Override
 	public String toString() {

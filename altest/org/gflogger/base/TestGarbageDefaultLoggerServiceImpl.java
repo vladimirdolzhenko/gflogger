@@ -55,57 +55,57 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	public static void init(){
 
 		final ThreadLocal<StringBuilder> local = new ThreadLocal<StringBuilder>(){
-            @Override
-            public StringBuilder get() {
-                return new StringBuilder(1 << 10);
-            }
-        };
+			@Override
+			public StringBuilder get() {
+				return new StringBuilder(1 << 10);
+			}
+		};
 
-        final ThreadLocal<String> threadName = new ThreadLocal<String>(){
-            @Override
-            protected String initialValue() {
-                return Thread.currentThread().getName();
-            }
-        };
+		final ThreadLocal<String> threadName = new ThreadLocal<String>(){
+			@Override
+			protected String initialValue() {
+				return Thread.currentThread().getName();
+			}
+		};
 
-        // pre init
-        local.get();
-        threadName.get();
+		// pre init
+		local.get();
+		threadName.get();
 
-        AllocationRecorder.addSampler(new Sampler() {
+		AllocationRecorder.addSampler(new Sampler() {
 
-            @Override
-            public void sampleAllocation(int count, String desc, Object newObj, long size) {
-              if (!objectCounting.get()) return;
+			@Override
+			public void sampleAllocation(int count, String desc, Object newObj, long size) {
+			  if (!objectCounting.get()) return;
 
-              objectCount.incrementAndGet();
-              objectSize.addAndGet(size);
+			  objectCount.incrementAndGet();
+			  objectSize.addAndGet(size);
 
-              final StringBuilder builder = local.get();
-              builder.setLength(0);
-              if (count != -1) {
-                  builder.append("It's an array of ").
-                    append(newObj.getClass().getComponentType().getName()).
-                    append("[").append(count).append("]");
-              } else {
-                  if (newObj instanceof String){
-                      builder.append("I just allocated the string '").append(newObj).
-                          append('\'');
-                    } else {
-                        builder.append("I just allocated the object ").append(newObj).
-                        append(" of type ").append(desc).append(" whose size is ").append(size);
-                    }
-              }
-              builder.append('[').append(threadName.get()).append(']');
+			  final StringBuilder builder = local.get();
+			  builder.setLength(0);
+			  if (count != -1) {
+				  builder.append("It's an array of ").
+					append(newObj.getClass().getComponentType().getName()).
+					append("[").append(count).append("]");
+			  } else {
+				  if (newObj instanceof String){
+					  builder.append("I just allocated the string '").append(newObj).
+						  append('\'');
+					} else {
+						builder.append("I just allocated the object ").append(newObj).
+						append(" of type ").append(desc).append(" whose size is ").append(size);
+					}
+			  }
+			  builder.append('[').append(threadName.get()).append(']');
 
-              if (!detailedAllocation.get()) return;
-              System.out.println(builder);
-              /*/
-              //*/
-            }
-          });
-        BasicConfigurator.configure();
-        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("com.db.fxpricing.Logger");
+			  if (!detailedAllocation.get()) return;
+			  System.out.println(builder);
+			  /*/
+			  //*/
+			}
+		  });
+		BasicConfigurator.configure();
+		org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("com.db.fxpricing.Logger");
 	}
 
 	@AfterClass
@@ -118,14 +118,14 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	}
 
 	@Test
-    public void testGFLoggerAppendLong() throws Exception {
+	public void testGFLoggerAppendLong() throws Exception {
 		final int maxMessageSize = 20;
-	    final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
-	    factory.setLayoutPattern("%m");
-	    // 1k
-	    final StringBuffer buffer = new StringBuffer(1<<20);
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		// 1k
+		final StringBuffer buffer = new StringBuffer(1<<20);
 		factory.setOutputStream(buffer);
-	    factory.setLogLevel(LogLevel.INFO);
+		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize,
 			new GFLogger[]{new GFLoggerImpl("com.db", factory)},
 			factory);
@@ -162,7 +162,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 
 		assertEquals(0, objectCount.get());
 		printState("gflogger");
-    }
+	}
 
 	@Test
 	public void testLog4JAppendString() throws Exception {
