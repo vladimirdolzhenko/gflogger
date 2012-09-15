@@ -1,50 +1,92 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="gflogger" default="jar">
 
-	<property name="build.dir" value="build" />
 	<property name="manifest.author" value="Vladimir Dolzhenko" />
 	<property name="manifest.title" value="Garbage Free Logger" />
 	<property name="manifest.repository.url" value="https://bitbucket.org/vladimir.dolzhenko/gflogger/" />
+	
+	<property name="src.dir" value="src" />
+	<property name="benchmarks.src.dir" value="perftest" />
+	<property name="tests.src.dir" value="test" />
+	<property name="allocation.src.dir" value="altest" />
+	
+	<property name="src.build.dir" value="build/src" />
+	<property name="benchmarks.build.dir" value="build/benchmarks" />
+	<property name="tests.build.dir" value="build/tests" />
+	<property name="allocation.build.dir" value="build/allocation" />
+	
+	<property name="dest.dir" value="dist" />
+	
 	<path id="jars">
-		<fileset dir="libs" includes="**/*.jar" />
+		<fileset dir="libs" includes="**/*.jar"/>
 	</path>
 
 	<target name="clear">
-		<delete dir="${build.dir}" />
-		<delete>
-			<fileset dir="libs" includes="gflogger**"/>
-		</delete>
+		<delete dir="${src.build.dir}" />
+		<delete dir="${benchmarks.build.dir}" />
+		<delete dir="${tests.build.dir}" />
+		<delete dir="${allocation.build.dir}" />
+		<delete dir="${dest.dir}" />
 	</target>
 
 	<target name="compile">
-		<mkdir dir="${build.dir}" />
+		<mkdir dir="${src.build.dir}" />
+		<mkdir dir="${benchmarks.build.dir}" />
+		<mkdir dir="${tests.build.dir}" />
+		<mkdir dir="${allocation.build.dir}" />
 
-		<javac destdir="${build.dir}" classpathref="jars" 
+		<javac destdir="${src.build.dir}" classpathref="jars" 
 			includeantruntime="false" debug="true">
-			<src path="src" />
+			<src path="${src.dir}" />
+		</javac>
+		
+		<javac destdir="${tests.build.dir}" 
+			includeantruntime="false" debug="true">
+			<classpath>
+				<path refid="jars"/>
+				<dirset dir="${src.build.dir}" />
+			</classpath>
+			<src path="${tests.src.dir}" />
+		</javac>
+		
+		<javac destdir="${allocation.build.dir}" 
+			includeantruntime="false" debug="true">
+			<classpath>
+				<path refid="jars"/>
+				<dirset dir="${src.build.dir}" />
+			</classpath>
+			<src path="${allocation.src.dir}" />
 		</javac>
 
-		<javac destdir="${build.dir}" classpathref="jars"
+		<javac destdir="${benchmarks.build.dir}" classpathref="jars"
 				includeantruntime="false" debug="true">
 			<classpath>
-				<fileset dir="libs" includes="**/*.jar" />
-				<dirset dir="${build.dir}" />
+				<path refid="jars"/>
+				<dirset dir="${src.build.dir}" />
 			</classpath>
-			<src path="perftest" />
+			<src path="${benchmarks.src.dir}" />
 		</javac>
 
-		<copy todir="${build.dir}">
-			<fileset dir="perftest" includes="**/*.xml" />
-			<fileset dir="src" includes="**/*.xsd" />
+		<copy todir="${src.build.dir}">
+			<fileset dir="${perftests.build.dir}" includes="**/*.xml" />
+			<fileset dir="${src.dir}" includes="**/*.xsd" />
 		</copy>
 	</target>
-
-	<target name="jar" depends="clear, compile">
+	
+	<target name="ver" unless="${build.version}">
+		<tstamp>
+			<format property="build.version" timezone="GMT" locale="en,UK" pattern="yyyyMMdd"/>
+		</tstamp>
+	</target>
+	
+	<target name="jar" depends="clear, compile, ver">
 		<tstamp>
 			<format property="build.time" timezone="GMT" locale="en,UK" pattern="yyyy-MM-dd HH:mm:ss,SSS z"/>
 		</tstamp>
+		
+		<mkdir dir="${dest.dir}" />
 
-		<jar destfile="libs/gflogger-${build.version}.jar">
+		<jar destfile="${dest.dir}/gflogger-${build.version}.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Built-At" value="${build.time}"/>
@@ -55,40 +97,92 @@
 				<attribute name="Implementation-Version" value="${build.version}"/>
 				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
 			</manifest>	
-			<fileset dir="${build.dir}">
+			<fileset dir="${src.build.dir}">
 				<include name="org/gflogger/**/*.class" />
 				<include name="**/*.xsd" />
 			</fileset>
 		</jar>
-		<copy file="libs/gflogger-${build.version}.jar" tofile="libs/gflogger.jar"/>
-		<zip destfile="libs/gflogger-src.zip">
-			<fileset dir="src">
+		
+		<zip destfile="${dest.dir}/gflogger-${build.version}-src.zip">
+			<fileset dir="${src.dir}">
 				<include name="**/*.java" />
 				<include name="**/*.xml" />
+				<include name="**/*.xsd" />
 			</fileset>
 		</zip>
-		<jar destfile="libs/gflogger-${build.version}-sources.jar">
+		
+		<jar destfile="${dest.dir}/gflogger-${build.version}-sources.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Built-At" value="${build.time}"/>
 				
 				<attribute name="Author" value="${manifest.author}"/>
 				<attribute name="Implementation-Vendor" value="${manifest.author}"/>
-				<attribute name="Implementation-Title" value="${manifest.title}"/>
+				<attribute name="Implementation-Title" value="${manifest.title} sources"/>
 				<attribute name="Implementation-Version" value="${build.version}"/>
 				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
 			</manifest>	
-			<fileset dir="src">
+			<fileset dir="${src.dir}">
 				<include name="**/*.java" />
 				<include name="**/*.xml" />
+				<include name="**/*.xsd" />
 			</fileset>
 		</jar>
-		<jar destfile="libs/gflogger-perftests.jar">
-			<fileset dir="${build.dir}">
-				<include name="org/gflogger/perftest/**/*.class" />
+		
+		<jar destfile="${dest.dir}/gflogger-${build.version}-benchmarks.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Built-At" value="${build.time}"/>
+				
+				<attribute name="Author" value="${manifest.author}"/>
+				<attribute name="Implementation-Vendor" value="${manifest.author}"/>
+				<attribute name="Implementation-Title" value="${manifest.title} benchmarks"/>
+				<attribute name="Implementation-Version" value="${build.version}"/>
+				<attribute name="Implementation-URL" value="${manifest.repository.url}"/>
+			</manifest>	
+			<fileset dir="${benchmarks.build.dir}">
+				<include name="**/*.class" />
 				<include name="**/*.xml" />
 			</fileset>
 		</jar>
+	</target>
+	
+	<target name="tests" depends="compile">
+		<junit fork="true">
+			<classpath>
+				<path refid="jars"/>
+				<path path="${src.build.dir}"/>
+				<path path="${tests.build.dir}"/>
+			</classpath>
+			<batchtest todir="${tests.build.dir}">
+				<fileset dir="${tests.src.dir}">
+					<include name="**/Test*.java"/>
+					<include name="**/*Test.java"/>
+				</fileset>
+				<formatter type="plain" usefile="false"/>
+			</batchtest>
+		</junit>
+		
+		<antcall target="allocation.tests"/>
+	</target>
+	
+	<target name="allocation.tests" depends="compile">
+		
+		<junit fork="true">
+			<jvmarg value="-javaagent:libs/allocation.jar"/>
+			<classpath>
+				<path refid="jars"/>
+				<path path="${src.build.dir}"/>
+				<path path="${allocation.build.dir}"/>
+			</classpath>
+			<batchtest todir="${allocation.build.dir}">
+				<fileset dir="${allocation.src.dir}">
+					<include name="**/Test*.java"/>
+					<include name="**/*Test.java"/>
+				</fileset>
+				<formatter type="plain" usefile="false"/>
+			</batchtest>
+		</junit>
 	</target>
 
 </project>

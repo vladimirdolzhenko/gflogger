@@ -11,10 +11,10 @@
 	<classpathentry kind="lib" path="libs/logback-classic-0.9.29.jar" sourcepath="/home/bob/downloads/logback-0.9.29/logback-classic-0.9.29-sources.jar"/>
 	<classpathentry kind="lib" path="libs/commons-logging.jar" sourcepath="/usr/share/commons-logging/sources/commons-logging-src.zip"/>
 	<classpathentry kind="lib" path="libs/log4j.jar" sourcepath="/usr/share/log4j/sources/log4j-src.zip"/>
-	<classpathentry kind="lib" path="libs/disruptor.jar"/>
 	<classpathentry kind="lib" path="libs/spring-beans-2.5.6.jar"/>
 	<classpathentry kind="lib" path="libs/spring-context-2.5.6.jar"/>
 	<classpathentry kind="lib" path="libs/spring-core-2.5.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/disruptor-2.10.3.jar"/>
 	<classpathentry kind="output" path="out"/>
 </classpath>
