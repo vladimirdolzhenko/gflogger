@@ -22,12 +22,22 @@ import static org.gflogger.formatter.BytesOverflow.BYTES_OVERFLOW;
 
 import java.nio.ByteBuffer;
 
+import sun.misc.Unsafe;
+import sun.nio.ch.DirectBuffer;
+
+import com.lmax.disruptor.util.Util;
+
 /**
  * Bytes
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public final class Bytes {
+
+	private static final Unsafe UNSAFE = Util.getUnsafe();
+
+	// Cached array base offset
+	private static final long arrayBaseOffset = UNSAFE.arrayBaseOffset(byte[].class);
 
 	private final byte[] bs;
 	private int pos;
@@ -239,12 +249,65 @@ public final class Bytes {
 	}
 
 	public void copyTo(ByteBuffer buffer) {
-		buffer.put(bs, 0, pos);
+		buffer.clear();
+		if (buffer.isDirect()) {
+			DirectBuffer db = (DirectBuffer) buffer;
+
+			copyFromArray(bs, arrayBaseOffset, 0 << 0,
+				db.address(), pos << 0);
+
+			buffer.position(buffer.position() + pos);
+		} else {
+			buffer.put(bs, 0, pos);
+		}
 	}
 
 	public String asString() {
 		return new String(bs, 0, pos);
 	}
 
+    // -- Bulk get/put acceleration --
+
+    // These numbers represent the point at which we have empirically
+    // determined that the average cost of a JNI call exceeds the expense
+    // of an element by element copy.  These numbers may change over time.
+    static final int JNI_COPY_TO_ARRAY_THRESHOLD   = 6;
+    static final int JNI_COPY_FROM_ARRAY_THRESHOLD = 6;
+
+    // This number limits the number of bytes to copy per call to Unsafe's
+    // copyMemory method. A limit is imposed to allow for safepoint polling
+    // during a large copy
+    static final long UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
+
+    // These methods do no bounds checking.  Verification that the copy will not
+    // result in memory corruption should be done prior to invocation.
+    // All positions and lengths are specified in bytes.
+
+    /**
+     * Copy from given source array to destination address.
+     *
+     * @param   src
+     *          source array
+     * @param   srcBaseOffset
+     *          offset of first element of storage in source array
+     * @param   srcPos
+     *          offset within source array of the first element to read
+     * @param   dstAddr
+     *          destination address
+     * @param   length
+     *          number of bytes to copy
+     */
+    static void copyFromArray(Object src, long srcBaseOffset, long srcPos,
+                              long dstAddr, long length)
+    {
+        long offset = srcBaseOffset + srcPos;
+        while (length > 0) {
+            long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
+            UNSAFE.copyMemory(src, offset, null, dstAddr, size);
+            length -= size;
+            offset += size;
+            dstAddr += size;
+        }
+    }
 
 }
