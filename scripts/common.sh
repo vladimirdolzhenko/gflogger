@@ -8,7 +8,7 @@ run(){
 	MAINCLASS=$5
 	JAVA_EXTRA_OPTS=$6
 	
-	echo ${NAME} number of threads: "${THREADS}" messages: ${MESSAGES}
+	echo "${NAME}, number of threads: "${THREADS}", messages: ${MESSAGES}"
 	
 	JAVA_ASSEMBLY=""
 	
