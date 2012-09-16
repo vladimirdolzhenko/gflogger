@@ -68,7 +68,7 @@
 		</javac>
 
 		<copy todir="${src.build.dir}">
-			<fileset dir="${perftests.build.dir}" includes="**/*.xml" />
+			<fileset dir="${benchmarks.build.dir}" includes="**/*.xml" />
 			<fileset dir="${src.dir}" includes="**/*.xsd" />
 		</copy>
 	</target>
@@ -148,7 +148,7 @@
 	</target>
 	
 	<target name="tests" depends="compile">
-		<junit fork="true">
+		<junit fork="true" haltonfailure="true">
 			<classpath>
 				<path refid="jars"/>
 				<path path="${src.build.dir}"/>
@@ -168,7 +168,7 @@
 	
 	<target name="allocation.tests" depends="compile">
 		
-		<junit fork="true">
+		<junit fork="true" haltonfailure="true">
 			<jvmarg value="-javaagent:libs/allocation.jar"/>
 			<classpath>
 				<path refid="jars"/>

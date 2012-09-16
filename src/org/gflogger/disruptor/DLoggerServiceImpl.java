@@ -17,6 +17,7 @@ package org.gflogger.disruptor;
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -125,6 +126,8 @@ public class DLoggerServiceImpl implements LoggerService {
 		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
 		final ByteBuffer buffer = allocate(c * bufferSize);
 
+		final boolean typeOfByteBuffer = getBooleanProperty("gflogger.bytebuffer", true);
+
 		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>(){
 			@Override
 			protected LocalLogEntry initialValue() {
@@ -134,17 +137,15 @@ public class DLoggerServiceImpl implements LoggerService {
 						bufferSize,
 						formatterFactory,
 						DLoggerServiceImpl.this) :
-					/*/
-					new ByteBufferLocalLogEntry(Thread.currentThread(),
-						bufferSize,
-						formatterFactory,
-						DLoggerServiceImpl.this);
-					/*/
-					new ByteLocalLogEntry(Thread.currentThread(),
-						bufferSize,
-						formatterFactory,
-						DLoggerServiceImpl.this);
-					//*/
+					typeOfByteBuffer ?
+						new ByteBufferLocalLogEntry(Thread.currentThread(),
+							bufferSize,
+							formatterFactory,
+							DLoggerServiceImpl.this):
+						new ByteLocalLogEntry(Thread.currentThread(),
+							bufferSize,
+							formatterFactory,
+							DLoggerServiceImpl.this);
 				return logEntry;
 			}
 		};
@@ -293,6 +294,8 @@ public class DLoggerServiceImpl implements LoggerService {
 		final String categoryName = localEntry.getCategoryName();
 		final LogLevel logLevel = localEntry.getLogLevel();
 		final String threadName = localEntry.getThreadName();
+		final long appenderMask = localEntry.getAppenderMask();
+
 		final long now = System.currentTimeMillis();
 
 		long sequence = ringBuffer.next();
@@ -302,8 +305,7 @@ public class DLoggerServiceImpl implements LoggerService {
 			entry.setLogLevel(logLevel);
 			entry.setThreadName(threadName);
 			entry.setTimestamp(now);
-
-			entry.setAppenderMask(localEntry.getAppenderMask());
+			entry.setAppenderMask(appenderMask);
 
 			if (multibyte) {
 				localEntry.copyTo(entry.getCharBuffer());

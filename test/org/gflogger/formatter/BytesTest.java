@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -129,6 +130,7 @@ public class BytesTest {
 				bytes.put(i);
 				assertEquals(Long.toString(i), bytes.asString());
 
+				buffer.clear();
 				bytes.copyTo(buffer);
 				assertEquals("buffer " + (buffer.isDirect() ? "direct" : "heap") + " : " + Long.toString(i),
 					Long.toString(i), BufferFormatterTest.toString(buffer));
@@ -148,6 +150,7 @@ public class BytesTest {
 				bytes.put(' ');
 				assertEquals(Long.toString(numbers[i]) + " ", bytes.asString());
 
+				buffer.clear();
 				bytes.copyTo(buffer);
 				assertEquals(Long.toString(numbers[i]) + " ", BufferFormatterTest.toString(buffer));
 
@@ -182,8 +185,13 @@ public class BytesTest {
 	}
 
 	@Test
+	@Ignore
 	public void testBytesVsBufferFormatter() throws Exception {
 		final int size = 1 << 6;
+
+		final long min = Short.MIN_VALUE - 100;
+		final long max = Short.MAX_VALUE + 100;
+
 		System.out.println("size:" + size);
 		final Bytes bytes = new Bytes(size);
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(size);
@@ -191,12 +199,12 @@ public class BytesTest {
 		final ByteBuffer target = ByteBuffer.allocateDirect(size);
 
 		int n = 100;
-
 		for(int q = 0; q < 5; q++){
 
 			final long s0 = System.nanoTime();
+
 			for(int k = 0; k < n; k++){
-				for (long i = Short.MIN_VALUE - 100; i < Short.MAX_VALUE + 100; i++) {
+				for (long i = min; i < max; i++) {
 					bytes.put(i);
 					bytes.put(i);
 					bytes.put(i);
@@ -214,7 +222,7 @@ public class BytesTest {
 
 			final long s1 = System.nanoTime();
 			for(int k = 0; k < n; k++){
-				for (long i = Short.MIN_VALUE - 100; i < Short.MAX_VALUE + 100; i++) {
+				for (long i = min; i < max; i++) {
 					BufferFormatter.append(buffer, i);
 					BufferFormatter.append(buffer, i);
 					BufferFormatter.append(buffer, i);
@@ -231,7 +239,9 @@ public class BytesTest {
 
 
 			final long t1 = e1 - s1;
-			System.out.println("bytes time:" + (t0/1000)/1e3 + " ms, " +
+			System.out.println("bytes time:" + (t0/1000)/1e3 + " ms ["
+				+ (t0 / n / (max - min)) / 1e3 + " us" +
+				"], " +
 				"direct buffer time: " + (t1/1000)/1e3 + " ms, ration: " +
 				((t1 * 100/t0)/1e2));
 		}

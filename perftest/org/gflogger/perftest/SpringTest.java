@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class SpringTest {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable {
 		final ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:app-context.xml");
 		ctx.start();
 
@@ -36,6 +36,8 @@ public class SpringTest {
 		logger2.debug().append("org.spring.debug").commit();
 
 		logger2.error().append("org.spring.error").commit();
+
+		Thread.sleep(2000);
 
 		ctx.stop();
 	}
