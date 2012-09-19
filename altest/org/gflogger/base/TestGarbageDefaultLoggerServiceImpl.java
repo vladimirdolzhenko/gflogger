@@ -18,7 +18,7 @@ import org.gflogger.GFLoggerImpl;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.ConsoleAppenderFactory;
-import org.gflogger.base.DefaultLoggerServiceImpl;
+import org.gflogger.base.LoggerServiceImpl;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -126,7 +126,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 		final StringBuffer buffer = new StringBuffer(1<<20);
 		factory.setOutputStream(buffer);
 		factory.setLogLevel(LogLevel.INFO);
-		final LoggerService loggerService = new DefaultLoggerServiceImpl(4, maxMessageSize,
+		final LoggerService loggerService = new LoggerServiceImpl(4, maxMessageSize,
 			new GFLogger[]{new GFLoggerImpl("com.db", factory)},
 			factory);
 

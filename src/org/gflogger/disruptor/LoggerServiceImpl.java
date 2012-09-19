@@ -39,7 +39,7 @@ import com.lmax.disruptor.dsl.Disruptor;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class DLoggerServiceImpl implements LoggerService {
+public class LoggerServiceImpl implements LoggerService {
 
 	private final LogLevel				   level;
 
@@ -66,7 +66,7 @@ public class DLoggerServiceImpl implements LoggerService {
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param appenders
 	 */
-	public DLoggerServiceImpl(final int count, final int maxMessageSize,
+	public LoggerServiceImpl(final int count, final int maxMessageSize,
 		final GFLogger[] loggers,
 		final AppenderFactory ... appenderFactories) {
 		this(count, maxMessageSize, null, loggers, createAppenders(appenderFactories));
@@ -78,7 +78,7 @@ public class DLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public DLoggerServiceImpl(final int count, final int maxMessageSize,
+	public LoggerServiceImpl(final int count, final int maxMessageSize,
 		final ObjectFormatterFactory objectFormatterFactory,
 		final GFLogger[] loggers,
 		final AppenderFactory ... appenderFactories) {
@@ -88,7 +88,7 @@ public class DLoggerServiceImpl implements LoggerService {
 	private static DAppender[] createAppenders(AppenderFactory[] appenderFactories) {
 		final DAppender[] appenders = new DAppender[appenderFactories.length];
 		for (int i = 0; i < appenders.length; i++) {
-			appenders[i] = (DAppender) appenderFactories[i].createAppender(DLoggerServiceImpl.class);
+			appenders[i] = (DAppender) appenderFactories[i].createAppender(LoggerServiceImpl.class);
 		}
 		return appenders;
 	}
@@ -99,7 +99,7 @@ public class DLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public DLoggerServiceImpl(final int count, final int maxMessageSize,
+	public LoggerServiceImpl(final int count, final int maxMessageSize,
 		final ObjectFormatterFactory objectFormatterFactory,
 		final GFLogger[] loggers,
 		final DAppender ... appenders) {
@@ -136,16 +136,16 @@ public class DLoggerServiceImpl implements LoggerService {
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						bufferSize,
 						formatterFactory,
-						DLoggerServiceImpl.this) :
+						LoggerServiceImpl.this) :
 					typeOfByteBuffer ?
 						new ByteBufferLocalLogEntry(Thread.currentThread(),
 							bufferSize,
 							formatterFactory,
-							DLoggerServiceImpl.this):
+							LoggerServiceImpl.this):
 						new ByteLocalLogEntry(Thread.currentThread(),
 							bufferSize,
 							formatterFactory,
-							DLoggerServiceImpl.this);
+							LoggerServiceImpl.this);
 				return logEntry;
 			}
 		};

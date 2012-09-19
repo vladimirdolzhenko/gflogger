@@ -13,7 +13,7 @@ import org.gflogger.PatternLayout;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.appender.ConsoleAppenderFactory;
 import org.gflogger.appender.FileAppenderFactory;
-import org.gflogger.base.DefaultLoggerServiceImpl;
+import org.gflogger.base.LoggerServiceImpl;
 
 /**
  *
@@ -33,7 +33,7 @@ public class JCLGFLoggerExample extends AbstractExample {
 		final GFLogger[] loggers =
 				new GFLogger[]{ new GFLoggerImpl(LogLevel.INFO, "com.db", factories)};
 		final LoggerService impl =
-			new DefaultLoggerServiceImpl(
+			new LoggerServiceImpl(
 				getIntProperty("gflogger.service.count", 1 << 10),
 				getIntProperty("gflogger.service.maxMessageSize", 1 << 8),
 				loggers,

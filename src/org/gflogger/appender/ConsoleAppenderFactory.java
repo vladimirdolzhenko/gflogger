@@ -16,8 +16,6 @@ package org.gflogger.appender;
 
 import org.gflogger.Appender;
 import org.gflogger.LoggerService;
-import org.gflogger.base.DefaultLoggerServiceImpl;
-import org.gflogger.disruptor.DLoggerServiceImpl;
 
 
 /**
@@ -32,7 +30,7 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
+		if (org.gflogger.base.LoggerServiceImpl.class.equals(loggerServiceClass)){
 			final org.gflogger.base.appender.ConsoleAppender appender =
 				new org.gflogger.base.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
 
@@ -45,7 +43,7 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 			appender.setIndex(index);
 
 			return appender;
-		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
+		} else if (org.gflogger.disruptor.LoggerServiceImpl.class.equals(loggerServiceClass)){
 			final org.gflogger.disruptor.appender.ConsoleAppender appender =
 				new org.gflogger.disruptor.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
 

@@ -17,7 +17,7 @@ package org.gflogger.config.xml;
 import org.gflogger.GFLogger;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.disruptor.DLoggerServiceImpl;
+import org.gflogger.disruptor.LoggerServiceImpl;
 
 
 /**
@@ -29,7 +29,7 @@ public class DLoggerServiceFactory extends AbstractLoggerServiceFactory {
 
 	@Override
 	public LoggerService createService() {
-		return new DLoggerServiceImpl(
+		return new LoggerServiceImpl(
 				count,
 				maxMessageSize,
 				objectFormatterFactory,

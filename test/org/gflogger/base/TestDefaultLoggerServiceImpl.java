@@ -5,7 +5,7 @@ import org.gflogger.GFLogger;
 import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.base.DefaultLoggerServiceImpl;
+import org.gflogger.base.LoggerServiceImpl;
 
 
 /**
@@ -21,7 +21,7 @@ public class TestDefaultLoggerServiceImpl extends AbstractTestLoggerService {
 			GFLogger[] loggers,
 			AppenderFactory... factories) {
 		final LoggerService loggerService =
-			new DefaultLoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
+			new LoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);
 		return loggerService;
 	}
 }

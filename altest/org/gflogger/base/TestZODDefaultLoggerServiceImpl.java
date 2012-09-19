@@ -117,7 +117,7 @@ public class TestZODDefaultLoggerServiceImpl {
 		factory.setAppend(false);
 		factory.setLayoutPattern("%m%n");
 		factory.setLogLevel(LogLevel.INFO);
-		final LoggerService loggerService = new DefaultLoggerServiceImpl(1 << 10, maxMessageSize,
+		final LoggerService loggerService = new LoggerServiceImpl(1 << 10, maxMessageSize,
 			new GFLogger[]{new GFLoggerImpl("com.db", factory)},
 			factory);
 

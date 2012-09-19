@@ -37,7 +37,7 @@ import org.gflogger.util.NamedThreadFactory;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class DefaultLoggerServiceImpl implements LoggerService {
+public class LoggerServiceImpl implements LoggerService {
 
 	private final LogLevel					level;
 	private final Appender[]				   appenders;
@@ -59,7 +59,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenderFactories
 	 */
-	public DefaultLoggerServiceImpl(final int count,
+	public LoggerServiceImpl(final int count,
 			final int maxMessageSize,
 			final GFLogger[] loggers,
 			final AppenderFactory ... appenderFactories) {
@@ -72,7 +72,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenderFactories
 	 */
-	public DefaultLoggerServiceImpl(final int count,
+	public LoggerServiceImpl(final int count,
 			final int maxMessageSize,
 			final ObjectFormatterFactory objectFormatterFactory,
 			final GFLogger[] loggers,
@@ -83,7 +83,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
 		final Appender[] appenders = new Appender[appenderFactories.length];
 		for (int i = 0; i < appenders.length; i++) {
-			appenders[i] = (Appender) appenderFactories[i].createAppender(DefaultLoggerServiceImpl.class);
+			appenders[i] = (Appender) appenderFactories[i].createAppender(LoggerServiceImpl.class);
 		}
 		return appenders;
 	}
@@ -94,7 +94,7 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public DefaultLoggerServiceImpl(final int count,
+	public LoggerServiceImpl(final int count,
 			final int maxMessageSize,
 			final ObjectFormatterFactory objectFormatterFactory,
 			final GFLogger[] loggers,
@@ -130,11 +130,11 @@ public class DefaultLoggerServiceImpl implements LoggerService {
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
 						formatterFactory,
-						DefaultLoggerServiceImpl.this) :
+						LoggerServiceImpl.this) :
 					new ByteBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
 						formatterFactory,
-						DefaultLoggerServiceImpl.this);
+						LoggerServiceImpl.this);
 				return logEntry;
 			}
 

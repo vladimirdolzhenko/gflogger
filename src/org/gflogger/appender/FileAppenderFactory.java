@@ -14,12 +14,11 @@
 
 package org.gflogger.appender;
 
-import static org.gflogger.helpers.OptionConverter.*;
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 import org.gflogger.Appender;
 import org.gflogger.LoggerService;
-import org.gflogger.base.DefaultLoggerServiceImpl;
-import org.gflogger.disruptor.DLoggerServiceImpl;
 
 
 /**
@@ -36,7 +35,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		if (DefaultLoggerServiceImpl.class.equals(loggerServiceClass)){
+		if (org.gflogger.base.LoggerServiceImpl.class.equals(loggerServiceClass)){
 			final org.gflogger.base.appender.FileAppender appender =
 				new org.gflogger.base.appender.FileAppender(bufferSize, multibyte);
 
@@ -52,7 +51,7 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 			appender.setCodepage(codepage);
 			appender.setAppend(append);
 			return appender;
-		} else if (DLoggerServiceImpl.class.equals(loggerServiceClass)){
+		} else if (org.gflogger.disruptor.LoggerServiceImpl.class.equals(loggerServiceClass)){
 			final org.gflogger.disruptor.appender.FileAppender appender =
 				new org.gflogger.disruptor.appender.FileAppender(bufferSize, multibyte);
 

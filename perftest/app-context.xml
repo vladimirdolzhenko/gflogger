@@ -24,7 +24,7 @@
 			p:index="1"/>
 	</util:list>
 
-	<bean id="loggerService" class="org.gflogger.disruptor.DLoggerServiceImpl">
+	<bean id="loggerService" class="org.gflogger.disruptor.LoggerServiceImpl">
 		<!-- count a number of items in the ring -->
 		<constructor-arg index="0" value="1024"/>
 		<!-- maxMessageSize max message size in the ring 

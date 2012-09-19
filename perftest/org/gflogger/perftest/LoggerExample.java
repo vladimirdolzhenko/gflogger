@@ -7,7 +7,7 @@ import org.gflogger.GFLoggerImpl;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.base.DefaultLoggerServiceImpl;
+import org.gflogger.base.LoggerServiceImpl;
 
 
 
@@ -25,7 +25,7 @@ public class LoggerExample extends AbstractLoggerExample {
 		final GFLogger[] loggers =
 				new GFLogger[]{ new GFLoggerImpl(LogLevel.INFO, "com.db", factories)};
 		final LoggerService impl =
-			new DefaultLoggerServiceImpl(
+			new LoggerServiceImpl(
 				getIntProperty("gflogger.service.count", 1 << 10),
 				getIntProperty("gflogger.service.maxMessageSize", 1 << 8),
 				loggers,
