@@ -17,12 +17,12 @@ public class LoggerServiceView implements LoggerService {
 	}
 
 	@Override
-	public LogEntry log(LogLevel level, String categoryName, final long appenderMask) {
+	public GFLogEntry log(LogLevel level, String categoryName, final long appenderMask) {
 		return service.log(level, categoryName, appenderMask);
 	}
 
 	@Override
-	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
+	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
 		return service.formattedLog(level, categoryName, pattern, appenderMask);
 	}
 

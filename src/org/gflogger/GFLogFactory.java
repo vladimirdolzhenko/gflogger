@@ -36,8 +36,8 @@ public final class GFLogFactory {
 		namedLogger = new HashMap<String, GFLogView>();
 		classedLogger = new HashMap<Class, GFLogView>();
 
-		final String implementationVersion = GFLogFactory.class.getPackage().getImplementationVersion();
-		System.out.println("GFLogger version " + implementationVersion);
+		final String ver = GFLogFactory.class.getPackage().getImplementationVersion();
+		System.out.println("GFLogger version " + (ver != null ? ver : "*dev*") );
 	}
 
 	private GFLog get(final String name){
@@ -97,22 +97,17 @@ public final class GFLogFactory {
 		}
 	}
 
-	@Deprecated
-	public static GFLogFactory init(String category, LoggerService service){
-		return init(service);
-	}
-
 	public static GFLogFactory init(LoggerService service){
 		synchronized (Helper.FACTORY.lock) {
 			stop();
-			if (service != null){
-				Helper.FACTORY.loggerService.set(service);
-			}
+			if (service == null)
+				throw new IllegalArgumentException("Not a null logger service is expected");
+			Helper.FACTORY.loggerService.set(service);
 		}
 		return Helper.FACTORY;
 	}
 
-	private static class Helper {
+	private final static class Helper {
 		final static GFLogFactory FACTORY = new GFLogFactory();
 	}
 }

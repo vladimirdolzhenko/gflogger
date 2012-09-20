@@ -33,16 +33,13 @@
 		<constructor-arg index="1" value="4096"/>
 		<constructor-arg index="2">
 			<list>
-				<bean class="org.gflogger.GFLoggerImpl">
-					<constructor-arg index="0" value="WARN"/>
-					<constructor-arg index="1"><null/></constructor-arg>
-					<constructor-arg index="2" ref="appenderFactories"/>
-				</bean>
-				<bean class="org.gflogger.GFLoggerImpl">
-					<constructor-arg index="0" value="INFO"/>
-					<constructor-arg index="1" value="com.db"/>
-					<constructor-arg index="2" ref="appenderFactories"/>
-				</bean>
+				<bean class="org.gflogger.GFLoggerBuilder"
+					p:logLevel="WARN"
+					p:appenderFactories-ref="appenderFactories"/>
+				<bean class="org.gflogger.GFLoggerBuilder"
+					p:logLevel="INFO"
+					p:name="com.db"
+					p:appenderFactories-ref="appenderFactories"/>
 			</list>
 		</constructor-arg>
 		<!-- appender factories -->

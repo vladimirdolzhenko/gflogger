@@ -1,9 +1,10 @@
 package org.gflogger.perftest;
 
-import static org.gflogger.helpers.OptionConverter.*;
+import static org.gflogger.helpers.OptionConverter.getIntProperty;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 import org.gflogger.GFLogger;
-import org.gflogger.GFLoggerImpl;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AppenderFactory;
@@ -22,8 +23,8 @@ public class LoggerExample extends AbstractLoggerExample {
 	@Override
 	protected LoggerService createLoggerImpl() {
 		final AppenderFactory[] factories = createAppenderFactories();
-		final GFLogger[] loggers =
-				new GFLogger[]{ new GFLoggerImpl(LogLevel.INFO, "com.db", factories)};
+		final GFLoggerBuilder[] loggers =
+				new GFLoggerBuilder[]{ new GFLoggerBuilder(LogLevel.INFO, "com.db", factories)};
 		final LoggerService impl =
 			new LoggerServiceImpl(
 				getIntProperty("gflogger.service.count", 1 << 10),

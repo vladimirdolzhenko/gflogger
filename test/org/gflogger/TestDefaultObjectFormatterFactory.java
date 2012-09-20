@@ -16,7 +16,7 @@ package org.gflogger;
 import static org.junit.Assert.assertSame;
 
 import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.LogEntry;
+import org.gflogger.GFLogEntry;
 import org.gflogger.ObjectFormatter;
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ public class TestDefaultObjectFormatterFactory {
 
 		final ObjectFormatter<A> aObjectFormatter = new ObjectFormatter<A>(){
 			@Override
-			public void append(A obj, LogEntry entry) {
+			public void append(A obj, GFLogEntry entry) {
 				entry.append("A");
 			}
 
@@ -57,7 +57,7 @@ public class TestDefaultObjectFormatterFactory {
 
 		final ObjectFormatter<A> aObjectFormatter = new ObjectFormatter<A>(){
 			@Override
-			public void append(A obj, LogEntry entry) {
+			public void append(A obj, GFLogEntry entry) {
 				entry.append("A");
 			}
 
@@ -81,7 +81,7 @@ public class TestDefaultObjectFormatterFactory {
 
 		final ObjectFormatter<A> aObjectFormatter = new ObjectFormatter<A>(){
 			@Override
-			public void append(A obj, LogEntry entry) {
+			public void append(A obj, GFLogEntry entry) {
 				entry.append("A");
 			}
 
@@ -105,7 +105,7 @@ public class TestDefaultObjectFormatterFactory {
 
 		final ObjectFormatter<D> dObjectFormatter = new ObjectFormatter<D>(){
 			@Override
-			public void append(D obj, LogEntry entry) {
+			public void append(D obj, GFLogEntry entry) {
 				entry.append("D");
 			}
 
@@ -117,7 +117,7 @@ public class TestDefaultObjectFormatterFactory {
 
 		final ObjectFormatter<ABCImpl> abcImplObjectFormatter = new ObjectFormatter<ABCImpl>(){
 			@Override
-			public void append(ABCImpl obj, LogEntry entry) {
+			public void append(ABCImpl obj, GFLogEntry entry) {
 				entry.append("ABCImpl");
 			}
 

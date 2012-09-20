@@ -17,16 +17,10 @@ package org.gflogger.config.xml;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Stack;
-import java.util.TimeZone;
 
-import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.Layout;
 import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatter;
@@ -49,7 +43,7 @@ public class Configuration extends DefaultHandler {
 
 	private final Map<String, AppenderFactory> appenderFactories = new LinkedHashMap<String, AppenderFactory>();
 
-	private final List<GFLogger> loggers = new ArrayList<GFLogger>();
+	private final List<GFLoggerBuilder> loggerBuilders = new ArrayList<GFLoggerBuilder>();
 
 	private final Map<Class, ObjectFormatter> objectFormatters = new LinkedHashMap<Class, ObjectFormatter>();
 
@@ -136,8 +130,6 @@ public class Configuration extends DefaultHandler {
 
 		final AppenderFactory appenderFactory = (AppenderFactory)Class.forName(clazz).newInstance();
 
-		appenderFactory.setIndex(appenderFactories.size());
-
 		for(final String attributeName : new String[]{"datePattern", "patternLayout",
 				"append", "bufferSize", "multibyte", "immediateFlush", "fileName", "enabled"}){
 			setProperty(appenderFactory, attributeName, getAttribute(attributes, attributeName));
@@ -173,7 +165,7 @@ public class Configuration extends DefaultHandler {
 		final String className = getAttribute(attributes, "class");
 		final Class clazz = className != null ?
 				Class.forName(className) :
-				DefaultLoggerServiceFactory.class;
+				DLoggerServiceFactory.class;
 		final LoggerServiceFactory factory = (LoggerServiceFactory)clazz.newInstance();
 
 		for(final String attributeName : new String[]{"count", "maxMessageSize"}){
@@ -183,8 +175,8 @@ public class Configuration extends DefaultHandler {
 		for(final AppenderFactory appenderFactory: appenderFactories.values()){
 			factory.addAppenderFactory(appenderFactory);
 		}
-		for(final GFLogger logger: loggers){
-			factory.addLogger(logger);
+		for(final GFLoggerBuilder loggerBuilder: loggerBuilders){
+			factory.addGFLoggerBuilder(loggerBuilder);
 		}
 
 		for (final Entry<Class, ObjectFormatter> entry : objectFormatters.entrySet()) {
@@ -233,8 +225,8 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private void endLogger() {
-		final GFLogger gfLogger = ((GFLoggerBuilder)stack.peek()).build();
-		loggers.add(gfLogger);
+		final GFLoggerBuilder gfLogger = (GFLoggerBuilder)stack.peek();
+		loggerBuilders.add(gfLogger);
 	}
 
 	private void endAppenderFactory() {

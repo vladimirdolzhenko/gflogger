@@ -1,6 +1,6 @@
 package org.gflogger.base;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,14 +11,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.BasicConfigurator;
-import org.gflogger.GFLog;
-import org.gflogger.GFLogFactory;
-import org.gflogger.GFLogger;
-import org.gflogger.GFLoggerImpl;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
+import org.gflogger.*;
 import org.gflogger.appender.ConsoleAppenderFactory;
-import org.gflogger.base.LoggerServiceImpl;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -127,7 +121,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 		factory.setOutputStream(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new LoggerServiceImpl(4, maxMessageSize,
-			new GFLogger[]{new GFLoggerImpl("com.db", factory)},
+			new GFLoggerBuilder[]{new GFLoggerBuilder("com.db", factory)},
 			factory);
 
 		GFLogFactory.init(loggerService);

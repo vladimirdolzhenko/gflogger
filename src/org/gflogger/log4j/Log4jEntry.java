@@ -17,8 +17,8 @@ package org.gflogger.log4j;
 import static org.gflogger.util.StackTraceUtils.*;
 
 import org.apache.commons.logging.Log;
-import org.gflogger.FormattedLogEntry;
-import org.gflogger.LogEntry;
+import org.gflogger.FormattedGFLogEntry;
+import org.gflogger.GFLogEntry;
 import org.gflogger.LogLevel;
 import org.gflogger.Loggable;
 import org.gflogger.formatter.BufferFormatter;
@@ -29,7 +29,7 @@ import org.gflogger.formatter.BufferFormatter;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class Log4jEntry implements LogEntry, FormattedLogEntry {
+public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	// 2k
 	private static final int DEFAULT_BUFFER_SIZE = 1 << 11;
@@ -103,43 +103,43 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(char c) {
+	public GFLogEntry append(char c) {
 		this.builder.append(c);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(CharSequence csq) {
+	public GFLogEntry append(CharSequence csq) {
 		this.builder.append(csq);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(CharSequence csq, int start, int end) {
+	public GFLogEntry append(CharSequence csq, int start, int end) {
 		this.builder.append(csq, start, end);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(boolean b) {
+	public GFLogEntry append(boolean b) {
 		this.builder.append(b);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(int i) {
+	public GFLogEntry append(int i) {
 		this.builder.append(i);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(long i) {
+	public GFLogEntry append(long i) {
 		this.builder.append(i);
 		return this;
 	}
 
 	@Override
-	public LogEntry append(double i, int precision) {
+	public GFLogEntry append(double i, int precision) {
 		long x = (long)i;
 		this.builder.append(x);
 		this.builder.append('.');
@@ -149,7 +149,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Throwable e) {
+	public GFLogEntry append(Throwable e) {
 		if (e != null){
 			try {
 				append(e.getClass().getName());
@@ -200,7 +200,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Loggable loggable) {
+	public GFLogEntry append(Loggable loggable) {
 		if (loggable != null){
 			loggable.appendTo(this);
 		} else {
@@ -210,7 +210,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Object o) {
+	public GFLogEntry append(Object o) {
 		this.builder.append(String.valueOf(o));
 		return this;
 	}
@@ -276,7 +276,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(char c){
+	public FormattedGFLogEntry with(char c){
 		checkPlaceholder();
 		append(c);
 		appendNextPatternChank();
@@ -284,7 +284,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq){
+	public FormattedGFLogEntry with(CharSequence csq){
 		checkPlaceholder();
 		append(csq);
 		appendNextPatternChank();
@@ -292,7 +292,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq, int start, int end){
+	public FormattedGFLogEntry with(CharSequence csq, int start, int end){
 		checkPlaceholder();
 		append(csq, start, end);
 		appendNextPatternChank();
@@ -300,7 +300,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(boolean b){
+	public FormattedGFLogEntry with(boolean b){
 		checkPlaceholder();
 		append(b);
 		appendNextPatternChank();
@@ -308,7 +308,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(int i){
+	public FormattedGFLogEntry with(int i){
 		checkPlaceholder();
 		append(i);
 		appendNextPatternChank();
@@ -316,7 +316,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(long i){
+	public FormattedGFLogEntry with(long i){
 		checkPlaceholder();
 		append(i);
 		appendNextPatternChank();
@@ -324,7 +324,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(double i, int precision){
+	public FormattedGFLogEntry with(double i, int precision){
 		checkPlaceholder();
 		append(i, precision);
 		appendNextPatternChank();
@@ -332,7 +332,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Throwable e){
+	public FormattedGFLogEntry with(Throwable e){
 		checkPlaceholder();
 		append(e);
 		appendNextPatternChank();
@@ -340,7 +340,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Loggable loggable){
+	public FormattedGFLogEntry with(Loggable loggable){
 		checkPlaceholder();
 		append(loggable);
 		appendNextPatternChank();
@@ -348,7 +348,7 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Object o){
+	public FormattedGFLogEntry with(Object o){
 		checkPlaceholder();
 		append(o);
 		appendNextPatternChank();

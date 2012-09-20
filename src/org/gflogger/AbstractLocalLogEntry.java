@@ -159,7 +159,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected abstract void moveAndAppendSilent(String message);
 
 	@Override
-	public LogEntry append(Loggable loggable) {
+	public GFLogEntry append(Loggable loggable) {
 		if (loggable != null){
 			try {
 				loggable.appendTo(this);
@@ -173,7 +173,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Throwable e) {
+	public GFLogEntry append(Throwable e) {
 		if (e != null){
 			try {
 				append(e.getClass().getName());
@@ -229,7 +229,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(Object o) {
+	public GFLogEntry append(Object o) {
 		try {
 			if (o != null){
 				final ObjectFormatter formatter = formatterFactory.getObjectFormatter(o);
@@ -304,7 +304,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(char c){
+	public FormattedGFLogEntry with(char c){
 		checkPlaceholder();
 		append(c);
 		appendNextPatternChank();
@@ -312,7 +312,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq){
+	public FormattedGFLogEntry with(CharSequence csq){
 		checkPlaceholder();
 		append(csq);
 		appendNextPatternChank();
@@ -320,7 +320,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq, int start, int end){
+	public FormattedGFLogEntry with(CharSequence csq, int start, int end){
 		checkPlaceholder();
 		append(csq, start, end);
 		appendNextPatternChank();
@@ -328,7 +328,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(boolean b){
+	public FormattedGFLogEntry with(boolean b){
 		checkPlaceholder();
 		append(b);
 		appendNextPatternChank();
@@ -336,7 +336,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(int i){
+	public FormattedGFLogEntry with(int i){
 		checkPlaceholder();
 		append(i);
 		appendNextPatternChank();
@@ -344,7 +344,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(long i){
+	public FormattedGFLogEntry with(long i){
 		checkPlaceholder();
 		append(i);
 		appendNextPatternChank();
@@ -352,7 +352,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(double i, int precision){
+	public FormattedGFLogEntry with(double i, int precision){
 		checkPlaceholder();
 		append(i, precision);
 		appendNextPatternChank();
@@ -360,7 +360,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Throwable e){
+	public FormattedGFLogEntry with(Throwable e){
 		checkPlaceholder();
 		append(e);
 		appendNextPatternChank();
@@ -368,7 +368,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Loggable loggable){
+	public FormattedGFLogEntry with(Loggable loggable){
 		checkPlaceholder();
 		append(loggable);
 		appendNextPatternChank();
@@ -376,7 +376,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(Object o){
+	public FormattedGFLogEntry with(Object o){
 		checkPlaceholder();
 		append(o);
 		appendNextPatternChank();

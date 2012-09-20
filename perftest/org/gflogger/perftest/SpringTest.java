@@ -1,8 +1,6 @@
 package org.gflogger.perftest;
 
 
-import org.gflogger.GFLog;
-import org.gflogger.GFLogFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
@@ -11,33 +9,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class SpringTest {
+public class SpringTest extends AbstractSimpleTest {
 
 	public static void main(String[] args) throws Throwable {
+		final SpringTest springTest = new SpringTest();
 		final ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:app-context.xml");
 		ctx.start();
 
-		final GFLog logger = GFLogFactory.getLog("com.db.fxpricing.Logger");
-
-		logger.info().append("test1").commit();
-
-		logger.debug().append("testD").commit();
-
-		logger.error().append("testE").commit();
-
-		logger.info().append("test2").commit();
-
-		logger.info().append("test3").commit();
-
-		final GFLog logger2 = GFLogFactory.getLog("org.spring");
-
-		logger2.info().append("org.spring.info").commit();
-
-		logger2.debug().append("org.spring.debug").commit();
-
-		logger2.error().append("org.spring.error").commit();
-
-		Thread.sleep(2000);
+		springTest.test();
 
 		ctx.stop();
 	}

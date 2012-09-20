@@ -21,5 +21,5 @@ package org.gflogger;
  */
 public interface Loggable {
 
-	void appendTo(final LogEntry entry);
+	void appendTo(final GFLogEntry entry);
 }

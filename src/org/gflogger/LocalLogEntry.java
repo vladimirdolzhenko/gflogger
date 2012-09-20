@@ -21,7 +21,7 @@ import java.nio.Buffer;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface LocalLogEntry extends LogEntry, FormattedLogEntry {
+public interface LocalLogEntry extends GFLogEntry, FormattedGFLogEntry {
 
 	LogLevel getLogLevel();
 

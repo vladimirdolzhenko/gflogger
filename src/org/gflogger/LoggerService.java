@@ -23,9 +23,9 @@ public interface LoggerService {
 
 	LogLevel getLevel();
 
-	LogEntry log(final LogLevel level, final String categoryName, final long appenderMask);
+	GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask);
 
-	FormattedLogEntry formattedLog(final LogLevel level, final String categoryName,
+	FormattedGFLogEntry formattedLog(final LogLevel level, final String categoryName,
 		final String pattern, final long appenderMask);
 
 	void entryFlushed(final LocalLogEntry localEntry);

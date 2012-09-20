@@ -14,7 +14,7 @@ public final class DefaultObjectFormatter implements ObjectFormatter<Object> {
 	}
 
 	@Override
-	public void append(Object obj, LogEntry entry) {
+	public void append(Object obj, GFLogEntry entry) {
 		if (obj != null){
 			entry.append(obj.toString());
 		} else {

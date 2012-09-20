@@ -1,11 +1,10 @@
 package org.gflogger.base;
 
 import org.gflogger.AbstractTestLoggerService;
-import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.base.LoggerServiceImpl;
 
 
 /**
@@ -18,7 +17,7 @@ public class TestDefaultLoggerServiceImpl extends AbstractTestLoggerService {
 	@Override
 	protected LoggerService createLoggerService(int maxMessageSize,
 			ObjectFormatterFactory objectFormatterFactory,
-			GFLogger[] loggers,
+			GFLoggerBuilder[] loggers,
 			AppenderFactory... factories) {
 		final LoggerService loggerService =
 			new LoggerServiceImpl(4, maxMessageSize, objectFormatterFactory, loggers, factories);

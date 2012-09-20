@@ -15,7 +15,7 @@
 package org.gflogger;
 
 /**
- * Logger
+ * GFLog
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
@@ -23,37 +23,37 @@ public interface GFLog {
 
 	boolean isTraceEnabled();
 
-	LogEntry trace();
+	GFLogEntry trace();
 
-	FormattedLogEntry trace(final String pattern);
+	FormattedGFLogEntry trace(final String pattern);
 
 	boolean isDebugEnabled();
 
-	LogEntry debug();
+	GFLogEntry debug();
 
-	FormattedLogEntry debug(final String pattern);
+	FormattedGFLogEntry debug(final String pattern);
 
 	boolean isInfoEnabled();
 
-	LogEntry info();
+	GFLogEntry info();
 
-	FormattedLogEntry info(final String pattern);
+	FormattedGFLogEntry info(final String pattern);
 
 	boolean isWarnEnabled();
 
-	LogEntry warn();
+	GFLogEntry warn();
 
-	FormattedLogEntry warn(final String pattern);
+	FormattedGFLogEntry warn(final String pattern);
 
 	boolean isErrorEnabled();
 
-	LogEntry error();
+	GFLogEntry error();
 
-	FormattedLogEntry error(final String pattern);
+	FormattedGFLogEntry error(final String pattern);
 
 	boolean isFatalEnabled();
 
-	LogEntry fatal();
+	GFLogEntry fatal();
 
-	FormattedLogEntry fatal(final String pattern);
+	FormattedGFLogEntry fatal(final String pattern);
 }

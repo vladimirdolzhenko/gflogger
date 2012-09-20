@@ -41,6 +41,7 @@ public final class XmlLogFactoryConfigurator {
 	}
 
 	private XmlLogFactoryConfigurator(final InputStream in) throws Exception {
+		if (in == null) throw new IllegalArgumentException("Not a null input stream is expected.");
 		try {
 			final SAXParserFactory factory = SAXParserFactory.newInstance();
 			final SAXParser saxParser;

@@ -106,7 +106,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final boolean b) {
+	public GFLogEntry append(final boolean b) {
 		try{
 			BufferFormatter.append(byteBuffer, b);
 		} catch (Throwable e){
@@ -126,7 +126,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final long i) {
+	public GFLogEntry append(final long i) {
 		try{
 			BufferFormatter.append(byteBuffer, i);
 		} catch (Throwable e){
@@ -136,7 +136,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final double i, final int precision) {
+	public GFLogEntry append(final double i, final int precision) {
 		try{
 			BufferFormatter.append(byteBuffer, i, precision);
 		} catch (Throwable e){

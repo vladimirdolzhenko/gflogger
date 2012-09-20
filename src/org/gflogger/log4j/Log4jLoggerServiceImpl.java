@@ -20,10 +20,10 @@ import java.util.Map;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
-import org.gflogger.FormattedLogEntry;
+import org.gflogger.FormattedGFLogEntry;
 import org.gflogger.GFLogger;
 import org.gflogger.LocalLogEntry;
-import org.gflogger.LogEntry;
+import org.gflogger.GFLogEntry;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
 
@@ -59,7 +59,7 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public LogEntry log(LogLevel level, String categoryName, final long appenderMask) {
+	public GFLogEntry log(LogLevel level, String categoryName, final long appenderMask) {
 		final Map<String, Log4jEntry> map = entries.get();
 		Log4jEntry entry = map.get(categoryName);
 		if (entry == null){
@@ -72,7 +72,7 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
+	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
 		final Map<String, Log4jEntry> map = entries.get();
 		Log4jEntry entry = map.get(categoryName);
 		if (entry == null){

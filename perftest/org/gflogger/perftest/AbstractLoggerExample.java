@@ -1,10 +1,6 @@
 package org.gflogger.perftest;
 
-import org.gflogger.GFLog;
-import org.gflogger.GFLogFactory;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
-import org.gflogger.PatternLayout;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.appender.FileAppenderFactory;
 
@@ -21,7 +17,7 @@ public abstract class AbstractLoggerExample extends AbstractExample {
 	protected void initLogger() {
 		service = createLoggerImpl();
 
-		GFLogFactory.init("com.db", service);
+		GFLogFactory.init(service);
 
 		this.log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 	}

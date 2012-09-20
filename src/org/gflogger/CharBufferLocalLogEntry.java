@@ -104,7 +104,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final boolean b) {
+	public GFLogEntry append(final boolean b) {
 		try{
 			BufferFormatter.append(buffer, b);
 		} catch (Throwable e){
@@ -124,7 +124,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final long i) {
+	public GFLogEntry append(final long i) {
 		try{
 			BufferFormatter.append(buffer, i);
 		} catch (Throwable e){
@@ -134,7 +134,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final double i, final int precision) {
+	public GFLogEntry append(final double i, final int precision) {
 		try{
 			BufferFormatter.append(buffer, i, precision);
 		} catch (Throwable e){

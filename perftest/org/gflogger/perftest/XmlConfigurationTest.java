@@ -13,7 +13,6 @@
  */
 package org.gflogger.perftest;
 
-import org.gflogger.GFLog;
 import org.gflogger.GFLogFactory;
 import org.gflogger.config.xml.XmlLogFactoryConfigurator;
 
@@ -24,33 +23,13 @@ import org.gflogger.config.xml.XmlLogFactoryConfigurator;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class XmlConfigurationTest {
+public class XmlConfigurationTest extends AbstractSimpleTest {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Throwable {
 		XmlLogFactoryConfigurator.configure();
 
-		final GFLog logger = GFLogFactory.getLog("com.db.fxpricing.Logger");
-
-		logger.info().
-			append(new SomeObject(5)).commit();
-
-		logger.info().append("test1").commit();
-
-		logger.debug().append("testD").commit();
-
-		logger.error().append("testE").commit();
-
-		logger.info().append("test2").commit();
-
-		logger.info().append("test3").commit();
-
-		final GFLog logger2 = GFLogFactory.getLog("org.spring");
-
-		logger2.info().append("org.spring.info").commit();
-
-		logger2.debug().append("org.spring.debug").commit();
-
-		logger2.error().append("org.spring.error").commit();
+		final XmlConfigurationTest test = new XmlConfigurationTest();
+		test.test();
 
 		GFLogFactory.stop();
 	}

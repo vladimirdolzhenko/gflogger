@@ -63,7 +63,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(char c) {
+	public GFLogEntry append(char c) {
 		try {
 			bytes.put(c);
 		} catch (Throwable e){
@@ -73,7 +73,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(CharSequence csq) {
+	public GFLogEntry append(CharSequence csq) {
 		try{
 			bytes.put(csq);
 		} catch (Throwable e){
@@ -83,7 +83,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(CharSequence csq, int start, int end) {
+	public GFLogEntry append(CharSequence csq, int start, int end) {
 		try {
 			bytes.put(csq, start, end);
 		} catch (Throwable e){
@@ -93,7 +93,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(boolean b) {
+	public GFLogEntry append(boolean b) {
 		try{
 			bytes.put(b);
 		} catch (Throwable e){
@@ -103,7 +103,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(int i) {
+	public GFLogEntry append(int i) {
 		try{
 			bytes.put(i);
 		} catch (Throwable e){
@@ -113,7 +113,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(long i) {
+	public GFLogEntry append(long i) {
 		try{
 			bytes.put(i);
 		} catch (Throwable e){
@@ -123,7 +123,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	}
 
 	@Override
-	public LogEntry append(double i, int precision) {
+	public GFLogEntry append(double i, int precision) {
 		try{
 			bytes.put(i, precision);
 		} catch (Throwable e){

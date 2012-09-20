@@ -13,29 +13,34 @@
  */
 package org.gflogger;
 
-public interface FormattedLogEntry {
+/**
+ * FormattedGFLogEntry
+ *
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
+public interface FormattedGFLogEntry {
 
 	/**
 	 * appends with a single char parameter
 	 * @return a reference to this object.
 	 */
-	FormattedLogEntry with(char c);
+	FormattedGFLogEntry with(char c);
 
-	FormattedLogEntry with(CharSequence csq);
+	FormattedGFLogEntry with(CharSequence csq);
 
-	FormattedLogEntry with(CharSequence csq, int start, int end);
+	FormattedGFLogEntry with(CharSequence csq, int start, int end);
 
-	FormattedLogEntry with(boolean b);
+	FormattedGFLogEntry with(boolean b);
 
-	FormattedLogEntry with(int i);
+	FormattedGFLogEntry with(int i);
 
-	FormattedLogEntry with(long i);
+	FormattedGFLogEntry with(long i);
 
-	FormattedLogEntry with(double i, int precision);
+	FormattedGFLogEntry with(double i, int precision);
 
-	FormattedLogEntry with(Throwable e);
+	FormattedGFLogEntry with(Throwable e);
 
-	FormattedLogEntry with(Loggable loggable);
+	FormattedGFLogEntry with(Loggable loggable);
 
 	/**
 	 * appends with a string representation of an object using <code>o.toString()</code> method
@@ -45,7 +50,7 @@ public interface FormattedLogEntry {
 	 * @param o
 	 * @return
 	 */
-	FormattedLogEntry with(Object o);
+	FormattedGFLogEntry with(Object o);
 
 
 	/**

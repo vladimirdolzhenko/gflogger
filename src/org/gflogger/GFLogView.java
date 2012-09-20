@@ -80,13 +80,13 @@ public class GFLogView implements GFLog {
 		return setLoggerService(GFLogFactory.lookupService(name));
  	}
 
-	private LogEntry logEntry(final LogLevel logLevel) {
+	private GFLogEntry logEntry(final LogLevel logLevel) {
 		return hasNecessaryLevel(logLevel) ?
 			loggerService.log(logLevel, name, appenderMask[logLevel.ordinal()]) :
 			mockLogEntry;
 	}
 
-	private FormattedLogEntry formattedLogEntry(final LogLevel logLevel, String pattern) {
+	private FormattedGFLogEntry formattedLogEntry(final LogLevel logLevel, String pattern) {
 		return hasNecessaryLevel(logLevel) ?
 				loggerService.formattedLog(logLevel, name, pattern,  appenderMask[logLevel.ordinal()]) :
 					mockLogEntry;
@@ -98,12 +98,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry trace() {
+	public GFLogEntry trace() {
 		return logEntry(LogLevel.TRACE);
 	}
 
 	@Override
-	public FormattedLogEntry trace(String pattern) {
+	public FormattedGFLogEntry trace(String pattern) {
 		return formattedLogEntry(LogLevel.TRACE, pattern);
 	}
 
@@ -113,12 +113,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry debug() {
+	public GFLogEntry debug() {
 		return logEntry(LogLevel.DEBUG);
 	}
 
 	@Override
-	public FormattedLogEntry debug(String pattern) {
+	public FormattedGFLogEntry debug(String pattern) {
 		return formattedLogEntry(LogLevel.DEBUG, pattern);
 	}
 
@@ -128,12 +128,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry info() {
+	public GFLogEntry info() {
 		return logEntry(LogLevel.INFO);
 	}
 
 	@Override
-	public FormattedLogEntry info(String pattern) {
+	public FormattedGFLogEntry info(String pattern) {
 		return formattedLogEntry(LogLevel.INFO, pattern);
 	}
 
@@ -143,12 +143,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry warn() {
+	public GFLogEntry warn() {
 		return logEntry(LogLevel.WARN);
 	}
 
 	@Override
-	public FormattedLogEntry warn(String pattern) {
+	public FormattedGFLogEntry warn(String pattern) {
 		return formattedLogEntry(LogLevel.WARN, pattern);
 	}
 
@@ -158,12 +158,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry error() {
+	public GFLogEntry error() {
 		return logEntry(LogLevel.ERROR);
 	}
 
 	@Override
-	public FormattedLogEntry error(String pattern) {
+	public FormattedGFLogEntry error(String pattern) {
 		return formattedLogEntry(LogLevel.ERROR, pattern);
 	}
 
@@ -173,12 +173,12 @@ public class GFLogView implements GFLog {
 	}
 
 	@Override
-	public LogEntry fatal() {
+	public GFLogEntry fatal() {
 		return logEntry(LogLevel.FATAL);
 	}
 
 	@Override
-	public FormattedLogEntry fatal(String pattern) {
+	public FormattedGFLogEntry fatal(String pattern) {
 		return formattedLogEntry(LogLevel.FATAL, pattern);
 	}
 }

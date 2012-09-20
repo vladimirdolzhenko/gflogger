@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.ObjectFormatter;
 import org.gflogger.appender.AppenderFactory;
 
@@ -30,7 +30,7 @@ abstract class AbstractLoggerServiceFactory implements LoggerServiceFactory {
 
 	protected final List<AppenderFactory> appenderFactories = new ArrayList<AppenderFactory>();
 
-	protected final List<GFLogger> loggers = new ArrayList<GFLogger>();
+	protected final List<GFLoggerBuilder> loggersBuilders = new ArrayList<GFLoggerBuilder>();
 
 	protected final DefaultObjectFormatterFactory objectFormatterFactory = new DefaultObjectFormatterFactory();
 
@@ -67,8 +67,8 @@ abstract class AbstractLoggerServiceFactory implements LoggerServiceFactory {
 	}
 
 	@Override
-	public void addLogger(GFLogger logger) {
-		loggers.add(logger);
+	public void addGFLoggerBuilder(GFLoggerBuilder logger) {
+		loggersBuilders.add(logger);
 	}
 
 }

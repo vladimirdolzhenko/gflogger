@@ -14,7 +14,7 @@
 
 package org.gflogger.config.xml;
 
-import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatter;
 import org.gflogger.appender.AppenderFactory;
@@ -34,7 +34,7 @@ public interface LoggerServiceFactory {
 
 	void addAppenderFactory(AppenderFactory factory);
 
-	void addLogger(GFLogger logger);
+	void addGFLoggerBuilder(GFLoggerBuilder logger);
 
 	void addObjectFormatter(Class clazz, ObjectFormatter objectFormatter);
 }

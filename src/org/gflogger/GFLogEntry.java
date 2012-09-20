@@ -15,33 +15,33 @@
 package org.gflogger;
 
 /**
- * LogEntry
+ * GFLogEntry
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface LogEntry {
+public interface GFLogEntry {
 
 	/**
 	 * appends a single char
 	 * @return a reference to this object.
 	 */
-	LogEntry append(char c);
+	GFLogEntry append(char c);
 
-	LogEntry append(CharSequence csq);
+	GFLogEntry append(CharSequence csq);
 
-	LogEntry append(CharSequence csq, int start, int end);
+	GFLogEntry append(CharSequence csq, int start, int end);
 
-	LogEntry append(boolean b);
+	GFLogEntry append(boolean b);
 
-	LogEntry append(int i);
+	GFLogEntry append(int i);
 
-	LogEntry append(long i);
+	GFLogEntry append(long i);
 
-	LogEntry append(double i, int precision);
+	GFLogEntry append(double i, int precision);
 
-	LogEntry append(Throwable e);
+	GFLogEntry append(Throwable e);
 
-	LogEntry append(Loggable loggable);
+	GFLogEntry append(Loggable loggable);
 
 	/**
 	 * appends string representation of an object using <code>o.toString()</code> method
@@ -51,7 +51,7 @@ public interface LogEntry {
 	 * @param o
 	 * @return
 	 */
-	LogEntry append(Object o);
+	GFLogEntry append(Object o);
 
 	/**
 	 * appends last a single char

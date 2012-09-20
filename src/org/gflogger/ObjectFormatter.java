@@ -25,6 +25,6 @@ public interface ObjectFormatter<T> {
 	 * @param obj
 	 * @param entry
 	 */
-	void append(T obj, LogEntry entry);
+	void append(T obj, GFLogEntry entry);
 
 }

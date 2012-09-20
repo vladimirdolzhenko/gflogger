@@ -14,7 +14,7 @@
 
 package org.gflogger.config.xml;
 
-import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.LoggerServiceImpl;
@@ -33,7 +33,7 @@ public class DLoggerServiceFactory extends AbstractLoggerServiceFactory {
 				count,
 				maxMessageSize,
 				objectFormatterFactory,
-				loggers.toArray(new GFLogger[loggers.size()]),
+				loggersBuilders.toArray(new GFLoggerBuilder[loggersBuilders.size()]),
 				appenderFactories.toArray(new AppenderFactory[appenderFactories.size()]));
 	}
 

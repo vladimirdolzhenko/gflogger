@@ -32,26 +32,26 @@ import org.gflogger.ring.RingBuffer;
 import org.gflogger.util.NamedThreadFactory;
 
 /**
- * DefaultLoggerServiceImpl is the garbage-free implementation on the top of
+ * garbage-free logger service implementation on the top of
  * own ring buffer implementation and off-heap buffer.
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class LoggerServiceImpl implements LoggerService {
 
-	private final LogLevel					level;
-	private final Appender[]				   appenders;
-	private final GFLogger[]				   loggers;
+	private final LogLevel						level;
+	private final Appender[]					appenders;
+	private final GFLogger[]					loggers;
 
-	private final ThreadLocal<LocalLogEntry>   logEntryThreadLocal;
+	private final ThreadLocal<LocalLogEntry>	logEntryThreadLocal;
 
-	private final RingBuffer<LogEntryItemImpl> ringBuffer;
-	private final ExecutorService			  executorService;
-	private final EntryHandler				 entryHandler;
+	private final RingBuffer<LogEntryItemImpl>	ringBuffer;
+	private final ExecutorService				executorService;
+	private final EntryHandler					entryHandler;
 
-	private final boolean					 multibyte;
+	private final boolean						multibyte;
 
-	private volatile boolean				  running = false;
+	private volatile boolean					running	= false;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -61,9 +61,11 @@ public class LoggerServiceImpl implements LoggerService {
 	 */
 	public LoggerServiceImpl(final int count,
 			final int maxMessageSize,
-			final GFLogger[] loggers,
+			final GFLoggerBuilder[] loggerBuilders,
 			final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, null, loggers, createAppenders(appenderFactories));
+		this(count, maxMessageSize, null,
+			createAppenders(appenderFactories),
+			createLoggers(appenderFactories, loggerBuilders));
 	}
 
 	/**
@@ -75,17 +77,28 @@ public class LoggerServiceImpl implements LoggerService {
 	public LoggerServiceImpl(final int count,
 			final int maxMessageSize,
 			final ObjectFormatterFactory objectFormatterFactory,
-			final GFLogger[] loggers,
+			final GFLoggerBuilder[] loggersBuilders,
 			final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, objectFormatterFactory, loggers, createAppenders(appenderFactories));
+		this(count, maxMessageSize, objectFormatterFactory,
+			createAppenders(appenderFactories),
+			createLoggers(appenderFactories, loggersBuilders));
 	}
 
 	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
 		final Appender[] appenders = new Appender[appenderFactories.length];
 		for (int i = 0; i < appenders.length; i++) {
+			appenderFactories[i].setIndex(i);
 			appenders[i] = (Appender) appenderFactories[i].createAppender(LoggerServiceImpl.class);
 		}
 		return appenders;
+	}
+
+	private static GFLogger[] createLoggers(AppenderFactory[] appenderFactories, GFLoggerBuilder[] loggerBuilders) {
+		final GFLogger[] loggers = new GFLogger[loggerBuilders.length];
+		for (int i = 0; i < loggerBuilders.length; i++) {
+			loggers[i] = loggerBuilders[i].build();
+		}
+		return loggers;
 	}
 
 	/**
@@ -94,11 +107,11 @@ public class LoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public LoggerServiceImpl(final int count,
+	private LoggerServiceImpl(final int count,
 			final int maxMessageSize,
 			final ObjectFormatterFactory objectFormatterFactory,
-			final GFLogger[] loggers,
-			final Appender ... appenders) {
+			final Appender[] appenders,
+			final GFLogger[] loggers) {
 		if (appenders.length <= 0){
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
@@ -219,7 +232,7 @@ public class LoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public LogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
+	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
 		if (!running) throw new IllegalStateException("Logger was stopped.");
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
@@ -238,7 +251,7 @@ public class LoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public FormattedLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
+	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
 		if (!running) throw new IllegalStateException("Logger was stopped.");
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 

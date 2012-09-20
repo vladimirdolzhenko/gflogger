@@ -19,7 +19,7 @@ package org.gflogger;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class NullLogEntry implements LogEntry, FormattedLogEntry {
+public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	public static final NullLogEntry INSTANCE = new NullLogEntry();
 
@@ -27,52 +27,52 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public LogEntry append(final char c) {
+	public GFLogEntry append(final char c) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final CharSequence csq) {
+	public GFLogEntry append(final CharSequence csq) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final CharSequence csq, final int start, final int end) {
+	public GFLogEntry append(final CharSequence csq, final int start, final int end) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final boolean b) {
+	public GFLogEntry append(final boolean b) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final int i) {
+	public GFLogEntry append(final int i) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final long i) {
+	public GFLogEntry append(final long i) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(final double i, final int precision) {
+	public GFLogEntry append(final double i, final int precision) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(Throwable e) {
+	public GFLogEntry append(Throwable e) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(Loggable loggable) {
+	public GFLogEntry append(Loggable loggable) {
 		return this;
 	}
 
 	@Override
-	public LogEntry append(Object o) {
+	public GFLogEntry append(Object o) {
 		return this;
 	}
 
@@ -132,52 +132,52 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
-	public FormattedLogEntry with(char c) {
+	public FormattedGFLogEntry with(char c) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq) {
+	public FormattedGFLogEntry with(CharSequence csq) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(CharSequence csq, int start, int end) {
+	public FormattedGFLogEntry with(CharSequence csq, int start, int end) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(boolean b) {
+	public FormattedGFLogEntry with(boolean b) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(int i) {
+	public FormattedGFLogEntry with(int i) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(long i) {
+	public FormattedGFLogEntry with(long i) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(double i, int precision) {
+	public FormattedGFLogEntry with(double i, int precision) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(Throwable e) {
+	public FormattedGFLogEntry with(Throwable e) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(Loggable loggable) {
+	public FormattedGFLogEntry with(Loggable loggable) {
 		return this;
 	}
 
 	@Override
-	public FormattedLogEntry with(Object o) {
+	public FormattedGFLogEntry with(Object o) {
 		return this;
 	}
 
