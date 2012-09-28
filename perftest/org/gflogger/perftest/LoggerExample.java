@@ -3,7 +3,6 @@ package org.gflogger.perftest;
 import static org.gflogger.helpers.OptionConverter.getIntProperty;
 import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
-import org.gflogger.GFLogger;
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
@@ -25,9 +24,9 @@ public class LoggerExample extends AbstractLoggerExample {
 		final AppenderFactory[] factories = createAppenderFactories();
 		final GFLoggerBuilder[] loggers =
 				new GFLoggerBuilder[]{ new GFLoggerBuilder(LogLevel.INFO, "com.db", factories)};
-		final LoggerService impl =
-			new LoggerServiceImpl(
-				getIntProperty("gflogger.service.count", 1 << 10),
+		final int count = getIntProperty("gflogger.service.count", 1 << 10);
+		final LoggerService impl = new LoggerServiceImpl(
+				count,
 				getIntProperty("gflogger.service.maxMessageSize", 1 << 8),
 				loggers,
 				factories);
@@ -39,24 +38,11 @@ public class LoggerExample extends AbstractLoggerExample {
 		return getStringProperty("gflogger.filename", "./logs/gflogger.log");
 	}
 
-	/*/
-	@Override
-	protected void logFinalMessage(int count, long t, long e) {
-		final DefaultLoggerServiceImpl impl2 = (DefaultLoggerServiceImpl) service;
-//		logMessage("__ park:" + impl2.park.get().get(), 0);
-//		logMessage("__ miss:" + impl2.miss.get().get(), 0);
-//		logMessage("__ acq:" + ((impl2.acq.get().get() / 1000) / 1e3) + " ms", 0);
-		logMessage("__ commit:" + ((impl2.commit.get().get() / 1000) / 1e3) + " ms", 0);
-		System.out.println("__ commit:" + ((impl2.commit.get().get() / 1000) / 1e3) + " ms / " + impl2.commitbytes.get().get() + " bytes");
-		super.logFinalMessage(count, t, e);
-	}
-	/*/
-	//*/
-
 	public static void main(final String[] args) throws Throwable {
+		if (args.length > 2) System.in.read();
 		final LoggerExample loggerExample = new LoggerExample();
-		loggerExample.parseArgs(args);
 
+		loggerExample.parseArgs(args);
 		loggerExample.runTest();
 	}
 }

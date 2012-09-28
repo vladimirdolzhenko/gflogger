@@ -16,10 +16,10 @@ package org.gflogger.ring;
 
 /**
  * RingBufferAware
- * 
+ *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface RingBufferAware<T> {
+public interface RingBufferAware<T extends Publishable> {
 
 	void setRingBuffer(final RingBuffer<T> ringBuffer);
 }

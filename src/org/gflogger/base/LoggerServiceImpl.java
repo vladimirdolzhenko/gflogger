@@ -18,16 +18,29 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.*;
+import org.gflogger.ByteBufferLocalLogEntry;
+import org.gflogger.CharBufferLocalLogEntry;
+import org.gflogger.DefaultObjectFormatterFactory;
+import org.gflogger.FormattedGFLogEntry;
+import org.gflogger.GFLogEntry;
+import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
+import org.gflogger.LocalLogEntry;
+import org.gflogger.LogLevel;
+import org.gflogger.LoggerService;
+import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.base.appender.Appender;
 import org.gflogger.helpers.LogLog;
-import org.gflogger.ring.BlockingWaitStrategy;
 import org.gflogger.ring.RingBuffer;
 import org.gflogger.util.NamedThreadFactory;
 
@@ -129,10 +142,7 @@ public class LoggerServiceImpl implements LoggerService {
 
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
-		this.ringBuffer =
-			new RingBuffer<LogEntryItemImpl>(new BlockingWaitStrategy(),
-				initEnties(c, maxMessageSize0));
-		this.ringBuffer.setEntryProcessors(appenders);
+
 		this.level = initLogLevel(loggers);
 
 		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
@@ -160,7 +170,8 @@ public class LoggerServiceImpl implements LoggerService {
 		/*/
 		executorService = Executors.newFixedThreadPool(1, new NamedThreadFactory("gflogger"));
 		entryHandler = new EntryHandler(appenders);
-		this.ringBuffer.setEntryProcessors(entryHandler);
+		this.ringBuffer =
+				new RingBuffer<LogEntryItemImpl>(initEnties(c, maxMessageSize0), entryHandler);
 		entryHandler.start();
 		executorService.execute(entryHandler);
 
@@ -222,15 +233,6 @@ public class LoggerServiceImpl implements LoggerService {
 		return entries;
 	}
 
-	private void start(final Appender ... appenders) {
-		for (int i = 0; i < appenders.length; i++) {
-			appenders[i].start();
-		}
-		for (int i = 0; i < appenders.length; i++) {
-			executorService.execute(appenders[i]);
-		}
-	}
-
 	@Override
 	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
 		if (!running) throw new IllegalStateException("Logger was stopped.");
@@ -271,16 +273,22 @@ public class LoggerServiceImpl implements LoggerService {
 
 	@Override
 	public void entryFlushed(final LocalLogEntry localEntry){
+		final String categoryName = localEntry.getCategoryName();
+		final LogLevel logLevel = localEntry.getLogLevel();
+		final String threadName = localEntry.getThreadName();
+		final long appenderMask = localEntry.getAppenderMask();
+
+		final long now = System.currentTimeMillis();
+
 		final long next = ringBuffer.next();
 		final LogEntryItemImpl entry = ringBuffer.get(next);
 
 		try {
-			entry.setCategoryName(localEntry.getCategoryName());
-			entry.setLogLevel(localEntry.getLogLevel());
-			entry.setThreadName(localEntry.getThreadName());
-			entry.setTimestamp(System.currentTimeMillis());
-
-			entry.setAppenderMask(localEntry.getAppenderMask());
+			entry.setCategoryName(categoryName);
+			entry.setLogLevel(logLevel);
+			entry.setThreadName(threadName);
+			entry.setTimestamp(now);
+			entry.setAppenderMask(appenderMask);
 
 			if (multibyte) {
 				localEntry.copyTo(entry.getCharBuffer());
@@ -342,7 +350,6 @@ public class LoggerServiceImpl implements LoggerService {
 			appenders[i].stop();
 		}
 		/*/
-		entryHandler.stop();
 		//*/
 		ringBuffer.stop();
 		executorService.shutdown();

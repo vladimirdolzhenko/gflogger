@@ -25,7 +25,7 @@ import org.gflogger.helpers.LogLog;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class ConsoleAppender extends AbstractAsyncAppender implements Runnable {
+public class ConsoleAppender extends AbstractAsyncAppender {
 
 	private final Appendable out;
 	private final Flushable flushable;

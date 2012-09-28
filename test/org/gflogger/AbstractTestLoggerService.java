@@ -58,6 +58,30 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testCommit() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final int maxMessageSize = 32;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService =
+				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		log.info().append("commited").commit();
+
+		//System.in.read();
+		GFLogFactory.stop();
+
+		assertEquals("commited", buffer.toString());
+	}
+
+	@Test
 	public void testCommitUncommited() throws Exception {
 		for(boolean multibyte : new boolean[]{false, true}){
 			final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
@@ -278,7 +302,6 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
-	@Ignore
 	public void testAppendTruncatedMessage() throws Exception {
 		final String placeholder = ">>>";
 		System.setProperty("gflogger.errorMessage", placeholder);
@@ -323,7 +346,6 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
-	@Ignore
 	public void testAppendTruncatedMessageWithDigits() throws Exception {
 		final String placeholder = ">";
 		System.setProperty("gflogger.errorMessage", placeholder);

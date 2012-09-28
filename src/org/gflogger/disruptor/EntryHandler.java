@@ -17,9 +17,10 @@
 package org.gflogger.disruptor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.gflogger.disruptor.appender.DAppender;
-
+import org.gflogger.helpers.LogLog;
 
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.LifecycleAware;
@@ -33,6 +34,8 @@ public final class EntryHandler implements EventHandler<DLogEntryItem>, Lifecycl
 	protected final AtomicBoolean running = new AtomicBoolean();
 
 	protected final DAppender[] appenders;
+
+	private final AtomicLong timer = new AtomicLong();
 
 	public EntryHandler(DAppender[] appenders) {
 		this.appenders = appenders;
@@ -65,17 +68,22 @@ public final class EntryHandler implements EventHandler<DLogEntryItem>, Lifecycl
 
 		for(int i = 0 ; i < appenders.length; i++){
 			try {
+				LogLog.debug("going to stop appender " + appenders[i].getName());
 				appenders[i].onShutdown();
 			} catch (Throwable e){
 				// TODO:
 			}
 		}
+
+		LogLog.debug("total appender time:" + (timer.get() / 1000) / 1e3 + " ms");
 	}
 
 	@Override
 	public void onEvent(DLogEntryItem event, long sequence, boolean endOfBatch)
 			throws Exception {
 		if (!running.get()) return;
+
+		final long start = System.nanoTime();
 
 		long mask = event.getAppenderMask();
 		int idx = 0;
@@ -90,5 +98,9 @@ public final class EntryHandler implements EventHandler<DLogEntryItem>, Lifecycl
 			idx++;
 			mask >>= 1;
 		}
+
+		final long end = System.nanoTime();
+
+		timer.addAndGet(end - start);
 	}
 }

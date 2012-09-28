@@ -14,24 +14,46 @@
 
 package org.gflogger.disruptor;
 
-import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
+import static com.lmax.disruptor.util.Util.getMinimumSequence;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.*;
+import org.gflogger.ByteBufferLocalLogEntry;
+import org.gflogger.ByteLocalLogEntry;
+import org.gflogger.CharBufferLocalLogEntry;
+import org.gflogger.DefaultObjectFormatterFactory;
+import org.gflogger.FormattedGFLogEntry;
+import org.gflogger.GFLogEntry;
+import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
+import org.gflogger.LocalLogEntry;
+import org.gflogger.LogLevel;
+import org.gflogger.LoggerService;
+import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.appender.DAppender;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.util.NamedThreadFactory;
 
-import com.lmax.disruptor.*;
+import com.lmax.disruptor.AlertException;
+import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.ExceptionHandler;
+import com.lmax.disruptor.MultiThreadedClaimStrategy;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.Sequence;
+import com.lmax.disruptor.SequenceBarrier;
+import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 
 /**
@@ -416,7 +438,11 @@ public class LoggerServiceImpl implements LoggerService {
 							throw AlertException.INSTANCE;
 						}
 						barrier.checkAlert();
+						//*/
 						lock.wait();
+						/*/
+						Thread.sleep(1);
+						//*/
 					}
 					--numWaiters;
 				}
@@ -448,9 +474,13 @@ public class LoggerServiceImpl implements LoggerService {
 							disruptor.halt();
 							throw AlertException.INSTANCE;
 						}
+						//*/
 						lock.wait(timeoutMs);
 
 						if (!signalled || (System.currentTimeMillis() - startTime) > timeoutMs) break;
+						/*/
+						Thread.sleep(timeoutMs);
+						//*/
 					}
 					--numWaiters;
 				}
@@ -467,12 +497,16 @@ public class LoggerServiceImpl implements LoggerService {
 
 		@Override
 		public void signalAllWhenBlocking() {
+			//*/
 			if (0 != numWaiters) {
+				// TODO: remove sync notification
 				synchronized (lock) {
 					signalled = true;
 					lock.notifyAll();
 				}
 			}
+			/*/
+			//*/
 		}
 
 	}

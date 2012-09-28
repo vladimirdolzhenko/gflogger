@@ -21,16 +21,19 @@ import java.nio.CharBuffer;
 
 import org.gflogger.LogEntryItem;
 import org.gflogger.LogLevel;
+import org.gflogger.ring.Publishable;
 
 /**
  * LogEntryItemImpl
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class LogEntryItemImpl implements LogEntryItem {
+public final class LogEntryItemImpl implements LogEntryItem, Publishable {
 
 	private final ByteBuffer buffer;
 	private final CharBuffer charBuffer;
+
+	private volatile boolean published;
 
 	private String categoryName;
 	private LogLevel logLevel;
@@ -103,6 +106,16 @@ public final class LogEntryItemImpl implements LogEntryItem {
 
 	public void setAppenderMask(long appenderMask) {
 		this.appenderMask = appenderMask;
+	}
+
+	@Override
+	public boolean isPublished() {
+		return this.published;
+	}
+
+	@Override
+	public void setPublished(boolean published) {
+		this.published = published;
 	}
 
 	@Override

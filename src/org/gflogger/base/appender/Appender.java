@@ -16,10 +16,9 @@ package org.gflogger.base.appender;
 
 import org.gflogger.LogEntryItem;
 import org.gflogger.base.LogEntryItemImpl;
-import org.gflogger.ring.EntryProcessor;
 
 
-public interface Appender<T extends LogEntryItem> extends org.gflogger.Appender, EntryProcessor, Runnable {
+public interface Appender<T extends LogEntryItem> extends org.gflogger.Appender {
 
 	void start();
 

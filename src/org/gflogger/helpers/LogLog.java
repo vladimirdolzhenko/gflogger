@@ -16,17 +16,17 @@ package org.gflogger.helpers;
 
 /**
  * This class used to output log statements from within the gflogger package.
- * 
+ *
  * <p>
  * Log4j components cannot make gflogger logging calls. However, it is sometimes
  * useful for the user to learn about what gflogger is doing. You can enable gflogger
  * internal logging by defining the <b>gflogger.configDebug</b> variable.
- * 
+ *
  * <p>
  * All gflogger internal debug calls go to <code>System.out</code> where as
  * internal error messages are sent to <code>System.err</code>. All internal
  * messages are prepended with the string "gflogger: ".
- * 
+ *
  * @author Ceki G&uuml;lc&uuml;
  * @author Vladimir Dolzhenko
  */
@@ -35,10 +35,10 @@ public class LogLog {
 	/**
 	 * Defining this value makes gflogger print gflogger-internal debug statements to
 	 * <code>System.out</code>.
-	 * 
+	 *
 	 * <p>
 	 * The value of this string is <b>gflogger.debug</b>.
-	 * 
+	 *
 	 * <p>
 	 * Note that the search for all option names is case sensitive.
 	 */
@@ -47,15 +47,16 @@ public class LogLog {
 	/**
 	 * Defining this value makes gflogger components print gflogger-internal debug
 	 * statements to <code>System.out</code>.
-	 * 
+	 *
 	 * <p>
 	 * The value of this string is <b>gflogger.configDebug</b>.
-	 * 
+	 *
 	 * <p>
 	 * Note that the search for all option names is case sensitive.
-	 * 
+	 *
 	 * @deprecated Use {@link #DEBUG_KEY} instead.
 	 */
+	@Deprecated
 	public static final String  CONFIG_DEBUG_KEY = "logger.configDebug";
 
 	protected static boolean	debugEnabled	 = Boolean.getBoolean("gflogger.internalDebugEnabled");
@@ -139,7 +140,7 @@ public class LogLog {
 	/**
 	 * In quite mode no LogLog generates strictly no output, not even for
 	 * errors.
-	 * 
+	 *
 	 * @param quietMode
 	 *			A true for not
 	 */

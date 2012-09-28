@@ -118,36 +118,34 @@ public abstract class AbstractAsyncAppender implements DAppender {
 
 		if (multibyte) {
 			final CharBuffer eventBuffer = event.getCharBuffer();
-			synchronized (byteBuffer) {
-				final int size = layout.size(event);
-				final int position = charBuffer.position();
-				final int limit = charBuffer.limit();
-				if (position + size >= limit){
-					flushBuffer();
-					charBuffer.clear();
-				}
-				formatMessage(event, eventBuffer, sequence);
-				processCharBuffer();
 
-				if (immediateFlush) {
-					flushBuffer();
-				}
+			final int size = layout.size(event);
+			final int position = charBuffer.position();
+			final int limit = charBuffer.limit();
+			if (position + size >= limit){
+				flushBuffer();
+				charBuffer.clear();
+			}
+			formatMessage(event, eventBuffer, sequence);
+			processCharBuffer();
+
+			if (immediateFlush) {
+				flushBuffer();
 			}
 		} else {
 			final ByteBuffer eventBuffer = event.getBuffer();
-			synchronized (byteBuffer) {
-				final int size = layout.size(event);
-				final int position = byteBuffer.position();
-				final int limit = byteBuffer.limit();
-				if (position + size >= limit){
-					flushBuffer();
-					byteBuffer.clear();
-				}
-				formatMessage(event, eventBuffer, sequence);
 
-				if (immediateFlush) {
-					flushBuffer();
-				}
+			final int size = layout.size(event);
+			final int position = byteBuffer.position();
+			final int limit = byteBuffer.limit();
+			if (position + size >= limit){
+				flushBuffer();
+				byteBuffer.clear();
+			}
+			formatMessage(event, eventBuffer, sequence);
+
+			if (immediateFlush) {
+				flushBuffer();
 			}
 		}
 	}
@@ -155,9 +153,7 @@ public abstract class AbstractAsyncAppender implements DAppender {
 	@Override
 	public void flush() {
 		try{
-			synchronized (byteBuffer) {
-				flushBuffer();
-			}
+			flushBuffer();
 		} catch (RuntimeException e){
 			LogLog.error("[" + Thread.currentThread().getName() +
 				"] exception at " + getName() + " - " + e.getMessage(), e);
@@ -221,8 +217,9 @@ public abstract class AbstractAsyncAppender implements DAppender {
 
 	@Override
 	public void onShutdown() {
-		LogLog.debug("[" + Thread.currentThread().getName() + "] " +
-			getName() + " is about to shutdown");
+		final String msg = "[" + Thread.currentThread().getName() + "] " +
+			getName() + " is about to shutdown";
+		LogLog.debug(msg);
 		immediateFlush = true;
 		flushBuffer();
 		BufferFormatter.purge(byteBuffer);

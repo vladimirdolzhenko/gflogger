@@ -23,8 +23,9 @@ public class DLoggerExample extends AbstractLoggerExample {
 		final AppenderFactory[] factories = createAppenderFactories();
 		final GFLoggerBuilder[] loggers =
 				new GFLoggerBuilder[]{ new GFLoggerBuilder(LogLevel.INFO, "com.db", factories)};
+		final int count = getIntProperty("gflogger.service.count", 1 << 10);
 		final LoggerService impl = new LoggerServiceImpl(
-			getIntProperty("gflogger.service.count", 1 << 10),
+			count,
 			getIntProperty("gflogger.service.maxMessageSize", 1 << 8),
 			loggers,
 			factories);
@@ -38,10 +39,9 @@ public class DLoggerExample extends AbstractLoggerExample {
 
 	public static void main(final String[] args) throws Throwable {
 		if (args.length > 2) System.in.read();
-		final DLoggerExample dLoggerExample = new DLoggerExample();
+		final DLoggerExample loggerExample = new DLoggerExample();
 
-		dLoggerExample.parseArgs(args);
-
-		dLoggerExample.runTest();
+		loggerExample.parseArgs(args);
+		loggerExample.runTest();
 	}
 }
