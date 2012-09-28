@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package org.gflogger.base.appender;
+package org.gflogger.appender;
 
 
 import java.io.FileNotFoundException;

@@ -14,35 +14,20 @@
 
 package org.gflogger.base;
 
-import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.ByteBufferLocalLogEntry;
-import org.gflogger.CharBufferLocalLogEntry;
-import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.FormattedGFLogEntry;
-import org.gflogger.GFLogEntry;
+import org.gflogger.AbstractLoggerServiceImpl;
+import org.gflogger.Appender;
 import org.gflogger.GFLogger;
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LocalLogEntry;
+import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.base.appender.Appender;
-import org.gflogger.helpers.LogLog;
 import org.gflogger.ring.RingBuffer;
-import org.gflogger.util.NamedThreadFactory;
 
 /**
  * garbage-free logger service implementation on the top of
@@ -50,21 +35,10 @@ import org.gflogger.util.NamedThreadFactory;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class LoggerServiceImpl implements LoggerService {
-
-	private final LogLevel						level;
-	private final Appender[]					appenders;
-	private final GFLogger[]					loggers;
-
-	private final ThreadLocal<LocalLogEntry>	logEntryThreadLocal;
+public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 	private final RingBuffer<LogEntryItemImpl>	ringBuffer;
-	private final ExecutorService				executorService;
 	private final EntryHandler					entryHandler;
-
-	private final boolean						multibyte;
-
-	private volatile boolean					running	= false;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -97,23 +71,6 @@ public class LoggerServiceImpl implements LoggerService {
 			createLoggers(appenderFactories, loggersBuilders));
 	}
 
-	private static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
-		final Appender[] appenders = new Appender[appenderFactories.length];
-		for (int i = 0; i < appenders.length; i++) {
-			appenderFactories[i].setIndex(i);
-			appenders[i] = (Appender) appenderFactories[i].createAppender(LoggerServiceImpl.class);
-		}
-		return appenders;
-	}
-
-	private static GFLogger[] createLoggers(AppenderFactory[] appenderFactories, GFLoggerBuilder[] loggerBuilders) {
-		final GFLogger[] loggers = new GFLogger[loggerBuilders.length];
-		for (int i = 0; i < loggerBuilders.length; i++) {
-			loggers[i] = loggerBuilders[i].build();
-		}
-		return loggers;
-	}
-
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
 	 * @param maxMessageSize max message size in the ring (in chars)
@@ -125,50 +82,15 @@ public class LoggerServiceImpl implements LoggerService {
 			final ObjectFormatterFactory objectFormatterFactory,
 			final Appender[] appenders,
 			final GFLogger[] loggers) {
-		if (appenders.length <= 0){
-			throw new IllegalArgumentException("Expected at least one appender");
-		}
-		this.appenders = appenders;
-		this.loggers = loggers;
-		this.multibyte = multibyte(appenders);
+
+		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
 
 		// unicode char has 2 bytes
 		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
 
-		final ObjectFormatterFactory formatterFactory =
-			objectFormatterFactory != null ?
-				objectFormatterFactory :
-				new DefaultObjectFormatterFactory();
-
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
 
-		this.level = initLogLevel(loggers);
-
-		this.logEntryThreadLocal  = new ThreadLocal<LocalLogEntry>(){
-			@Override
-			protected LocalLogEntry initialValue() {
-				final LocalLogEntry logEntry =
-					multibyte ?
-					new CharBufferLocalLogEntry(Thread.currentThread(),
-						maxMessageSize0,
-						formatterFactory,
-						LoggerServiceImpl.this) :
-					new ByteBufferLocalLogEntry(Thread.currentThread(),
-						maxMessageSize0,
-						formatterFactory,
-						LoggerServiceImpl.this);
-				return logEntry;
-			}
-
-		};
-
-		/*/
-		executorService = initExecutorService(appenders);
-
-		start(appenders);
-		/*/
-		executorService = Executors.newFixedThreadPool(1, new NamedThreadFactory("gflogger"));
 		entryHandler = new EntryHandler(appenders);
 		this.ringBuffer =
 				new RingBuffer<LogEntryItemImpl>(initEnties(c, maxMessageSize0), entryHandler);
@@ -179,97 +101,6 @@ public class LoggerServiceImpl implements LoggerService {
 		running = true;
 	}
 
-	private LogLevel initLogLevel(final Appender ... appenders) {
-		LogLevel level = LogLevel.ERROR;
-		for (int i = 0; i < appenders.length; i++) {
-			final LogLevel l = appenders[i].getLogLevel();
-			level = level.isHigher(l) ? level : l;
-		}
-		return level;
-	}
-
-	private final LogLevel initLogLevel(final GFLogger ... loggers) {
-		LogLevel level = LogLevel.FATAL;
-		for (int i = 0; i < loggers.length; i++) {
-			final LogLevel l = loggers[i].getLogLevel();
-			level = level.isHigher(l) ? level : l;
-		}
-		return level;
-	}
-
-	private boolean multibyte(final Appender ... appenders) {
-		boolean multibyte = appenders[0].isMultibyte();
-		for (int i = 1; i < appenders.length; i++) {
-			if (appenders[i].isMultibyte() != multibyte){
-				throw new IllegalArgumentException(
-					"Expected " + (multibyte ? "multibyte" : "single byte") +
-					" mode for appender #" + i);
-			}
-		}
-		return multibyte;
-	}
-
-	private ExecutorService initExecutorService(final Appender... appenders){
-		final String[] names = new String[appenders.length];
-		for (int i = 0; i < appenders.length; i++) {
-			names[i] = appenders[i].getName();
-		}
-
-		return Executors.newFixedThreadPool(appenders.length, new NamedThreadFactory("appender", names));
-	}
-
-	private LogEntryItemImpl[] initEnties(int count, final int maxMessageSize) {
-		// unicode char has 2 bytes
-		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
-		final ByteBuffer buffer = allocate(count * bufferSize);
-
-		final LogEntryItemImpl[] entries = new LogEntryItemImpl[count];
-		for (int i = 0; i < count; i++) {
-			buffer.limit((i + 1) * bufferSize);
-			buffer.position(i * bufferSize);
-			final ByteBuffer subBuffer = buffer.slice();
-			entries[i] = new LogEntryItemImpl(subBuffer, multibyte);
-		}
-		return entries;
-	}
-
-	@Override
-	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-		final LocalLogEntry entry = logEntryThreadLocal.get();
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message '" + entry.stringValue()
-				+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
-			entry.commit();
-		}
-
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.clear();
-		return entry;
-	}
-
-	@Override
-	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-		final LocalLogEntry entry = logEntryThreadLocal.get();
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message was not properly commited.");
-			entry.commit();
-		}
-
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.clear();
-		entry.setPattern(pattern);
-		return entry;
-	}
 
 	@Override
 	public void entryFlushed(final LocalLogEntry localEntry){
@@ -300,46 +131,6 @@ public class LoggerServiceImpl implements LoggerService {
 		}
 	}
 
-	@Override
-	public LogLevel getLevel() {
-		return level;
-	}
-
-	@Override
-	public GFLogger[] lookupLoggers(String name) {
-		List<GFLogger> list = new ArrayList<GFLogger>();
-		for(final GFLogger logger : this.loggers){
-			final String category = logger.getCategory();
-			if (category == null || name.startsWith(category)){
-				list.add(logger);
-			}
-		}
-
-		Collections.sort(list, new Comparator<GFLogger>() {
-			@Override
-			public int compare(GFLogger o1, GFLogger o2) {
-				final String c1 = o1.getCategory();
-				final String c2 = o2.getCategory();
-				return c2 == null ? -1 :
-					c1 == null ?  1 :
-						c2.length() - c1.length();
-			}
-		});
-
-		int idx = 0;
-		for(final Iterator<GFLogger> it = list.iterator(); it.hasNext();){
-			final GFLogger gfLogger = it.next();
-			if (!gfLogger.hasAdditivity()) {
-				break;
-			}
-			idx++;
-		}
-
-		final List<GFLogger> subList = list.subList(0, idx + 1);
-		final GFLogger[] array = subList.toArray(new GFLogger[subList.size()]);
-
-		return array;
-	}
 
 	@Override
 	public void stop(){

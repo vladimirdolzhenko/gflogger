@@ -1,10 +1,23 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gflogger.base;
 
-
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.gflogger.base.appender.Appender;
+import org.gflogger.AbstractEntryHandler;
+import org.gflogger.Appender;
+import org.gflogger.LogEntryItemImpl;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.ring.AlertException;
 import org.gflogger.ring.EntryProcessor;
@@ -12,11 +25,12 @@ import org.gflogger.ring.PaddedAtomicLong;
 import org.gflogger.ring.RingBuffer;
 import org.gflogger.ring.RingBufferAware;
 
-public class EntryHandler implements Runnable, EntryProcessor, RingBufferAware<LogEntryItemImpl> {
-
-	protected final AtomicBoolean running = new AtomicBoolean();
-
-	protected final Appender[] appenders;
+/**
+ * EntryHandler
+ *
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
+public class EntryHandler extends AbstractEntryHandler implements Runnable, EntryProcessor, RingBufferAware<LogEntryItemImpl> {
 
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 
@@ -29,7 +43,7 @@ public class EntryHandler implements Runnable, EntryProcessor, RingBufferAware<L
 	protected long awaitTimeout = 10L;
 
 	public EntryHandler(Appender[] appenders) {
-		this.appenders = appenders;
+		super(appenders);
 	}
 
 	@Override
@@ -60,19 +74,7 @@ public class EntryHandler implements Runnable, EntryProcessor, RingBufferAware<L
 					assert entry.isPublished();
 
 					try {
-						long mask = entry.getAppenderMask();
-						int appenderIdx = 0;
-						while(mask != 0L){
-							if ((mask & 1L) != 0L){
-								try {
-									appenders[appenderIdx].process(entry);
-								} catch (Throwable e){
-									// TODO:
-								}
-							}
-							appenderIdx++;
-							mask >>= 1;
-						}
+						process(entry);
 					} finally {
 						// release entry anyway
 						entry.setPublished(false);
@@ -108,39 +110,6 @@ public class EntryHandler implements Runnable, EntryProcessor, RingBufferAware<L
 	@Override
 	public final void setRingBuffer(RingBuffer<LogEntryItemImpl> ringBuffer) {
 		this.ringBuffer = ringBuffer;
-	}
-
-	protected final void workerIsAboutToFinish() {
-		for(int i = 0; i < appenders.length; i++){
-			appenders[i].workerIsAboutToFinish();
-		}
-	}
-
-	protected final void flushBuffer() {
-		flushBuffer(true);
-	}
-
-	protected final void flushBuffer(boolean force) {
-		for(int i = 0; i < appenders.length; i++){
-			appenders[i].flush(force);
-		}
-	}
-
-	public void start() {
-		if (running.getAndSet(true)) throw new IllegalStateException();
-
-		for(int i = 0; i < appenders.length; i++){
-			appenders[i].start();
-		}
-	}
-
-	public void stop(){
-		if (!running.getAndSet(false)) return;
-
-		for(int i = 0; i < appenders.length; i++){
-			LogLog.debug("going to stop appender " + appenders[i].getName());
-			appenders[i].stop();
-		}
 	}
 
 }

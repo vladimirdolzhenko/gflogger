@@ -36,45 +36,23 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		if (org.gflogger.base.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.base.appender.DailyRollingFileAppender appender =
-				new org.gflogger.base.appender.DailyRollingFileAppender(bufferSize, multibyte);
+		final org.gflogger.appender.DailyRollingFileAppender appender =
+			new org.gflogger.appender.DailyRollingFileAppender(bufferSize, multibyte);
 
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
+		appender.setLogLevel(logLevel);
+		appender.setLayout(layout);
+		appender.setImmediateFlush(immediateFlush);
+		appender.setBufferedIOThreshold(bufferedIOThreshold);
+		appender.setAwaitTimeout(awaitTimeout);
+		appender.setEnabled(enabled);
 
-			appender.setFileName(fileName);
-			appender.setCodepage(codepage);
-			appender.setAppend(append);
-			appender.setIndex(index);
+		appender.setFileName(fileName);
+		appender.setCodepage(codepage);
+		appender.setAppend(append);
+		appender.setIndex(index);
 
-			appender.setDatePattern(datePattern);
-			return appender;
-		} else if (org.gflogger.disruptor.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.disruptor.appender.DailyRollingFileAppender appender =
-				new org.gflogger.disruptor.appender.DailyRollingFileAppender(bufferSize, multibyte);
-
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
-			appender.setIndex(index);
-
-			appender.setFileName(fileName);
-			appender.setCodepage(codepage);
-			appender.setAppend(append);
-
-			appender.setDatePattern(datePattern);
-			return appender;
-		}
-		throw new IllegalArgumentException(loggerServiceClass.getName()
-			+ " is unsupported type of logger service");
+		appender.setDatePattern(datePattern);
+		return appender;
 	}
 
 	/*

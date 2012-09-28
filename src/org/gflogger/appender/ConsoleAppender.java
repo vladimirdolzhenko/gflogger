@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package org.gflogger.disruptor.appender;
+package org.gflogger.appender;
 
 
 import java.io.Flushable;
@@ -31,40 +31,43 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	private final Flushable flushable;
 
 	public ConsoleAppender() {
-		this(System.out);
+		this(false);
 	}
 
-	public ConsoleAppender(final int bufferSize) {
-		this(bufferSize, false);
+	public ConsoleAppender(final boolean multibyte) {
+		this(System.out, multibyte);
 	}
 
-	public ConsoleAppender(final int bufferSize, final boolean multibyte) {
+	public ConsoleAppender(final int bufferSize,final boolean multibyte) {
 		this(bufferSize, multibyte, System.out);
 	}
 
-	public ConsoleAppender(final Appendable out) {
+	public ConsoleAppender(final Appendable out,final boolean multibyte) {
+		super(multibyte);
 		this.out = out;
-		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
+		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	public ConsoleAppender(final int bufferSize, final boolean multibyte, final Appendable out) {
 		super(bufferSize, multibyte);
 		this.out = out;
-		this.flushable =  (out instanceof Flushable) ? (Flushable)out : null;
+		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	@Override
 	protected void processCharBuffer() {
-		flushBuffer();
+		flush();
 	}
 
 	@Override
-	protected void flushBuffer() {
+	public void flush(boolean force) {
+		if (!(force || immediateFlush)) return;
 		if (multibyte) {
 			if (charBuffer.position() > 0){
 				charBuffer.flip();
 				try {
 					while(charBuffer.hasRemaining()) out.append(charBuffer.get());
+
 					if (flushable != null) flushable.flush();
 				} catch (IOException e){
 					LogLog.error("[" + Thread.currentThread().getName() +
@@ -78,6 +81,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 				byteBuffer.flip();
 				try {
 					while(byteBuffer.hasRemaining()) out.append((char) byteBuffer.get());
+
 					if (flushable != null) flushable.flush();
 				} catch (IOException e){
 					LogLog.error("[" + Thread.currentThread().getName() +

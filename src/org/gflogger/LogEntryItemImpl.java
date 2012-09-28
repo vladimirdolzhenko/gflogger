@@ -12,25 +12,26 @@
  * limitations under the License.
  */
 
-package org.gflogger.disruptor;
+package org.gflogger;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-import org.gflogger.LogEntryItem;
-import org.gflogger.LogLevel;
+import org.gflogger.ring.Publishable;
 
 /**
- * DLogEntryItem
+ * LogEntryItemImpl
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class DLogEntryItem implements LogEntryItem {
+public final class LogEntryItemImpl implements LogEntryItem, Publishable {
 
 	private final ByteBuffer buffer;
 	private final CharBuffer charBuffer;
+
+	private volatile boolean published;
 
 	private String categoryName;
 	private LogLevel logLevel;
@@ -38,15 +39,15 @@ public final class DLogEntryItem implements LogEntryItem {
 	private String threadName;
 	private long appenderMask;
 
-	public DLogEntryItem(final int size) {
+	public LogEntryItemImpl(final int size) {
 		this(size, false);
 	}
 
-	public DLogEntryItem(final int size, final boolean multibyte) {
+	public LogEntryItemImpl(final int size, final boolean multibyte) {
 		this(allocate(size), multibyte);
 	}
 
-	public DLogEntryItem(final ByteBuffer buffer, final boolean multibyte) {
+	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte) {
 		this.buffer = buffer;
 		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;
 	}
@@ -85,12 +86,12 @@ public final class DLogEntryItem implements LogEntryItem {
 		return charBuffer;
 	}
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
-
 	public void setCategoryName(String name) {
 		this.categoryName = name;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	public void setThreadName(String threadName) {
@@ -106,11 +107,19 @@ public final class DLogEntryItem implements LogEntryItem {
 	}
 
 	@Override
+	public boolean isPublished() {
+		return this.published;
+	}
+
+	@Override
+	public void setPublished(boolean published) {
+		this.published = published;
+	}
+
+	@Override
 	public String toString() {
-		return "["
-			+ " pos:" + buffer.position()
-			+ " limit:" + buffer.limit()
-			+ " capacity:" + buffer.capacity() + "]";
+		return "[" + logLevel
+		+ " pos:" + buffer.position() + " limit:" + buffer.limit() + " capacity:" + buffer.capacity() + "]";
 	}
 
 }

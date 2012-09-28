@@ -12,17 +12,18 @@
  * limitations under the License.
  */
 
-package org.gflogger.base.appender;
+package org.gflogger.appender;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
+import org.gflogger.Appender;
 import org.gflogger.Layout;
+import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
 import org.gflogger.PatternLayout;
-import org.gflogger.base.LogEntryItemImpl;
 import org.gflogger.formatter.BufferFormatter;
 import org.gflogger.helpers.LogLog;
 
@@ -159,6 +160,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		BufferFormatter.purge(charBuffer);
 	}
 
+	@Override
 	public void flush(){
 		flush(true);
 	}

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package org.gflogger.base.appender;
+package org.gflogger.appender;
 
 
 import java.io.FileNotFoundException;
@@ -28,8 +28,8 @@ import java.util.TimeZone;
 import java.util.Locale;
 
 import org.gflogger.Layout;
+import org.gflogger.LogEntryItemImpl;
 import org.gflogger.PatternLayout;
-import org.gflogger.base.LogEntryItemImpl;
 import org.gflogger.helpers.LogLog;
 
 /**

@@ -35,41 +35,21 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		if (org.gflogger.base.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.base.appender.FileAppender appender =
-				new org.gflogger.base.appender.FileAppender(bufferSize, multibyte);
+		final org.gflogger.appender.FileAppender appender =
+			new org.gflogger.appender.FileAppender(bufferSize, multibyte);
 
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
-			appender.setIndex(index);
+		appender.setLogLevel(logLevel);
+		appender.setLayout(layout);
+		appender.setImmediateFlush(immediateFlush);
+		appender.setBufferedIOThreshold(bufferedIOThreshold);
+		appender.setAwaitTimeout(awaitTimeout);
+		appender.setEnabled(enabled);
+		appender.setIndex(index);
 
-			appender.setFileName(fileName);
-			appender.setCodepage(codepage);
-			appender.setAppend(append);
-			return appender;
-		} else if (org.gflogger.disruptor.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.disruptor.appender.FileAppender appender =
-				new org.gflogger.disruptor.appender.FileAppender(bufferSize, multibyte);
-
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
-			appender.setIndex(index);
-
-			appender.setFileName(fileName);
-			appender.setCodepage(codepage);
-			appender.setAppend(append);
-			return appender;
-		}
-		throw new IllegalArgumentException(loggerServiceClass.getName()
-			+ " is unsupported type of logger service");
+		appender.setFileName(fileName);
+		appender.setCodepage(codepage);
+		appender.setAppend(append);
+		return appender;
 	}
 
 	/*

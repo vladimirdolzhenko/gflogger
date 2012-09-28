@@ -16,35 +16,20 @@ package org.gflogger.disruptor;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
-import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.ByteBufferLocalLogEntry;
-import org.gflogger.ByteLocalLogEntry;
-import org.gflogger.CharBufferLocalLogEntry;
-import org.gflogger.DefaultObjectFormatterFactory;
-import org.gflogger.FormattedGFLogEntry;
-import org.gflogger.GFLogEntry;
+import org.gflogger.AbstractLoggerServiceImpl;
+import org.gflogger.Appender;
 import org.gflogger.GFLogger;
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LocalLogEntry;
+import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.disruptor.appender.DAppender;
-import org.gflogger.helpers.LogLog;
-import org.gflogger.util.NamedThreadFactory;
 
 import com.lmax.disruptor.AlertException;
 import com.lmax.disruptor.EventFactory;
@@ -61,27 +46,13 @@ import com.lmax.disruptor.dsl.Disruptor;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class LoggerServiceImpl implements LoggerService {
+public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
-	private final LogLevel				   level;
+	private final Disruptor<LogEntryItemImpl>	disruptor;
 
-	private final DAppender[]				appenders;
+	private final RingBuffer<LogEntryItemImpl>	ringBuffer;
 
-	private final GFLogger[]				 loggers;
-
-	private final ThreadLocal<LocalLogEntry> logEntryThreadLocal;
-
-	private final Disruptor<DLogEntryItem>   disruptor;
-
-	private final ExecutorService			executorService;
-
-	private final RingBuffer<DLogEntryItem>  ringBuffer;
-
-	private final boolean					multibyte;
-
-	private final WaitStrategyImpl		   strategy;
-
-	private volatile boolean				 running = false;
+	private final WaitStrategyImpl				strategy;
 
 	/**
 	 * @param count a number of items in the ring
@@ -111,23 +82,6 @@ public class LoggerServiceImpl implements LoggerService {
 			createLoggers(appenderFactories, loggerBuilders));
 	}
 
-	private static DAppender[] createAppenders(AppenderFactory[] appenderFactories) {
-		final DAppender[] appenders = new DAppender[appenderFactories.length];
-		for (int i = 0; i < appenders.length; i++) {
-			appenderFactories[i].setIndex(i);
-			appenders[i] = (DAppender) appenderFactories[i].createAppender(LoggerServiceImpl.class);
-		}
-		return appenders;
-	}
-
-	private static GFLogger[] createLoggers(AppenderFactory[] appenderFactories, GFLoggerBuilder[] loggerBuilders) {
-		final GFLogger[] loggers = new GFLogger[loggerBuilders.length];
-		for (int i = 0; i < loggerBuilders.length; i++) {
-			loggers[i] = loggerBuilders[i].build();
-		}
-		return loggers;
-	}
-
 	/**
 	 * @param count a number of items in the ring
 	 * @param maxMessageSize max message size in the ring (in chars)
@@ -136,74 +90,30 @@ public class LoggerServiceImpl implements LoggerService {
 	 */
 	private LoggerServiceImpl(final int count, final int maxMessageSize,
 		final ObjectFormatterFactory objectFormatterFactory,
-		final DAppender[] appenders,
+		final Appender[] appenders,
 		final GFLogger[] loggers) {
-		if (appenders.length == 0){
-			throw new IllegalArgumentException("Expected at least one appender");
-		}
-		this.appenders = appenders;
-		this.multibyte = multibyte(appenders);
+
+		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
 
 		// quick check is count = 2^k ?
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
 
-		this.loggers = loggers;
-
-		this.level = initLogLevel(loggers);
-
-		final ObjectFormatterFactory formatterFactory =
-			objectFormatterFactory != null ?
-				objectFormatterFactory :
-				new DefaultObjectFormatterFactory();
-
 		// unicode char has 2 bytes
 		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
 		final ByteBuffer buffer = allocate(c * bufferSize);
 
-		final boolean typeOfByteBuffer = getBooleanProperty("gflogger.bytebuffer", true);
-
-		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>(){
-			@Override
-			protected LocalLogEntry initialValue() {
-				final LocalLogEntry logEntry =
-					multibyte ?
-					new CharBufferLocalLogEntry(Thread.currentThread(),
-						bufferSize,
-						formatterFactory,
-						LoggerServiceImpl.this) :
-					typeOfByteBuffer ?
-						new ByteBufferLocalLogEntry(Thread.currentThread(),
-							bufferSize,
-							formatterFactory,
-							LoggerServiceImpl.this):
-						new ByteLocalLogEntry(Thread.currentThread(),
-							bufferSize,
-							formatterFactory,
-							LoggerServiceImpl.this);
-				return logEntry;
-			}
-		};
-
-		executorService =
-				/*/
-				initExecutorService(appenders);
-				//*/
-				Executors.newFixedThreadPool(1,
-						new NamedThreadFactory("dgflogger"));
-				//*/
-
 		strategy = new WaitStrategyImpl();
 
-		disruptor = new Disruptor<DLogEntryItem>(new EventFactory<DLogEntryItem>() {
+		disruptor = new Disruptor<LogEntryItemImpl>(new EventFactory<LogEntryItemImpl>() {
 			int i = 0;
 			@Override
-			public DLogEntryItem newInstance() {
+			public LogEntryItemImpl newInstance() {
 				buffer.limit((i + 1) * bufferSize);
 				buffer.position(i * bufferSize);
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
-				return new DLogEntryItem(subBuffer, multibyte);
+				return new LogEntryItemImpl(subBuffer, multibyte);
 			}
 		},
 		executorService,
@@ -228,100 +138,11 @@ public class LoggerServiceImpl implements LoggerService {
 			}
 		});
 
-		/*/
-		// handle appenders in a sequence mode to avoid extra synchronization
-		disruptor.handleEventsWith(appenders[0]);
-		for(int i = 1; i < appenders.length; i++){
-			disruptor.after(appenders[i-1]).then(appenders[i]);
-		}
-		/*/
 		final EntryHandler entryHandler = new EntryHandler(appenders);
 		disruptor.handleEventsWith(entryHandler);
-		//*/
 
 		ringBuffer = disruptor.start();
 		running = true;
-	}
-
-	private LogLevel initLevel(final DAppender... appenders) {
-		LogLevel level = LogLevel.ERROR;
-		for (int i = 0; i < appenders.length; i++) {
-			final LogLevel l = appenders[i].getLogLevel();
-			level = level.isHigher(l) ? level : l;
-		}
-		return level;
-	}
-
-	protected final LogLevel initLogLevel(final GFLogger ... loggers) {
-		LogLevel level = LogLevel.FATAL;
-		for (int i = 0; i < loggers.length; i++) {
-			final LogLevel l = loggers[i].getLogLevel();
-			level = level.isHigher(l) ? level : l;
-		}
-		return level;
-	}
-
-	private ExecutorService initExecutorService(final DAppender... appenders){
-		final String[] names = new String[appenders.length];
-		for (int i = 0; i < appenders.length; i++) {
-			names[i] = appenders[i].getName();
-		}
-
-		return Executors.newFixedThreadPool(appenders.length,
-			new NamedThreadFactory("appender", names));
-	}
-
-	private boolean multibyte(final DAppender... appenders) {
-		boolean multibyte = appenders[0].isMultibyte();
-		for (int i = 1; i < appenders.length; i++) {
-			if (appenders[i].isMultibyte() != multibyte){
-				throw new IllegalArgumentException(
-					"Expected " + (multibyte ? "multibyte" : "single byte") +
-					" mode for appender #" + i);
-			}
-		}
-		return multibyte;
-	}
-
-	@Override
-	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-
-		final LocalLogEntry entry = logEntryThreadLocal.get();
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message '" + entry.stringValue()
-					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
-			entry.commit();
-		}
-
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.clear();
-		return entry;
-	}
-
-	@Override
-	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName,
-			String pattern, final long appenderMask) {
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-
-		final LocalLogEntry entry = logEntryThreadLocal.get();
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message was not properly commited.");
-			entry.commit();
-		}
-
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.clear();
-		entry.setPattern(pattern);
-		return entry;
 	}
 
 	@Override
@@ -334,7 +155,7 @@ public class LoggerServiceImpl implements LoggerService {
 		final long now = System.currentTimeMillis();
 
 		long sequence = ringBuffer.next();
-		final DLogEntryItem entry = ringBuffer.get(sequence);
+		final LogEntryItemImpl entry = ringBuffer.get(sequence);
 		try {
 			entry.setCategoryName(categoryName);
 			entry.setLogLevel(logLevel);
@@ -350,47 +171,6 @@ public class LoggerServiceImpl implements LoggerService {
 		} finally {
 			ringBuffer.publish(sequence);
 		}
-	}
-
-	@Override
-	public final GFLogger[] lookupLoggers(String name) {
-		List<GFLogger> list = new ArrayList<GFLogger>();
-		for(final GFLogger logger : this.loggers){
-			final String category = logger.getCategory();
-			if (category == null || name.startsWith(category)){
-				list.add(logger);
-			}
-		}
-
-		Collections.sort(list, new Comparator<GFLogger>() {
-			@Override
-			public int compare(GFLogger o1, GFLogger o2) {
-				final String c1 = o1.getCategory();
-				final String c2 = o2.getCategory();
-				return c2 == null ? -1 :
-					c1 == null ?  1 :
-						c2.length() - c1.length();
-			}
-		});
-
-		int idx = 0;
-		for(final Iterator<GFLogger> it = list.iterator(); it.hasNext();){
-			final GFLogger gfLogger = it.next();
-			if (!gfLogger.hasAdditivity()) {
-				break;
-			}
-			idx++;
-		}
-
-		final List<GFLogger> subList = list.subList(0, idx + 1);
-		final GFLogger[] array = subList.toArray(new GFLogger[subList.size()]);
-
-		return array;
-	}
-
-	@Override
-	public LogLevel getLevel() {
-		return level;
 	}
 
 	@Override

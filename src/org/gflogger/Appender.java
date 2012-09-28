@@ -14,12 +14,13 @@
 
 package org.gflogger;
 
+
 /**
  * Appender
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface Appender {
+public interface Appender<T extends LogEntryItem> {
 
 	boolean isMultibyte();
 
@@ -28,4 +29,17 @@ public interface Appender {
 	String getName();
 
 	int getIndex();
+
+	void workerIsAboutToFinish();
+
+	void flush();
+
+	void flush(boolean force);
+
+	void process(T entry);
+
+	void start();
+
+	void stop();
+
 }

@@ -30,35 +30,18 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 	@Override
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		if (org.gflogger.base.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.base.appender.ConsoleAppender appender =
-				new org.gflogger.base.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
+		final org.gflogger.appender.ConsoleAppender appender =
+			new org.gflogger.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
 
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
-			appender.setIndex(index);
+		appender.setLogLevel(logLevel);
+		appender.setLayout(layout);
+		appender.setImmediateFlush(immediateFlush);
+		appender.setBufferedIOThreshold(bufferedIOThreshold);
+		appender.setAwaitTimeout(awaitTimeout);
+		appender.setEnabled(enabled);
+		appender.setIndex(index);
 
-			return appender;
-		} else if (org.gflogger.disruptor.LoggerServiceImpl.class.equals(loggerServiceClass)){
-			final org.gflogger.disruptor.appender.ConsoleAppender appender =
-				new org.gflogger.disruptor.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
-
-			appender.setLogLevel(logLevel);
-			appender.setLayout(layout);
-			appender.setImmediateFlush(immediateFlush);
-			appender.setBufferedIOThreshold(bufferedIOThreshold);
-			appender.setAwaitTimeout(awaitTimeout);
-			appender.setEnabled(enabled);
-			appender.setIndex(index);
-
-			return appender;
-		}
-		throw new IllegalArgumentException(loggerServiceClass.getName()
-			+ " is unsupported type of logger service");
+		return appender;
 	}
 
 	/*
