@@ -1,7 +1,22 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gflogger;
 
 import static org.gflogger.helpers.OptionConverter.getStringProperty;
-import static org.gflogger.util.StackTraceUtils.*;
+import static org.gflogger.util.StackTraceUtils.getCodeLocation;
+import static org.gflogger.util.StackTraceUtils.getImplementationVersion;
+import static org.gflogger.util.StackTraceUtils.loadClass;
 
 import org.gflogger.helpers.LogLog;
 
@@ -39,8 +54,8 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 			final LoggerService loggerService,
 			final String logErrorsMessage) {
 		/*
-		 * It worth to cache thread categoryName at thread local variable cause
-		 * thread.getName() creates new String(char[])
+		 * It have to be cached thread name at thread local variable cause
+		 * thread.getName() generates new String(char[])
 		 */
 		this.threadName = owner.getName();
 		this.formatterFactory = formatterFactory;
