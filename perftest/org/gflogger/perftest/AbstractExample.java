@@ -1,3 +1,16 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gflogger.perftest;
 
 
@@ -116,8 +129,18 @@ public abstract class AbstractExample {
 				}
 
 				public void doSmth() throws Throwable{
+					final int warmupCount = 10000;
+					final int[] bogus = new int[warmupCount];
+
+					// bogus before
 					for(int k = 0; k < 5; k++){
-						for(int j = 0; j < 10000; j++){
+						for(int j = 0; j < warmupCount; j++){
+							bogus[j] = j * 29;
+						}
+					}
+
+					for(int k = 0; k < 5; k++){
+						for(int j = 0; j < warmupCount; j++){
 							logMessage("warm", j);
 						}
 					}
@@ -135,13 +158,20 @@ public abstract class AbstractExample {
 					objectCounting.set(true);
 
 					final long t = System.nanoTime();
-					//System.out.println(Thread.currentThread().getName() + " is started.");
+
 					for(int j = 0; j < n; j++){
 						logMessage("test", j);
 					}
 					final long e = System.nanoTime();
 					logFinalMessage(n, t, e);
 					finalLatch.countDown();
+
+					// bogus after
+					for(int k = 0; k < 5; k++){
+						for(int j = 0; j < warmupCount; j++){
+							bogus[j] = j * 31;
+						}
+					}
 
 					//System.out.println(Thread.currentThread().getName() + " is finished.");
 				}
