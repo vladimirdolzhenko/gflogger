@@ -14,31 +14,17 @@
 
 package org.gflogger.disruptor;
 
+import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
-import static com.lmax.disruptor.util.Util.getMinimumSequence;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.AbstractLoggerServiceImpl;
-import org.gflogger.Appender;
-import org.gflogger.GFLogger;
-import org.gflogger.GFLoggerBuilder;
-import org.gflogger.LocalLogEntry;
-import org.gflogger.LogEntryItemImpl;
-import org.gflogger.LogLevel;
-import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 
-import com.lmax.disruptor.AlertException;
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.ExceptionHandler;
-import com.lmax.disruptor.MultiThreadedClaimStrategy;
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.Sequence;
-import com.lmax.disruptor.SequenceBarrier;
-import com.lmax.disruptor.WaitStrategy;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 
 /**
@@ -190,6 +176,11 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		logEntryThreadLocal.remove();
 
 		disruptor.halt();
+	}
+
+	@Override
+	protected String name() {
+		return "dgflogger";
 	}
 
 	void flush() {

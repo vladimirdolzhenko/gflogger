@@ -1,5 +1,3 @@
-package org.gflogger.ring;
-
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +11,16 @@ package org.gflogger.ring;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface EntryProcessor {
-	
+
+package org.gflogger.ring;
+
+/**
+ * EntryProcessor
+ *
+ * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
+ */
+public interface EntryProcessor extends Runnable {
+
 	long getSequence();
-	
+
 }

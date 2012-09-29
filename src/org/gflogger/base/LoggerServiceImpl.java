@@ -18,14 +18,7 @@ import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
 import java.util.concurrent.TimeUnit;
 
-import org.gflogger.AbstractLoggerServiceImpl;
-import org.gflogger.Appender;
-import org.gflogger.GFLogger;
-import org.gflogger.GFLoggerBuilder;
-import org.gflogger.LocalLogEntry;
-import org.gflogger.LogEntryItemImpl;
-import org.gflogger.LogLevel;
-import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.ring.RingBuffer;
 
@@ -131,6 +124,10 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		}
 	}
 
+	@Override
+	protected String name() {
+		return "gflogger";
+	}
 
 	@Override
 	public void stop(){

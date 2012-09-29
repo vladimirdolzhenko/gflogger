@@ -18,11 +18,7 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,11 +40,11 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected final ThreadLocal<LocalLogEntry>			logEntryThreadLocal;
 
-	protected final ExecutorService					executorService;
+	protected final ExecutorService						executorService;
 
-	protected final boolean							multibyte;
+	protected final boolean								multibyte;
 
-	protected volatile boolean						running	= false;
+	protected volatile boolean							running	= false;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -147,8 +143,10 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return multibyte;
 	}
 
+	protected abstract String name();
+
 	protected ExecutorService initExecutorService(){
-		return Executors.newFixedThreadPool(1, new NamedThreadFactory("gflogger"));
+		return Executors.newFixedThreadPool(1, new NamedThreadFactory(name()));
 	}
 
 	protected LogEntryItemImpl[] initEnties(int count, final int maxMessageSize) {

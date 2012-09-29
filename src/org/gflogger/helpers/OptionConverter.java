@@ -103,35 +103,32 @@ public class OptionConverter {
 	}
 
 	public static String getStringProperty(final String name, final String defaultValue){
-		final Properties properties = System.getProperties();
-		return (String) (properties.containsKey(name) ? properties.get(name) : defaultValue);
+		final String propValue = System.getProperty(name);
+		return propValue != null ? propValue : defaultValue;
 	}
 
 	public static boolean getBooleanProperty(final String name, final boolean defaultValue){
-		try {
-			return Boolean.parseBoolean(System.getProperty(name));
-		} catch (Throwable e){}
+		final String propValue = System.getProperty(name);
+		if (propValue != null) {
+			try {
+				return Boolean.parseBoolean(propValue);
+			} catch (Throwable e){
+				// nothing
+			}
+		}
 		return defaultValue;
 	}
 
 	public static int getIntProperty(final String name, final int defaultValue){
-		try {
-			return Integer.parseInt(System.getProperty(name));
-		} catch (Throwable e){}
-		return defaultValue;
-	}
-
-	public static Object instantiateByKey(Properties props, String key, Class superClass,
-			Object defaultValue) {
-
-		// Get the value of the property in string form
-		String className = findAndSubst(key, props);
-		if (className == null) {
-			LogLog.error("Could not find value for key " + key);
-			return defaultValue;
+		final String propValue = System.getProperty(name);
+		if (propValue != null) {
+			try {
+				return Integer.parseInt(propValue);
+			} catch (Throwable e){
+				// nothing
+			}
 		}
-		// Trim className to avoid trailing spaces that cause problems.
-		return OptionConverter.instantiateByClassName(className.trim(), superClass, defaultValue);
+		return defaultValue;
 	}
 
 	/**
@@ -166,88 +163,6 @@ public class OptionConverter {
 		return dEfault;
 	}
 
-	/**
-	 * Converts a standard or custom priority level to a Level object.
-	 * <p>
-	 * If <code>value</code> is of form "level#classname", then the specified
-	 * class' toLevel method is called to process the specified level string; if
-	 * no '#' character is present, then the default
-	 * {@link org.apache.log4j.Level} class is used to process the level value.
-	 *
-	 * <p>
-	 * As a special case, if the <code>value</code> parameter is equal to the
-	 * string "NULL", then the value <code>null</code> will be returned.
-	 *
-	 * <p>
-	 * If any error occurs while converting the value to a level, the
-	 * <code>defaultValue</code> parameter, which may be <code>null</code>, is
-	 * returned.
-	 *
-	 * <p>
-	 * Case of <code>value</code> is insignificant for the level level, but is
-	 * significant for the class name part, if present.
-	 *
-	 * @since 1.1
-	 */
-//	public static Level toLevel(String value, Level defaultValue) {
-//		if (value == null)
-//			return defaultValue;
-//
-//		value = value.trim();
-//
-//		int hashIndex = value.indexOf('#');
-//		if (hashIndex == -1) {
-//			if ("NULL".equalsIgnoreCase(value)) {
-//				return null;
-//			} else {
-//				// no class name specified : use standard Level class
-//				return (Level) Level.toLevel(value, defaultValue);
-//			}
-//		}
-//
-//		Level result = defaultValue;
-//
-//		String clazz = value.substring(hashIndex + 1);
-//		String levelName = value.substring(0, hashIndex);
-//
-//		// This is degenerate case but you never know.
-//		if ("NULL".equalsIgnoreCase(levelName)) {
-//			return null;
-//		}
-//
-//		LogLog.debug("toLevel" + ":class=[" + clazz + "]" + ":pri=[" + levelName + "]");
-//
-//		try {
-//			Class customLevel = Loader.loadClass(clazz);
-//
-//			// get a ref to the specified class' static method
-//			// toLevel(String, org.apache.log4j.Level)
-//			Class[] paramTypes = new Class[] { String.class, org.apache.log4j.Level.class };
-//			java.lang.reflect.Method toLevelMethod = customLevel.getMethod("toLevel", paramTypes);
-//
-//			// now call the toLevel method, passing level string + default
-//			Object[] params = new Object[] { levelName, defaultValue };
-//			Object o = toLevelMethod.invoke(null, params);
-//
-//			result = (Level) o;
-//		} catch (ClassNotFoundException e) {
-//			LogLog.warn("custom level class [" + clazz + "] not found.");
-//		} catch (NoSuchMethodException e) {
-//			LogLog.warn("custom level class [" + clazz + "]"
-//					+ " does not have a class function toLevel(String, Level)", e);
-//		} catch (java.lang.reflect.InvocationTargetException e) {
-//			LogLog.warn("custom level class [" + clazz + "]" + " could not be instantiated", e);
-//		} catch (ClassCastException e) {
-//			LogLog.warn("class [" + clazz + "] is not a subclass of org.apache.log4j.Level", e);
-//		} catch (IllegalAccessException e) {
-//			LogLog.warn("class [" + clazz + "] cannot be instantiated due to access restrictions",
-//					e);
-//		} catch (Exception e) {
-//			LogLog.warn("class [" + clazz + "], level [" + levelName + "] conversion failed.", e);
-//		}
-//		return result;
-//	}
-
 	public static long toFileSize(String value, long dEfault) {
 		if (value == null)
 			return dEfault;
@@ -275,58 +190,6 @@ public class OptionConverter {
 			}
 		}
 		return dEfault;
-	}
-
-	/**
-	 * Find the value corresponding to <code>key</code> in <code>props</code>.
-	 * Then perform variable substitution on the found value.
-	 */
-	public static String findAndSubst(String key, Properties props) {
-		String value = props.getProperty(key);
-		if (value == null)
-			return null;
-
-		try {
-			return substVars(value, props);
-		} catch (IllegalArgumentException e) {
-			LogLog.error("Bad option value [" + value + "].", e);
-			return value;
-		}
-	}
-
-	/**
-	 * Instantiate an object given a class name. Check that the
-	 * <code>className</code> is a subclass of <code>superClass</code>. If that
-	 * test fails or the object could not be instantiated, then
-	 * <code>defaultValue</code> is returned.
-	 *
-	 * @param className
-	 *			The fully qualified class name of the object to instantiate.
-	 * @param superClass
-	 *			The class to which the new object should belong.
-	 * @param defaultValue
-	 *			The object to return in case of non-fulfillment
-	 */
-	public static Object instantiateByClassName(String className, Class superClass,
-			Object defaultValue) {
-		if (className != null) {
-			try {
-				Class classObj = Loader.loadClass(className);
-				if (!superClass.isAssignableFrom(classObj)) {
-					LogLog.error("A \"" + className + "\" object is not assignable to a \""
-							+ superClass.getName() + "\" variable.");
-					LogLog.error("The class \"" + superClass.getName() + "\" was loaded by ");
-					LogLog.error("[" + superClass.getClassLoader() + "] whereas object of type ");
-					LogLog.error("\"" + classObj.getName() + "\" was loaded by ["
-							+ classObj.getClassLoader() + "].");
-					return defaultValue;
-				}
-				return classObj.newInstance();
-			} catch (Exception e) {
-				LogLog.error("Could not instantiate class [" + className + "].", e);
-			}
-		}
-		return defaultValue;
 	}
 
 	/**
@@ -422,53 +285,4 @@ public class OptionConverter {
 		}
 	}
 
-	/**
-	 * Configure log4j given a URL.
-	 *
-	 * <p>
-	 * The url must point to a file or resource which will be interpreted by a
-	 * new instance of a log4j configurator.
-	 *
-	 * <p>
-	 * All configurations steps are taken on the <code>hierarchy</code> passed
-	 * as a parameter.
-	 *
-	 * <p>
-	 *
-	 * @param url
-	 *			The location of the configuration file or resource.
-	 * @param clazz
-	 *			The classname, of the log4j configurator which will parse the
-	 *			file or resource at <code>url</code>. This must be a subclass
-	 *			of {@link Configurator}, or null. If this value is null then a
-	 *			default configurator of {@link PropertyConfigurator} is used,
-	 *			unless the filename pointed to by <code>url</code> ends in
-	 *			'.xml', in which case
-	 *			{@link org.apache.log4j.xml.DOMConfigurator} is used.
-	 * @param hierarchy
-	 *			The {@link org.apache.log4j.Hierarchy} to act on.
-	 * @since 1.1.4
-	 */
-
-//	static public void selectAndConfigure(URL url, String clazz, LoggerRepository hierarchy) {
-//		Configurator configurator = null;
-//		String filename = url.getFile();
-//
-//		if (clazz == null && filename != null && filename.endsWith(".xml")) {
-//			clazz = "org.apache.log4j.xml.DOMConfigurator";
-//		}
-//
-//		if (clazz != null) {
-//			LogLog.debug("Preferred configurator class: " + clazz);
-//			configurator = (Configurator) instantiateByClassName(clazz, Configurator.class, null);
-//			if (configurator == null) {
-//				LogLog.error("Could not instantiate configurator [" + clazz + "].");
-//				return;
-//			}
-//		} else {
-//			configurator = new PropertyConfigurator();
-//		}
-//
-//		configurator.doConfigure(url, hierarchy);
-//	}
 }

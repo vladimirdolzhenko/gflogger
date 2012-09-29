@@ -10,5 +10,5 @@ if [ -n "$3" ]; then
 	NAME="gflogger-d"
 fi
 
-#run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=/dev/null -Dgflogger.service.count=1024 -Dgflogger.append=false -Dgflogger.internalDebugEnabled=false -Dgflogger.bufferedIOThreshold=1000"
-run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=./logs/gflogger.log -Dgflogger.service.count=1024 -Dgflogger.append=false -Dgflogger.internalDebugEnabled=false"
+#run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=/dev/null"
+run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=./logs/gflogger.log"

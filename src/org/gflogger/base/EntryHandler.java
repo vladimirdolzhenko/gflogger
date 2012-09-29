@@ -19,18 +19,14 @@ import org.gflogger.AbstractEntryHandler;
 import org.gflogger.Appender;
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.helpers.LogLog;
-import org.gflogger.ring.AlertException;
-import org.gflogger.ring.EntryProcessor;
-import org.gflogger.ring.PaddedAtomicLong;
-import org.gflogger.ring.RingBuffer;
-import org.gflogger.ring.RingBufferAware;
+import org.gflogger.ring.*;
 
 /**
  * EntryHandler
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class EntryHandler extends AbstractEntryHandler implements Runnable, EntryProcessor, RingBufferAware<LogEntryItemImpl> {
+public class EntryHandler extends AbstractEntryHandler implements EntryProcessor, RingBufferAware<LogEntryItemImpl> {
 
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 

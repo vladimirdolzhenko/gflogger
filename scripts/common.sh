@@ -14,8 +14,19 @@ run(){
 	
 	#JAVA_ASSEMBLY="-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly"
 	
+	GFLOGGER_OPTS="
+		-Dgflogger.service.count=1024 
+		-Dgflogger.append=false 
+		-Dgflogger.internalDebugEnabled=false
+		-Dgflogger.bytebuffer=true
+		"
+	
 	JAVA_OPTS="
+	
 	${JAVA_EXTRA_OPTS}
+	
+	${GFLOGGER_OPTS}
+	
 	-Xss2m
 	-Xms512m
 	-Xmx512m
