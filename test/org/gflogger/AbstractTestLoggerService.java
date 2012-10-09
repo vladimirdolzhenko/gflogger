@@ -667,6 +667,55 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendFormattedWithArrayPlaceholder() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+		log.info("value: %s;").withLast(new String[0], ", ");
+		log.info("value: %s;").withLast(new String[]{"a"}, ", ");
+		log.info("value: %s;").withLast(new String[]{"b", "a"}, ", ");
+		log.info("value: %s;").withLast(new String[]{null, "q", null}, ", ");
+
+		GFLogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("value: [];value: [a];value: [b, a];value: [null, q, null];", string);
+	}
+
+	@Test
+	public void testAppendFormattedWithIterablePlaceholder() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+		log.info("value: %s;").withLast(Arrays.asList(), ", ");
+		log.info("value: %s;").withLast(Arrays.asList("a"), ", ");
+		log.info("value: %s;").withLast(Arrays.asList("b", "a"), ", ");
+		log.info("value: %s;").withLast(Arrays.asList(null, "q", null), ", ");
+
+		GFLogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("value: [];value: [a];value: [b, a];value: [null, q, null];", string);
+	}
+
+	@Test
 	public void testAppendObjectFormatter() throws Exception {
 		final int maxMessageSize = 64;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();

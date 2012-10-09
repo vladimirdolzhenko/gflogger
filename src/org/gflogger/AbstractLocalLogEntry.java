@@ -18,6 +18,8 @@ import static org.gflogger.util.StackTraceUtils.getCodeLocation;
 import static org.gflogger.util.StackTraceUtils.getImplementationVersion;
 import static org.gflogger.util.StackTraceUtils.loadClass;
 
+import java.util.Iterator;
+
 import org.gflogger.helpers.LogLog;
 
 /**
@@ -375,6 +377,70 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public <T> FormattedGFLogEntry with(T[] array, String separator) {
+		checkPlaceholder();
+		if (array == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(int i = 0; i < array.length; i++){
+					if (i > 0){
+						append(separator);
+					}
+					final T obj = array[i];
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				error("append(Object o)", e);
+			}
+		}
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public <T> FormattedGFLogEntry with(Iterable<T> iterable, String separator) {
+		checkPlaceholder();
+		if (iterable == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(final Iterator<T> it = iterable.iterator();it.hasNext();){
+					final T obj = it.next();
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+					if (it.hasNext()){
+						append(separator);
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				error("append(Object o)", e);
+			}
+		}
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
 	public FormattedGFLogEntry with(Throwable e){
 		checkPlaceholder();
 		append(e);
@@ -437,6 +503,18 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	@Override
 	public void withLast(double i, int precision){
 		with(i, precision);
+		checkAndCommit();
+	}
+
+	@Override
+	public <T> void withLast(T[] array, String separator) {
+		with(array, separator);
+		checkAndCommit();
+	}
+
+	@Override
+	public <T> void withLast(Iterable<T> iterable, String separator) {
+		with(iterable, separator);
 		checkAndCommit();
 	}
 

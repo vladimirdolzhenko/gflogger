@@ -167,6 +167,16 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public <T> FormattedGFLogEntry with(T[] array, String separator) {
+		return this;
+	}
+
+	@Override
+	public <T> FormattedGFLogEntry with(Iterable<T> iterable, String separator) {
+		return this;
+	}
+
+	@Override
 	public FormattedGFLogEntry with(Throwable e) {
 		return this;
 	}
@@ -213,6 +223,16 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	@Override
 	public void withLast(double i, int precision) {
+		// nothing
+	}
+
+	@Override
+	public <T> void withLast(T[] array, String separator) {
+		// nothing
+	}
+
+	@Override
+	public <T> void withLast(Iterable<T> iterable, String separator) {
 		// nothing
 	}
 

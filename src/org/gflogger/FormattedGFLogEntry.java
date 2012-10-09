@@ -38,6 +38,17 @@ public interface FormattedGFLogEntry {
 
 	FormattedGFLogEntry with(double i, int precision);
 
+	<T> FormattedGFLogEntry with(T[] array, String separator);
+
+	/**
+	 * <b>Note</b>: leads to garbage footprint
+	 *
+	 * @param iterable
+	 * @param separator
+	 * @return
+	 */
+	<T> FormattedGFLogEntry with(Iterable<T> iterable, String separator);
+
 	FormattedGFLogEntry with(Throwable e);
 
 	FormattedGFLogEntry with(Loggable loggable);
@@ -45,13 +56,12 @@ public interface FormattedGFLogEntry {
 	/**
 	 * appends with a string representation of an object using <code>o.toString()</code> method
 	 *
-	 * Leads to garbage footprint !
+	 * <b>Note</b>: could lead to garbage footprint
 	 *
 	 * @param o
 	 * @return
 	 */
 	FormattedGFLogEntry with(Object o);
-
 
 	/**
 	 * with a last single char parameter
@@ -70,6 +80,16 @@ public interface FormattedGFLogEntry {
 	void withLast(long i);
 
 	void withLast(double i, int precision);
+
+	<T> void withLast(T[] array, String separator);
+
+	/**
+	 * <b>Note</b>: leads to garbage footprint
+	 *
+	 * @param iterable
+	 * @param separator
+	 */
+	<T> void withLast(Iterable<T> iterable, String separator);
 
 	void withLast(Throwable e);
 
