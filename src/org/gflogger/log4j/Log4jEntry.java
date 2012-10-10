@@ -158,6 +158,67 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public <T> GFLogEntry append(T[] array, String separator) {
+		if (array == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(int i = 0; i < array.length; i++){
+					if (i > 0){
+						append(separator);
+					}
+					final T obj = array[i];
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				//error("append(Object o)", e);
+			}
+			return this;
+		}
+		return this;
+	}
+
+	@Override
+	public <T> GFLogEntry append(Iterable<T> iterable, String separator) {
+		if (iterable == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(final Iterator<T> it = iterable.iterator();it.hasNext();){
+					final T obj = it.next();
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+					if (it.hasNext()){
+						append(separator);
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				//error("append(Object o)", e);
+			}
+		}
+		return this;
+	}
+
+	@Override
 	public GFLogEntry append(Throwable e) {
 		if (e != null){
 			try {
@@ -276,6 +337,18 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public <T> void appendLast(T[] array, String separator) {
+		append(array, separator);
+		commit();
+	}
+
+	@Override
+	public <T> void appendLast(Iterable<T> iterable, String separator) {
+		append(iterable, separator);
+		commit();
+	}
+
+	@Override
 	public void appendLast(Throwable e) {
 		append(e);
 		commit();
@@ -352,32 +425,7 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	@Override
 	public <T> FormattedGFLogEntry with(T[] array, String separator) {
 		checkPlaceholder();
-		if (array == null){
-			append('n').append('u').append('l').append('l');
-		} else {
-			try {
-				append('[');
-				ObjectFormatter formatter = null;
-				for(int i = 0; i < array.length; i++){
-					if (i > 0){
-						append(separator);
-					}
-					final T obj = array[i];
-					if (obj != null){
-						if (formatter == null) {
-							formatter = formatterFactory.getObjectFormatter(obj);
-						}
-						formatter.append(obj, this);
-					} else {
-						append('n').append('u').append('l').append('l');
-					}
-				}
-				append(']');
-			} catch (Throwable e){
-				//error("append(Object o)", e);
-			}
-			return this;
-		}
+		append(array, separator);
 		appendNextPatternChank();
 		return this;
 	}
@@ -385,32 +433,7 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	@Override
 	public <T> FormattedGFLogEntry with(Iterable<T> iterable, String separator) {
 		checkPlaceholder();
-		if (iterable == null){
-			append('n').append('u').append('l').append('l');
-		} else {
-			try {
-				append('[');
-				ObjectFormatter formatter = null;
-				for(final Iterator<T> it = iterable.iterator();it.hasNext();){
-					final T obj = it.next();
-					if (obj != null){
-						if (formatter == null) {
-							formatter = formatterFactory.getObjectFormatter(obj);
-						}
-						formatter.append(obj, this);
-					} else {
-						append('n').append('u').append('l').append('l');
-					}
-					if (it.hasNext()){
-						append(separator);
-					}
-				}
-				append(']');
-			} catch (Throwable e){
-				//error("append(Object o)", e);
-			}
-			return this;
-		}
+		append(iterable, separator);
 		appendNextPatternChank();
 		return this;
 	}

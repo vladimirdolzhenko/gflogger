@@ -19,16 +19,19 @@ package org.gflogger;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface GFLogEntry {
+public interface GFLogEntry extends Appendable {
 
 	/**
 	 * appends a single char
 	 * @return a reference to this object.
 	 */
+	@Override
 	GFLogEntry append(char c);
 
+	@Override
 	GFLogEntry append(CharSequence csq);
 
+	@Override
 	GFLogEntry append(CharSequence csq, int start, int end);
 
 	GFLogEntry append(boolean b);
@@ -38,6 +41,17 @@ public interface GFLogEntry {
 	GFLogEntry append(long i);
 
 	GFLogEntry append(double i, int precision);
+
+	<T> GFLogEntry append(T[] array, String separator);
+
+	/**
+	 * <b>Note</b>: leads to garbage footprint
+	 *
+	 * @param iterable
+	 * @param separator
+	 * @return
+	 */
+	<T> GFLogEntry append(Iterable<T> iterable, String separator);
 
 	GFLogEntry append(Throwable e);
 
@@ -76,6 +90,17 @@ public interface GFLogEntry {
 	void appendLast(long i);
 
 	void appendLast(double i, int precision);
+
+	<T> void appendLast(T[] array, String separator);
+
+	/**
+	 * <b>Note</b>: leads to garbage footprint
+	 *
+	 * @param iterable
+	 * @param separator
+	 * @return
+	 */
+	<T> void appendLast(Iterable<T> iterable, String separator);
 
 	void appendLast(Throwable e);
 
