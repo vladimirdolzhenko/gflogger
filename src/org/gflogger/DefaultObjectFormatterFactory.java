@@ -51,7 +51,7 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		ObjectFormatter classFormatter = formatter;
 		ObjectFormatter interfaceFormatter = formatter;
 		int classLength = 0;
-		int intefaceLength = 0;
+		int interfaceLength = 0;
 
 		// lookup over classes: class - super class - super - super class and so on
 		while (classFormatter == null){
@@ -72,7 +72,7 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 			if (len != Integer.MAX_VALUE){
 				interfaceFormatter = depthSearchOverInterfaces(interfaceClazz.getInterfaces());
 				if (interfaceFormatter != null) {
-					intefaceLength += len;
+					interfaceLength += len;
 					break;
 				}
 			}
@@ -82,12 +82,25 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		}
 
 		// the nearest class has more priority than interface
-		Class clazz = classLength <= intefaceLength ? classClazz : interfaceClazz;
-		formatter = classLength <= intefaceLength ? classFormatter : interfaceFormatter;
-
-		// there is no any registered for this type of object formatter
-		// use the default one
-		if (clazz == null){
+		Class clazz;
+		if( interfaceFormatter != null && classFormatter != null ) {
+			//both searches was successful
+			if( classLength <= interfaceLength ) {
+				clazz = classClazz;
+				formatter = classFormatter;
+			} else {
+				clazz = interfaceClazz;
+				formatter = interfaceFormatter;
+			}
+		} else if( classFormatter != null ) {
+			clazz = classClazz;
+			formatter = classFormatter;
+		} else if( interfaceFormatter != null ) {
+			clazz = interfaceClazz;
+			formatter = interfaceFormatter;
+		} else {
+			// there is no any registered for this type of object formatter
+			// use the default one
 			clazz = Object.class;
 			formatter = DEFAULT_OBJECT_FORMATTER;
 		}
@@ -117,7 +130,6 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 		for (int i = 0; i < interfaces.length; i++) {
 			formatter = formatters.get(interfaces[i]);
 			if (formatter != null) {
-				formatters.put(interfaces[i], formatter);
 				return formatter;
 			}
 			formatter = depthSearchOverInterfaces(interfaces[i].getInterfaces());
