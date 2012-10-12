@@ -18,7 +18,11 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -279,6 +283,8 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 			}
 			idx++;
 		}
+
+		if (list.isEmpty()) return GFLogger.EMPTY;
 
 		final List<GFLogger> subList = list.subList(0, idx + 1);
 		final GFLogger[] array = subList.toArray(new GFLogger[subList.size()]);

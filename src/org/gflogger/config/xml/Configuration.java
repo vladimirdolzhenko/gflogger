@@ -17,8 +17,14 @@ package org.gflogger.config.xml;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Stack;
+import java.util.TimeZone;
 
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.Layout;
@@ -47,6 +53,8 @@ public class Configuration extends DefaultHandler {
 
 	private final Map<Class, ObjectFormatter> objectFormatters = new LinkedHashMap<Class, ObjectFormatter>();
 
+	private LoggerServiceFactory loggerServiceFactory;
+
 	private LoggerService loggerService;
 
 	public Map<String, AppenderFactory> getAppenderFactories() {
@@ -54,6 +62,21 @@ public class Configuration extends DefaultHandler {
 	}
 
 	public LoggerService getLoggerService() {
+		if (loggerService == null){
+			for(final AppenderFactory appenderFactory: appenderFactories.values()){
+				loggerServiceFactory.addAppenderFactory(appenderFactory);
+			}
+			for(final GFLoggerBuilder loggerBuilder: loggerBuilders){
+				loggerServiceFactory.addGFLoggerBuilder(loggerBuilder);
+			}
+
+			for (final Entry<Class, ObjectFormatter> entry : objectFormatters.entrySet()) {
+				loggerServiceFactory.addObjectFormatter(entry.getKey(), entry.getValue());
+			}
+
+			loggerService = loggerServiceFactory.createService();
+			debug("Created LoggerService.");
+		}
 		return loggerService;
 	}
 
@@ -131,7 +154,7 @@ public class Configuration extends DefaultHandler {
 		final AppenderFactory appenderFactory = (AppenderFactory)Class.forName(clazz).newInstance();
 
 		for(final String attributeName : new String[]{"datePattern", "patternLayout",
-				"append", "bufferSize", "multibyte", "immediateFlush", "fileName", "enabled"}){
+				"append", "bufferSize", "multibyte", "immediateFlush", "fileName", "enabled", "logLevel"}){
 			setProperty(appenderFactory, attributeName, getAttribute(attributes, attributeName));
 		}
 
@@ -166,25 +189,10 @@ public class Configuration extends DefaultHandler {
 		final Class clazz = className != null ?
 				Class.forName(className) :
 				DLoggerServiceFactory.class;
-		final LoggerServiceFactory factory = (LoggerServiceFactory)clazz.newInstance();
-
+		loggerServiceFactory = (LoggerServiceFactory)clazz.newInstance();
 		for(final String attributeName : new String[]{"count", "maxMessageSize"}){
-			setProperty(factory, attributeName, getAttribute(attributes, attributeName));
+			setProperty(loggerServiceFactory, attributeName, getAttribute(attributes, attributeName));
 		}
-
-		for(final AppenderFactory appenderFactory: appenderFactories.values()){
-			factory.addAppenderFactory(appenderFactory);
-		}
-		for(final GFLoggerBuilder loggerBuilder: loggerBuilders){
-			factory.addGFLoggerBuilder(loggerBuilder);
-		}
-
-		for (final Entry<Class, ObjectFormatter> entry : objectFormatters.entrySet()) {
-			factory.addObjectFormatter(entry.getKey(), entry.getValue());
-		}
-
-		loggerService = factory.createService();
-		debug("Created LoggerService.");
 	}
 
 	private void startObjectFormatter(Attributes attributes) throws Exception {
