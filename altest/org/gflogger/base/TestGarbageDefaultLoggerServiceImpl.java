@@ -2,6 +2,7 @@ package org.gflogger.base;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -112,7 +113,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	}
 
 	@Test
-	public void testGFLoggerAppendLong() throws Exception {
+	public void testGFLoggerAppendLongAndDouble() throws Exception {
 		final int maxMessageSize = 20;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
@@ -128,14 +129,17 @@ public class TestGarbageDefaultLoggerServiceImpl {
 
 		final GFLog logger = GFLogFactory.getLog("com.db.fxpricing.Logger");
 
-		for(long i = 0; i < WARMUP_COUNT; i++)
+		for(long i = -WARMUP_COUNT; i < WARMUP_COUNT; i++)
 			logger.info().append("value:").append(i).commit();
 		Thread.sleep(1000L);
 
 		objectCounting.set(true);
 
-		for(long i = 0; i < TEST_COUNT; i++)
+		for(long i = -TEST_COUNT; i < TEST_COUNT; i++)
 			logger.info().append("value:").append(i).commit();
+
+		for(long i = -TEST_COUNT; i < TEST_COUNT; i++)
+			logger.info().append("value:").append(i/2.0, 4).commit();
 
 		Thread.sleep(500L);
 
@@ -147,10 +151,12 @@ public class TestGarbageDefaultLoggerServiceImpl {
 
 		final StringBuffer buffer2 = new StringBuffer(1<<20);
 
-		for(long i = 0; i < WARMUP_COUNT; i++)
+		for(long i = -WARMUP_COUNT; i < WARMUP_COUNT; i++)
 			buffer2.append("value:" + i);
-		for(long i = 0; i < TEST_COUNT; i++)
+		for(long i = -TEST_COUNT; i < TEST_COUNT; i++)
 			buffer2.append("value:" + i);
+		for(long i = -TEST_COUNT; i < TEST_COUNT; i++)
+			buffer2.append("value:" + String.format(Locale.ENGLISH, "%.4f", (i/2.0)));
 
 		assertEquals(buffer2.toString(), string);
 

@@ -131,7 +131,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
-	public void testAppendDoubleCharBuffer() throws Exception {
+	public void testAppendDoubleCharBufferWithPrecision() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(100).asCharBuffer();
 		{
 			final double[] numbers = new double[]{0, 1, 7, 11, 123, 7895, -100, 101, -10007};
@@ -144,7 +144,7 @@ public class BufferFormatterTest extends TestCase {
 			}
 		}
 
-		final double[] numbers = new double[]{1.4328, -123.9487};
+		final double[] numbers = new double[]{1.4328, -123.9487, -0.5};
 		for (int i = 0; i < numbers.length; i++) {
 			BufferFormatter.append(buffer, numbers[i], 6);
 			buffer.append(' ');
@@ -162,7 +162,7 @@ public class BufferFormatterTest extends TestCase {
 			buffer.clear();
 		}
 
-		final double[] numbers3 = new double[]{1e-5, 1e-10, 1e-18, 5.074e-10};
+		final double[] numbers3 = new double[]{1e-5, 1e-10, 1e-18, 5.074e-10, 0.0035};
 		for (int i = 0; i < numbers3.length; i++) {
 			BufferFormatter.append(buffer, numbers3[i], 20);
 			buffer.append(' ');
@@ -181,7 +181,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
-	public void testAppendDoubleByteBuffer() throws Exception {
+	public void testAppendDoubleByteBufferWithPrecision() throws Exception {
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(200);
 		{
 			final double[] numbers = new double[]{0, 1, 7, 11, 123, 7895, -100, 101, -10007};
@@ -194,7 +194,7 @@ public class BufferFormatterTest extends TestCase {
 			}
 		}
 
-		final double[] numbers = new double[]{1.4328, -123.9487};
+		final double[] numbers = new double[]{1.4328, -123.9487, -0.5};
 		for (int i = 0; i < numbers.length; i++) {
 			BufferFormatter.append(buffer, numbers[i], 6);
 			buffer.put((byte) ' ');
@@ -212,7 +212,7 @@ public class BufferFormatterTest extends TestCase {
 			buffer.clear();
 		}
 
-		final double[] numbers3 = new double[]{1e-5, 1e-10, 1e-18};
+		final double[] numbers3 = new double[]{1e-5, 1e-10, 1e-18, 0.0035};
 		for (int i = 0; i < numbers3.length; i++) {
 			BufferFormatter.append(buffer, numbers3[i], 20);
 			buffer.put((byte) ' ');
@@ -225,6 +225,36 @@ public class BufferFormatterTest extends TestCase {
 		for (int i = 0; i < numbers4.length; i++) {
 			BufferFormatter.append(buffer, numbers4[i], 20);
 			buffer.put((byte) ' ');
+			assertEquals(Double.toString(numbers4[i]) + " ", toString(buffer));
+			// check
+			buffer.clear();
+		}
+	}
+
+	public void testAppendDoubleByteBuffer() throws Exception {
+		final ByteBuffer buffer = ByteBuffer.allocateDirect(200);
+
+		final double[] numbers4 = new double[]{1e-19, 1e19, 0.0035,
+				Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+				-0.0, 0.0, 1235, -1235, 0.005, -0.5};
+		for (int i = 0; i < numbers4.length; i++) {
+			BufferFormatter.append(buffer, numbers4[i]);
+			buffer.put((byte) ' ');
+			assertEquals(Double.toString(numbers4[i]) + " ", toString(buffer));
+			// check
+			buffer.clear();
+		}
+	}
+
+	public void testAppendDoubleCharBuffer() throws Exception {
+		final CharBuffer buffer = ByteBuffer.allocateDirect(100).asCharBuffer();
+
+		final double[] numbers4 = new double[]{1e-19, 1e19, 0.0035,
+				Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+				-0.0, 0.0, 1235, -1235, 0.005, -0.5};
+		for (int i = 0; i < numbers4.length; i++) {
+			BufferFormatter.append(buffer, numbers4[i]);
+			buffer.put(' ');
 			assertEquals(Double.toString(numbers4[i]) + " ", toString(buffer));
 			// check
 			buffer.clear();

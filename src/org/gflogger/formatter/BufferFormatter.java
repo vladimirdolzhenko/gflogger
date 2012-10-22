@@ -194,12 +194,22 @@ public class BufferFormatter {
 
 
 	public static ByteBuffer append(final ByteBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 4 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision);
 		return buffer;
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 4 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision);
+		return buffer;
+	}
+
+	public static ByteBuffer append(final ByteBuffer buffer, double v) {
+		put(buffer, v);
+		return buffer;
+	}
+
+	public static CharBuffer append(final CharBuffer buffer, double v) {
+		put(buffer, v);
 		return buffer;
 	}
 
@@ -570,14 +580,67 @@ public class BufferFormatter {
 		buffer.put((byte) b);
 	}
 
+
+	/**
+	 * Bit 63 represents the sign of the floating-point number.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long SIGN_MASK = 0x8000000000000000L;
+
+	/**
+	 * Bits 62-52 represent the exponent.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long EXP_MASK = 0x7ff0000000000000L;
+
+	/**
+	 * Bits 51-0 represent the significant (sometimes called the mantissa) of the floating-point number.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long MANTISA_MASK = 0x000fffffffffffffL;
+
+	private static void put(final ByteBuffer buffer, double v) {
+		if (Double.isNaN(v)){
+			append(buffer, "NaN");
+			return;
+		}
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put((byte) '-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, "Infinity");
+			return;
+		}
+		if (v == 0){
+			append(buffer, "0.0");
+			return;
+		}
+		// TODO: this leads to garbage
+		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		append(buffer, javaFormatString);
+	}
+
 	private static void put(final ByteBuffer buffer, double v, int precision) {
 		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
 				(v < 0 && (v < -1e18 || v > -1e-18))){
-			// TODO:
-			final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
-			append(buffer, javaFormatString);
+			put(buffer, v);
 			return;
 		}
+
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put((byte) '-');
+		}
+
 		long x = (long)v;
 		put(buffer, x);
 		buffer.put((byte) '.');
@@ -588,7 +651,6 @@ public class BufferFormatter {
 
 		int oldPos = buffer.position();
 
-		x = x < 0 ? -x : x;
 		// add leading zeros
 
 		final int stringSize = stringSize(x);
@@ -614,14 +676,50 @@ public class BufferFormatter {
 		}
 	}
 
+	private static void put(final CharBuffer buffer, double v) {
+		if (Double.isNaN(v)){
+			append(buffer, "NaN");
+			return;
+		}
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put('-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, "Infinity");
+			return;
+		}
+
+		if (v == 0){
+			append(buffer, "0.0");
+			return;
+		}
+
+		// All exceptional cases have been covered
+		// TODO: this leads to garbage
+		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		append(buffer, javaFormatString);
+	}
+
 	private static void put(final CharBuffer buffer, double v, int precision) {
 		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
 				(v < 0 && (v < -1e18 || v > -1e-18))){
-			// TODO:
-			final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
-			append(buffer, javaFormatString);
+			put(buffer, v);
 			return;
 		}
+
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put('-');
+		}
+
 		long x = (long)v;
 		put(buffer, x);
 		buffer.put('.');
@@ -632,7 +730,6 @@ public class BufferFormatter {
 
 		int oldPos = buffer.position();
 
-		x = x < 0 ? -x : x;
 		// add leading zeros
 
 		final int stringSize = stringSize(x);
