@@ -306,6 +306,180 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public GFLogEntry append(double v) {
+		append(v, 10);
+//		long    dBits = Double.doubleToLongBits( v );
+//        long    fractBits;
+//        int     binExp;
+//        int     nSignificantBits;
+//        boolean     isNegative;
+//        int         decExponent;
+//        int         nDigits;
+//        int         bigIntExp;
+//        int         bigIntNBits;
+//
+//        final long   signMask = 0x8000000000000000L;
+//        final long   expMask  = 0x7ff0000000000000L;
+//        final long   fractMask= ~(signMask|expMask);
+//        final int    expShift = 52;
+//        final int    expBias  = 1023;
+//        final long   fractHOB = ( 1L<<expShift ); // assumed High-Order bit
+//        final long   expOne   = ((long)expBias)<<expShift; // exponent of 1.0
+//
+//        // discover and delete sign
+//        if ( (dBits&signMask) != 0 ){
+//            isNegative = true;
+//            dBits ^= signMask;
+//        } else {
+//            isNegative = false;
+//        }
+//        // Begin to unpack
+//        // Discover obvious special cases of NaN and Infinity.?
+//        binExp = (int)( (dBits&expMask) >> expShift );
+//        fractBits = dBits&fractMask;
+//        if ( binExp == (int)(expMask>>expShift) ) {
+//            if ( fractBits == 0L ){
+//            	if (isNegative) append('-');
+//                append("Infinity");
+//            } else {
+//                append("NaN");
+//                isNegative = false; // NaN has no sign!
+//            }
+//            return this;
+//        }
+//        if (isNegative) append('-');
+////        // Finish unpacking
+////        // Normalize denormalized numbers.
+////        // Insert assumed high-order bit for normalized numbers.
+////        // Subtract exponent bias.
+//        if ( binExp == 0 ){
+//            if ( fractBits == 0L ){
+//                // not a denorm, just a 0!
+//                decExponent = 0;
+//                return append('0');
+//            }
+//            while ( (fractBits&fractHOB) == 0L ){
+//                fractBits <<= 1;
+//                binExp -= 1;
+//            }
+//            nSignificantBits = expShift + binExp +1; // recall binExp is  - shift count.
+//            binExp += 1;
+//        } else {
+//            fractBits |= fractHOB;
+//            nSignificantBits = expShift+1;
+//        }
+//        binExp -= expBias;
+//
+//        /*
+//         * This is the hard case. We are going to compute large positive
+//         * integers B and S and integer decExp, s.t.
+//         *      d = ( B / S ) * 10^decExp
+//         *      1 <= B / S < 10
+//         * Obvious choices are:
+//         *      decExp = floor( log10(d) )
+//         *      B      = d * 2^nTinyBits * 10^max( 0, -decExp )
+//         *      S      = 10^max( 0, decExp) * 2^nTinyBits
+//         * (noting that nTinyBits has already been forced to non-negative)
+//         * I am also going to compute a large positive integer
+//         *      M      = (1/2^nSignificantBits) * 2^nTinyBits * 10^max( 0, -decExp )
+//         * i.e. M is (1/2) of the ULP of d, scaled like B.
+//         * When we iterate through dividing B/S and picking off the
+//         * quotient bits, we will know when to stop when the remainder
+//         * is <= M.
+//         *
+//         * We keep track of powers of 2 and powers of 5.
+//         */
+//
+//        /*
+//         * Estimate decimal exponent. (If it is small-ish,
+//         * we could double-check.)
+//         *
+//         * First, scale the mantissa bits such that 1 <= d2 < 2.
+//         * We are then going to estimate
+//         *          log10(d2) ~=~  (d2-1.5)/1.5 + log(1.5)
+//         * and so we can estimate
+//         *      log10(d) ~=~ log10(d2) + binExp * log10(2)
+//         * take the floor and call it decExp.
+//         * FIXME -- use more precise constants here. It costs no more.
+//         */
+//
+//        double d2 = Double.longBitsToDouble(
+//                expOne | ( fractBits &~ fractHOB ) );
+//        int decExp = (int)Math.floor(
+//                (d2-1.5D)*0.289529654D + 0.176091259 + binExp * 0.301029995663981 );
+
+//
+//        assert nDigits <= 19 : nDigits; // generous bound on size of nDigits
+//        int i = 0;
+//        if (isNegative) { i = 1; }
+//        if (decExponent > 0 && decExponent < 8) {
+//		    // print digits.digits.
+//		    int charLength = Math.min(nDigits, decExponent);
+//		    //System.arraycopy(digits, 0, result, i, charLength);
+//		    i += charLength;
+//		    if (charLength < decExponent) {
+//		        charLength = decExponent-charLength;
+//		        //System.arraycopy(zero, 0, result, i, charLength);
+//		        for(int j = 0; j < charLength; j++)
+//		        	append('0');
+//		        i += charLength;
+//		        append('.');
+//		        append('0');
+//		    } else {
+//		    	append('.');
+//		        if (charLength < nDigits) {
+//		            int t = nDigits - charLength;
+//		            //System.arraycopy(digits, charLength, result, i, t);
+//		            i += t;
+//		        } else {
+//		        	append('0');
+//		        }
+//		    }
+//		} else if (decExponent <=0 && decExponent > -3) {
+//			append('0');
+//			append('.');
+//		    if (decExponent != 0) {
+//		        //System.arraycopy(zero, 0, result, i, -decExponent);
+//		    	for(int j = 0; j < -decExponent; j++)
+//		        	append('0');
+//		        i -= decExponent;
+//		    }
+//		    //System.arraycopy(digits, 0, result, i, nDigits);
+//		    i += nDigits;
+//		} else {
+//		    result[i++] = digits[0];
+//		    append('.');
+//		    if (nDigits > 1) {
+//		        System.arraycopy(digits, 1, result, i, nDigits-1);
+//		        i += nDigits-1;
+//		    } else {
+//		        append('0');
+//		    }
+//		    append('E');
+//		    int e;
+//		    if (decExponent <= 0) {
+//		        append('-');
+//		        e = -decExponent+1;
+//		    } else {
+//		        e = decExponent-1;
+//		    }
+//		    // decExponent has 1, 2, or 3, digits
+//		    if (e <= 9) {
+//		    	append(BufferFormatter.DIGIT_ONES[e]);
+//		    } else if (e <= 99) {
+//		    	append(BufferFormatter.DIGIT_TENS[e]);
+//		    	append(BufferFormatter.DIGIT_ONES[e]);
+//		    } else {
+//		    	append(BufferFormatter.DIGIT_ONES[e/100]);
+//		        e %= 100;
+//		        append(BufferFormatter.DIGIT_TENS[e]);
+//		        append(BufferFormatter.DIGIT_ONES[e]);
+//		    }
+//		}
+		return this;
+	}
+
+	@Override
 	public GFLogEntry append(Object o) {
 		try {
 			if (o != null){
@@ -352,6 +526,12 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public void appendLast (final long i) {
+		append(i);
+		commit();
+	}
+
+	@Override
+	public void appendLast (final double i) {
 		append(i);
 		commit();
 	}
@@ -441,6 +621,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public FormattedGFLogEntry with(double i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
 	public FormattedGFLogEntry with(double i, int precision){
 		checkPlaceholder();
 		append(i, precision);
@@ -520,6 +708,12 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public void  withLast(long i){
+		with(i);
+		checkAndCommit();
+	}
+
+	@Override
+	public void withLast(double i){
 		with(i);
 		checkAndCommit();
 	}

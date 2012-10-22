@@ -40,6 +40,8 @@ public interface GFLogEntry extends Appendable {
 
 	GFLogEntry append(long i);
 
+	GFLogEntry append(double i);
+
 	GFLogEntry append(double i, int precision);
 
 	<T> GFLogEntry append(T[] array, String separator);
@@ -88,6 +90,8 @@ public interface GFLogEntry extends Appendable {
 	void appendLast(int i);
 
 	void appendLast(long i);
+
+	void appendLast(double i);
 
 	void appendLast(double i, int precision);
 

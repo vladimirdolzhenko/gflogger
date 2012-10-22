@@ -297,8 +297,8 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return level;
 	}
 
-//	@Override
-//	public void stop(){
+	@Override
+	public void stop(){
 //		running = false;
 //		for(int i = 0; i < appenders.length; i++){
 //			appenders[i].stop();
@@ -309,7 +309,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 //		} catch (InterruptedException e) {
 //			// ignore
 //		}
-//		logEntryThreadLocal.remove();
-//	}
+		logEntryThreadLocal.remove();
+	}
 
 }

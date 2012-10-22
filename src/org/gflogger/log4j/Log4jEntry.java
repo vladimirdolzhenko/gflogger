@@ -148,6 +148,12 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public GFLogEntry append(double i) {
+		this.builder.append(i);
+		return this;
+	}
+
+	@Override
 	public GFLogEntry append(double i, int precision) {
 		long x = (long)i;
 		this.builder.append(x);
@@ -331,6 +337,12 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public void appendLast(final double i) {
+		append(i);
+		commit();
+	}
+
+	@Override
 	public void appendLast(final double i, final int precision) {
 		append(i, precision);
 		commit();
@@ -408,6 +420,14 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	@Override
 	public FormattedGFLogEntry with(long i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
+	public FormattedGFLogEntry with(double i){
 		checkPlaceholder();
 		append(i);
 		appendNextPatternChank();
@@ -494,6 +514,12 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	@Override
 	public void  withLast(long i){
+		with(i);
+		checkAndCommit();
+	}
+
+	@Override
+	public void withLast(double i){
 		with(i);
 		checkAndCommit();
 	}

@@ -82,6 +82,37 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void testAppendDouble() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final int maxMessageSize = 200;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService =
+				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		log.info().
+			append(6.0).
+			append(6E1).
+			append(6E100).
+			append(6E-1).
+			append(6E-10).
+			append(6E-100).
+			commit();
+
+		//System.in.read();
+		GFLogFactory.stop();
+
+		assertEquals("6.000000000060.00000000006.0E1000.60000000000.00000006006.0E-100", buffer.toString());
+	}
+
+	@Test
 	public void testCommitUncommited() throws Exception {
 		for(boolean multibyte : new boolean[]{false, true}){
 			final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
@@ -742,10 +773,10 @@ public abstract class AbstractTestLoggerService {
 		assertEquals("say hello v:5 world", string);
 	}
 
-	@Test
 	@Ignore
+	@Test
 	public void testMemoryConsumption() throws Exception {
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < 10000; i++){
 			final int maxMessageSize = 64;
 			final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 			factory.setLayoutPattern("%m");

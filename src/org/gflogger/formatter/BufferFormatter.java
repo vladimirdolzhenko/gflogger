@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 import sun.misc.Cleaner;
+import sun.misc.FloatingDecimal;
 import sun.nio.ch.DirectBuffer;
 
 /**
@@ -569,19 +570,91 @@ public class BufferFormatter {
 		buffer.put((byte) b);
 	}
 
-	private static void put(final ByteBuffer buffer, double i, int precision) {
-		long x = (long)i;
+	private static void put(final ByteBuffer buffer, double v, int precision) {
+		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
+				(v < 0 && (v < -1e18 || v > -1e-18))){
+			// TODO:
+			final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+			append(buffer, javaFormatString);
+			return;
+		}
+		long x = (long)v;
 		put(buffer, x);
 		buffer.put((byte) '.');
-		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
-		put(buffer, x < 0 ? -x : x);
+		x = (long)((v - x) * (precision > 0 ?
+				precision - 1 < LONG_SIZE_TABLE.length ?
+						LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+				1));
+
+		int oldPos = buffer.position();
+
+		x = x < 0 ? -x : x;
+		// add leading zeros
+
+		final int stringSize = stringSize(x);
+
+		int leadingZeros = precision - stringSize - 2;
+		if (leadingZeros > 0){
+			for(int i = 0; i < leadingZeros; i++){
+				buffer.put((byte) '0');
+			}
+		}
+
+		put(buffer, x);
+
+		int pos = buffer.position();
+		final int limit = buffer.limit();
+
+		if (pos - oldPos < precision && pos < limit){
+			int j = precision - (pos - oldPos);
+			j = j < limit - pos ? j : limit - pos;
+			for(int i = 0; i < j; i++){
+				buffer.put((byte) '0');
+			}
+		}
 	}
 
-	private static void put(final CharBuffer buffer, double i, int precision) {
-		long x = (long)i;
+	private static void put(final CharBuffer buffer, double v, int precision) {
+		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
+				(v < 0 && (v < -1e18 || v > -1e-18))){
+			// TODO:
+			final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+			append(buffer, javaFormatString);
+			return;
+		}
+		long x = (long)v;
 		put(buffer, x);
 		buffer.put('.');
-		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
-		put(buffer, x < 0 ? -x : x);
+		x = (long)((v - x) * (precision > 0 ?
+			precision - 1 < LONG_SIZE_TABLE.length ?
+					LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+			1));
+
+		int oldPos = buffer.position();
+
+		x = x < 0 ? -x : x;
+		// add leading zeros
+
+		final int stringSize = stringSize(x);
+
+		int leadingZeros = precision - stringSize - 2;
+		if (leadingZeros > 0){
+			for(int i = 0; i < leadingZeros; i++){
+				buffer.put('0');
+			}
+		}
+
+		put(buffer, x);
+
+		int pos = buffer.position();
+		final int limit = buffer.limit();
+
+		if (pos - oldPos < precision && pos < limit){
+			int j = precision - (pos - oldPos);
+			j = j < limit - pos ? j : limit - pos;
+			for(int i = 0; i < j; i++){
+				buffer.put('0');
+			}
+		}
 	}
 }

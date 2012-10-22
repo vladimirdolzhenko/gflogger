@@ -36,6 +36,8 @@ public interface FormattedGFLogEntry {
 
 	FormattedGFLogEntry with(long i);
 
+	FormattedGFLogEntry with(double i);
+
 	FormattedGFLogEntry with(double i, int precision);
 
 	<T> FormattedGFLogEntry with(T[] array, String separator);
@@ -78,6 +80,8 @@ public interface FormattedGFLogEntry {
 	void withLast(int i);
 
 	void withLast(long i);
+
+	void withLast(double i);
 
 	void withLast(double i, int precision);
 

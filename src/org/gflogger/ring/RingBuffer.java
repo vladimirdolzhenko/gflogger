@@ -37,12 +37,14 @@ public final class RingBuffer<T extends Publishable> {
 
 	private final PaddedAtomicLong sequence = new PaddedAtomicLong(INITIAL_CURSOR_VALUE);
 
-	private final ThreadLocal<MutableLong> minSequence = new ThreadLocal<MutableLong>(){
+	private static class MutableLongThreadLocal extends ThreadLocal<MutableLong> {
 		@Override
 		protected MutableLong initialValue() {
 			return new MutableLong(INITIAL_CURSOR_VALUE);
 		}
-	};
+	}
+
+	private final ThreadLocal<MutableLong> minSequence = new MutableLongThreadLocal();
 
 	private final EntryProcessor[] entryProcessors;
 

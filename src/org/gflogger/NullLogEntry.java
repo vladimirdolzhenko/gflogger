@@ -57,6 +57,11 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public GFLogEntry append(final double i) {
+		return this;
+	}
+
+	@Override
 	public GFLogEntry append(final double i, final int precision) {
 		return this;
 	}
@@ -113,6 +118,11 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	@Override
 	public void appendLast(long i) {
+		// nothing
+	}
+
+	@Override
+	public void appendLast(double i) {
 		// nothing
 	}
 
@@ -182,6 +192,11 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public FormattedGFLogEntry with(double i) {
+		return this;
+	}
+
+	@Override
 	public FormattedGFLogEntry with(double i, int precision) {
 		return this;
 	}
@@ -238,6 +253,11 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 
 	@Override
 	public void withLast(long i) {
+		// nothing
+	}
+
+	@Override
+	public void withLast(double i) {
 		// nothing
 	}
 
