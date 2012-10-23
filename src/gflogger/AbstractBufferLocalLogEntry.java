@@ -243,6 +243,11 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public LogEntry append(double v) {
+		return append(v, 10);
+	}
+
+	@Override
 	public LogEntry append(Object o) {
 		try {
 			if (o != null){
@@ -296,6 +301,12 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	@Override
 	public void appendLast (final double i, final int precision) {
 		append(i, precision);
+		commit();
+	}
+
+	@Override
+	public void appendLast (final double i) {
+		append(i);
 		commit();
 	}
 
@@ -374,6 +385,14 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public FormattedLogEntry with(double i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
 	public FormattedLogEntry with(Throwable e){
 		checkPlaceholder();
 		append(e);
@@ -436,6 +455,12 @@ abstract class AbstractBufferLocalLogEntry implements LocalLogEntry {
 	@Override
 	public void withLast(double i, int precision){
 		with(i, precision);
+		checkAndCommit();
+	}
+
+	@Override
+	public void withLast(double i){
+		with(i);
 		checkAndCommit();
 	}
 

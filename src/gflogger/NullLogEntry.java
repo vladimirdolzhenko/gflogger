@@ -62,6 +62,11 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public LogEntry append(final double i) {
+		return this;
+	}
+
+	@Override
 	public LogEntry append(Throwable e) {
 		return this;
 	}
@@ -108,6 +113,11 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public void appendLast(double i, int precision) {
+		// nothing
+	}
+
+	@Override
+	public void appendLast(double i) {
 		// nothing
 	}
 
@@ -167,6 +177,11 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public FormattedLogEntry with(double i) {
+		return this;
+	}
+
+	@Override
 	public FormattedLogEntry with(Throwable e) {
 		return this;
 	}
@@ -213,6 +228,11 @@ public class NullLogEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public void withLast(double i, int precision) {
+		// nothing
+	}
+
+	@Override
+	public void withLast(double i) {
 		// nothing
 	}
 

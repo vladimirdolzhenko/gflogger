@@ -14,15 +14,22 @@
 
 package gflogger.log4j;
 
-import static gflogger.util.StackTraceUtils.*;
+import static gflogger.util.StackTraceUtils.getCodeLocation;
+import static gflogger.util.StackTraceUtils.getImplementationVersion;
+import static gflogger.util.StackTraceUtils.loadClass;
+
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
-
+import gflogger.DefaultObjectFormatterFactory;
 import gflogger.FormattedLogEntry;
 import gflogger.LogEntry;
 import gflogger.LogLevel;
 import gflogger.Loggable;
+import gflogger.ObjectFormatter;
+import gflogger.ObjectFormatterFactory;
 import gflogger.formatter.BufferFormatter;
+
 
 /**
  * Log4jEntry
@@ -38,6 +45,8 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	private final StringBuilder builder;
 
 	private LogLevel logLevel;
+
+	private final ObjectFormatterFactory	formatterFactory = new DefaultObjectFormatterFactory();
 
 	private String pattern;
 	private int pPos;
@@ -139,12 +148,77 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public LogEntry append(double i) {
+		this.builder.append(i);
+		return this;
+	}
+
+	@Override
 	public LogEntry append(double i, int precision) {
 		long x = (long)i;
 		this.builder.append(x);
 		this.builder.append('.');
 		x = (long)((i -x) * (precision > 0 ? BufferFormatter.LONG_SIZE_TABLE[precision - 1] : 1));
 		this.builder.append(x < 0 ? -x : x);
+		return this;
+	}
+
+	public <T> LogEntry append(T[] array, String separator) {
+		if (array == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(int i = 0; i < array.length; i++){
+					if (i > 0){
+						append(separator);
+					}
+					final T obj = array[i];
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				//error("append(Object o)", e);
+			}
+			return this;
+		}
+		return this;
+	}
+
+	public <T> LogEntry append(Iterable<T> iterable, String separator) {
+		if (iterable == null){
+			append('n').append('u').append('l').append('l');
+		} else {
+			try {
+				append('[');
+				ObjectFormatter formatter = null;
+				for(final Iterator<T> it = iterable.iterator();it.hasNext();){
+					final T obj = it.next();
+					if (obj != null){
+						if (formatter == null) {
+							formatter = formatterFactory.getObjectFormatter(obj);
+						}
+						formatter.append(obj, this);
+					} else {
+						append('n').append('u').append('l').append('l');
+					}
+					if (it.hasNext()){
+						append(separator);
+					}
+				}
+				append(']');
+			} catch (Throwable e){
+				//error("append(Object o)", e);
+			}
+		}
 		return this;
 	}
 
@@ -211,7 +285,16 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 
 	@Override
 	public LogEntry append(Object o) {
-		this.builder.append(String.valueOf(o));
+		try {
+			if (o != null){
+				final ObjectFormatter formatter = formatterFactory.getObjectFormatter(o);
+				formatter.append(o, this);
+			} else {
+				append('n').append('u').append('l').append('l');
+			}
+		} catch (Throwable e){
+			//error("append(Object o)", e);
+		}
 		return this;
 	}
 
@@ -252,8 +335,24 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public void appendLast(final double i) {
+		append(i);
+		commit();
+	}
+
+	@Override
 	public void appendLast(final double i, final int precision) {
 		append(i, precision);
+		commit();
+	}
+
+	public <T> void appendLast(T[] array, String separator) {
+		append(array, separator);
+		commit();
+	}
+
+	public <T> void appendLast(Iterable<T> iterable, String separator) {
+		append(iterable, separator);
 		commit();
 	}
 
@@ -324,9 +423,31 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public FormattedLogEntry with(double i){
+		checkPlaceholder();
+		append(i);
+		appendNextPatternChank();
+		return this;
+	}
+
+	@Override
 	public FormattedLogEntry with(double i, int precision){
 		checkPlaceholder();
 		append(i, precision);
+		appendNextPatternChank();
+		return this;
+	}
+
+	public <T> FormattedLogEntry with(T[] array, String separator) {
+		checkPlaceholder();
+		append(array, separator);
+		appendNextPatternChank();
+		return this;
+	}
+
+	public <T> FormattedLogEntry with(Iterable<T> iterable, String separator) {
+		checkPlaceholder();
+		append(iterable, separator);
 		appendNextPatternChank();
 		return this;
 	}
@@ -392,8 +513,24 @@ public class Log4jEntry implements LogEntry, FormattedLogEntry {
 	}
 
 	@Override
+	public void withLast(double i){
+		with(i);
+		checkAndCommit();
+	}
+
+	@Override
 	public void withLast(double i, int precision){
 		with(i, precision);
+		checkAndCommit();
+	}
+
+	public <T> void withLast(T[] array, String separator) {
+		with(array, separator);
+		checkAndCommit();
+	}
+
+	public <T> void withLast(Iterable<T> iterable, String separator) {
+		with(iterable, separator);
 		checkAndCommit();
 	}
 

@@ -33,6 +33,8 @@ public interface FormattedLogEntry {
 
 	FormattedLogEntry with(double i, int precision);
 
+	FormattedLogEntry with(double i);
+
 	FormattedLogEntry with(Throwable e);
 
 	FormattedLogEntry with(Loggable loggable);
@@ -65,6 +67,8 @@ public interface FormattedLogEntry {
 	void withLast(long i);
 
 	void withLast(double i, int precision);
+
+	void withLast(double i);
 
 	void withLast(Throwable e);
 

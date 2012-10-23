@@ -39,6 +39,8 @@ public interface LogEntry {
 
 	LogEntry append(double i, int precision);
 
+	LogEntry append(double i);
+
 	LogEntry append(Throwable e);
 
 	LogEntry append(Loggable loggable);
@@ -76,6 +78,8 @@ public interface LogEntry {
 	void appendLast(long i);
 
 	void appendLast(double i, int precision);
+
+	void appendLast(double i);
 
 	void appendLast(Throwable e);
 

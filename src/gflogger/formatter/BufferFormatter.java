@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 import sun.misc.Cleaner;
+import sun.misc.FloatingDecimal;
 import sun.nio.ch.DirectBuffer;
 
 /**
@@ -193,12 +194,22 @@ public class BufferFormatter {
 
 
 	public static ByteBuffer append(final ByteBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 4 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision);
 		return buffer;
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 4 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision);
+		return buffer;
+	}
+
+	public static ByteBuffer append(final ByteBuffer buffer, double v) {
+		put(buffer, v);
+		return buffer;
+	}
+
+	public static CharBuffer append(final CharBuffer buffer, double v) {
+		put(buffer, v);
 		return buffer;
 	}
 
@@ -261,10 +272,45 @@ public class BufferFormatter {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	} ;
 
+	public final static byte[] BDIGIT_TENS = {
+		'0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
+		'1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
+		'2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
+		'3', '3', '3', '3', '3', '3', '3', '3', '3', '3',
+		'4', '4', '4', '4', '4', '4', '4', '4', '4', '4',
+		'5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
+		'6', '6', '6', '6', '6', '6', '6', '6', '6', '6',
+		'7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
+		'8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
+		'9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
+	} ;
+
+	public final static byte[] BDIGIT_ONES = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+	} ;
+
 	/**
 	 * All possible chars for representing a number as a String
 	 */
 	public final static char[] DIGITS = {
+		'0' , '1' , '2' , '3' , '4' , '5' ,
+		'6' , '7' , '8' , '9' , 'a' , 'b' ,
+		'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
+		'i' , 'j' , 'k' , 'l' , 'm' , 'n' ,
+		'o' , 'p' , 'q' , 'r' , 's' , 't' ,
+		'u' , 'v' , 'w' , 'x' , 'y' , 'z'
+	};
+
+	public final static byte[] BDIGITS = {
 		'0' , '1' , '2' , '3' , '4' , '5' ,
 		'6' , '7' , '8' , '9' , 'a' , 'b' ,
 		'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
@@ -534,19 +580,178 @@ public class BufferFormatter {
 		buffer.put((byte) b);
 	}
 
-	private static void put(final ByteBuffer buffer, double i, int precision) {
-		long x = (long)i;
-		put(buffer, x);
-		buffer.put((byte) '.');
-		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
-		put(buffer, x < 0 ? -x : x);
+
+	/**
+	 * Bit 63 represents the sign of the floating-point number.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long SIGN_MASK = 0x8000000000000000L;
+
+	/**
+	 * Bits 62-52 represent the exponent.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long EXP_MASK = 0x7ff0000000000000L;
+
+	/**
+	 * Bits 51-0 represent the significant (sometimes called the mantissa) of the floating-point number.
+	 * @see java.lang.Double#doubleToLongBits(double)
+	 */
+	public final static long MANTISA_MASK = 0x000fffffffffffffL;
+
+	private static void put(final ByteBuffer buffer, double v) {
+		if (Double.isNaN(v)){
+			append(buffer, "NaN");
+			return;
+		}
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put((byte) '-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, "Infinity");
+			return;
+		}
+		if (v == 0){
+			append(buffer, "0.0");
+			return;
+		}
+		// TODO: this leads to garbage
+		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		append(buffer, javaFormatString);
 	}
 
-	private static void put(final CharBuffer buffer, double i, int precision) {
-		long x = (long)i;
+	private static void put(final ByteBuffer buffer, double v, int precision) {
+		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
+				(v < 0 && (v < -1e18 || v > -1e-18))){
+			put(buffer, v);
+			return;
+		}
+
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put((byte) '-');
+		}
+
+		long x = (long)v;
+		put(buffer, x);
+		buffer.put((byte) '.');
+		x = (long)((v - x) * (precision > 0 ?
+				precision - 1 < LONG_SIZE_TABLE.length ?
+						LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+				1));
+
+		int oldPos = buffer.position();
+
+		// add leading zeros
+
+		final int stringSize = stringSize(x);
+
+		int leadingZeros = precision - stringSize - 2;
+		if (leadingZeros > 0){
+			for(int i = 0; i < leadingZeros; i++){
+				buffer.put((byte) '0');
+			}
+		}
+
+		put(buffer, x);
+
+		int pos = buffer.position();
+		final int limit = buffer.limit();
+
+		if (pos - oldPos < precision && pos < limit){
+			int j = precision - (pos - oldPos);
+			j = j < limit - pos ? j : limit - pos;
+			for(int i = 0; i < j; i++){
+				buffer.put((byte) '0');
+			}
+		}
+	}
+
+	private static void put(final CharBuffer buffer, double v) {
+		if (Double.isNaN(v)){
+			append(buffer, "NaN");
+			return;
+		}
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put('-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, "Infinity");
+			return;
+		}
+
+		if (v == 0){
+			append(buffer, "0.0");
+			return;
+		}
+
+		// All exceptional cases have been covered
+		// TODO: this leads to garbage
+		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		append(buffer, javaFormatString);
+	}
+
+	private static void put(final CharBuffer buffer, double v, int precision) {
+		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
+				(v < 0 && (v < -1e18 || v > -1e-18))){
+			put(buffer, v);
+			return;
+		}
+
+		final long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			buffer.put('-');
+		}
+
+		long x = (long)v;
 		put(buffer, x);
 		buffer.put('.');
-		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
-		put(buffer, x < 0 ? -x : x);
+		x = (long)((v - x) * (precision > 0 ?
+			precision - 1 < LONG_SIZE_TABLE.length ?
+					LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+			1));
+
+		int oldPos = buffer.position();
+
+		// add leading zeros
+
+		final int stringSize = stringSize(x);
+
+		int leadingZeros = precision - stringSize - 2;
+		if (leadingZeros > 0){
+			for(int i = 0; i < leadingZeros; i++){
+				buffer.put('0');
+			}
+		}
+
+		put(buffer, x);
+
+		int pos = buffer.position();
+		final int limit = buffer.limit();
+
+		if (pos - oldPos < precision && pos < limit){
+			int j = precision - (pos - oldPos);
+			j = j < limit - pos ? j : limit - pos;
+			for(int i = 0; i < j; i++){
+				buffer.put('0');
+			}
+		}
 	}
 }
