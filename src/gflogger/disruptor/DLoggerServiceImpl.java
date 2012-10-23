@@ -313,7 +313,8 @@ public class DLoggerServiceImpl implements LoggerService {
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
 		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message was not properly commited.");
+			LogLog.error("ERROR! log message '" + entry.stringValue()
+				+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
 			entry.commit();
 		}
 
