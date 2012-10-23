@@ -133,6 +133,43 @@ public class TestDefaultObjectFormatterFactory {
 		assertSame(abcImplObjectFormatter, objectFormatter);
 	}
 
+	@Test
+	public void testMDObjectFormatter() throws Exception {
+		final DefaultObjectFormatterFactory objectFormatterFactory = new DefaultObjectFormatterFactory();
+
+		final ObjectFormatter<AMD> amdObjectFormatter = new ObjectFormatter<AMD>(){
+			@Override
+			public void append(AMD obj, LogEntry entry) {
+				entry.append("AMD");
+			}
+
+			@Override
+			public String toString() {
+				return "AMDFormatter";
+			}
+		};
+
+		final ObjectFormatter<QE> qeObjectFormatter = new ObjectFormatter<QE>(){
+			@Override
+			public void append(QE obj, LogEntry entry) {
+				entry.append("QE");
+			}
+
+			@Override
+			public String toString() {
+				return "QEFormatter";
+			}
+
+		};
+		objectFormatterFactory.registerObjectFormatter(AMD.class, amdObjectFormatter);
+		objectFormatterFactory.registerObjectFormatter(QE.class, qeObjectFormatter);
+
+		final ObjectFormatter objectFormatter =
+				objectFormatterFactory.getObjectFormatter(new BImpl());
+
+		assertSame(amdObjectFormatter, objectFormatter);
+	}
+
 	private static interface A {}
 	private static interface B {}
 	private static interface C {}
@@ -145,4 +182,15 @@ public class TestDefaultObjectFormatterFactory {
 
 	private static class ABCImpl implements ABC {}
 	private static class ABCImpl2 extends ABCImpl implements D {}
+
+
+	private static interface MD {}
+
+	private static interface QE extends MD {}
+
+	private static abstract class AMD implements MD {}
+
+	private static class BRU extends AMD {}
+
+	private static class BImpl extends BRU {}
 }
