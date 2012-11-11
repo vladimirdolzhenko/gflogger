@@ -14,6 +14,11 @@
 
 package org.gflogger.helpers;
 
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
+
+import org.gflogger.LogLevel;
+
 /**
  * This class used to output log statements from within the gflogger package.
  *
@@ -32,61 +37,28 @@ package org.gflogger.helpers;
  */
 public class LogLog {
 
-	/**
-	 * Defining this value makes gflogger print gflogger-internal debug statements to
-	 * <code>System.out</code>.
-	 *
-	 * <p>
-	 * The value of this string is <b>gflogger.debug</b>.
-	 *
-	 * <p>
-	 * Note that the search for all option names is case sensitive.
-	 */
-	public static final String  DEBUG_KEY		= "logger.debug";
+	protected static LogLevel	internalLogLevel = LogLevel.INFO;
 
-	/**
-	 * Defining this value makes gflogger components print gflogger-internal debug
-	 * statements to <code>System.out</code>.
-	 *
-	 * <p>
-	 * The value of this string is <b>gflogger.configDebug</b>.
-	 *
-	 * <p>
-	 * Note that the search for all option names is case sensitive.
-	 *
-	 * @deprecated Use {@link #DEBUG_KEY} instead.
-	 */
-	@Deprecated
-	public static final String  CONFIG_DEBUG_KEY = "logger.configDebug";
-
-	protected static boolean	debugEnabled	 = Boolean.getBoolean("gflogger.internalDebugEnabled");
+	static {
+		final String value = getStringProperty("gflogger.internalLogLevel", "INFO");
+		try {
+			internalLogLevel = LogLevel.valueOf(value);
+		} catch (final Throwable e) {
+			System.err.println("Unable to parse internal log level of '" + value + "'");
+		}
+	}
 
 	/**
 	 * In quietMode not even errors generate any output.
 	 */
-	private static boolean	  quietMode		= Boolean.getBoolean("gflogger.internalQuietMode");
+	private static boolean	  quietMode		= getBooleanProperty("gflogger.internalQuietMode", false);
 
 	private static final String PREFIX		   = "gflogger: ";
 	private static final String ERR_PREFIX	   = "gflogger:ERROR ";
 	private static final String WARN_PREFIX	   = "gflogger:WARN ";
 
-	static {
-		String key = OptionConverter.getSystemProperty(DEBUG_KEY, null);
-
-		if (key == null) {
-			key = OptionConverter.getSystemProperty(CONFIG_DEBUG_KEY, null);
-		}
-
-		if (key != null) {
-			debugEnabled = OptionConverter.toBoolean(key, true);
-		}
-	}
-
-	/**
-	 * Allows to enable/disable gflogger internal logging.
-	 */
-	static public void setInternalDebugging(boolean enabled) {
-		debugEnabled = enabled;
+	private static boolean isLoggable(final LogLevel level){
+		return !quietMode && internalLogLevel.isHigher(level);
 	}
 
 	/**
@@ -94,7 +66,17 @@ public class LogLog {
 	 * goes to <code>System.out</code>.
 	 */
 	public static void debug(String msg) {
-		if (debugEnabled && !quietMode) {
+		if (isLoggable(LogLevel.DEBUG)) {
+			System.out.println(PREFIX + msg);
+		}
+	}
+
+	/**
+	 * This method is used to output gflogger internal info statements. Output
+	 * goes to <code>System.out</code>.
+	 */
+	public static void info(String msg) {
+		if (isLoggable(LogLevel.INFO)) {
 			System.out.println(PREFIX + msg);
 		}
 	}
@@ -104,7 +86,7 @@ public class LogLog {
 	 * goes to <code>System.out</code>.
 	 */
 	public static void debug(String msg, Throwable t) {
-		if (debugEnabled && !quietMode) {
+		if (isLoggable(LogLevel.DEBUG)) {
 			System.out.println(PREFIX + msg);
 			if (t != null)
 				t.printStackTrace(System.out);
@@ -117,9 +99,9 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void error(String msg) {
-		if (quietMode)
-			return;
-		System.err.println(ERR_PREFIX + msg);
+		if (isLoggable(LogLevel.ERROR)) {
+			System.err.println(ERR_PREFIX + msg);
+		}
 	}
 
 	/**
@@ -128,12 +110,11 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void error(String msg, Throwable t) {
-		if (quietMode)
-			return;
-
-		System.err.println(ERR_PREFIX + msg);
-		if (t != null) {
-			t.printStackTrace();
+		if (isLoggable(LogLevel.ERROR)) {
+			System.err.println(ERR_PREFIX + msg);
+			if (t != null) {
+				t.printStackTrace();
+			}
 		}
 	}
 
@@ -154,10 +135,9 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void warn(String msg) {
-		if (quietMode)
-			return;
-
-		System.err.println(WARN_PREFIX + msg);
+		if (isLoggable(LogLevel.WARN)) {
+			System.err.println(WARN_PREFIX + msg);
+		}
 	}
 
 	/**
@@ -165,12 +145,11 @@ public class LogLog {
 	 * disable warning statements. Output goes to <code>System.err</code>.
 	 */
 	public static void warn(String msg, Throwable t) {
-		if (quietMode)
-			return;
-
-		System.err.println(WARN_PREFIX + msg);
-		if (t != null) {
-			t.printStackTrace();
+		if (isLoggable(LogLevel.WARN)) {
+			System.err.println(WARN_PREFIX + msg);
+			if (t != null) {
+				t.printStackTrace();
+			}
 		}
 	}
 }

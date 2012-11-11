@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.gflogger.helpers.LogLog;
+
 /**
  * LogFactory
  *
@@ -37,7 +39,7 @@ public final class GFLogFactory {
 		classedLogger = new HashMap<Class, GFLogView>();
 
 		final String ver = GFLogFactory.class.getPackage().getImplementationVersion();
-		System.out.println("GFLogger version " + (ver != null ? ver : "*dev*") );
+		LogLog.info(" version " + (ver != null ? ver : "*dev*") );
 	}
 
 	private GFLog get(final String name){
