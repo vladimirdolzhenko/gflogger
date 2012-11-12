@@ -599,25 +599,30 @@ public class BufferFormatter {
 	 */
 	public final static long MANTISA_MASK = 0x000fffffffffffffL;
 
+	private static final String	INFINITY		= "Infinity";
+	private static final String	NAN				= "NaN";
+	private static final String	ZERO_DOT_ZERO	= "0.0";
+
 	private static void put(final ByteBuffer buffer, double v) {
 		if (Double.isNaN(v)){
-			append(buffer, "NaN");
+			append(buffer, NAN);
 			return;
 		}
-		final long d = Double.doubleToRawLongBits(v);
+		long d = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (d & SIGN_MASK) != 0;
 		if (isNegative){
 			// reset sign bit
-			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			d = d & ~SIGN_MASK;
+			v = Double.longBitsToDouble(d);
 			buffer.put((byte) '-');
 		}
 		if (v == Double.POSITIVE_INFINITY){
-			append(buffer, "Infinity");
+			append(buffer, INFINITY);
 			return;
 		}
-		if (v == 0){
-			append(buffer, "0.0");
+		if (d == 0){
+			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
 		// TODO: this leads to garbage
@@ -626,19 +631,33 @@ public class BufferFormatter {
 	}
 
 	private static void put(final ByteBuffer buffer, double v, int precision) {
-		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
-				(v < 0 && (v < -1e18 || v > -1e-18))){
-			put(buffer, v);
+		if (Double.isNaN(v)){
+			append(buffer, NAN);
 			return;
 		}
 
-		final long d = Double.doubleToRawLongBits(v);
+		long d = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (d & SIGN_MASK) != 0;
 		if (isNegative){
 			// reset sign bit
-			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			d = d & ~SIGN_MASK;
+			v = Double.longBitsToDouble(d);
 			buffer.put((byte) '-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, INFINITY);
+			return;
+		}
+		if (d == 0){
+			append(buffer, ZERO_DOT_ZERO);
+			return;
+		}
+
+		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
+				(v < 0 && (v < -1e18 || v > -1e-18))){
+			put(buffer, v);
+			return;
 		}
 
 		long x = (long)v;
@@ -678,24 +697,25 @@ public class BufferFormatter {
 
 	private static void put(final CharBuffer buffer, double v) {
 		if (Double.isNaN(v)){
-			append(buffer, "NaN");
+			append(buffer, NAN);
 			return;
 		}
-		final long d = Double.doubleToRawLongBits(v);
+		long d = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (d & SIGN_MASK) != 0;
 		if (isNegative){
 			// reset sign bit
-			v = Double.longBitsToDouble(d & ~SIGN_MASK);
+			d = d & ~SIGN_MASK;
+			v = Double.longBitsToDouble(d);
 			buffer.put('-');
 		}
 		if (v == Double.POSITIVE_INFINITY){
-			append(buffer, "Infinity");
+			append(buffer, INFINITY);
 			return;
 		}
 
-		if (v == 0){
-			append(buffer, "0.0");
+		if (d == 0){
+			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
 
@@ -706,18 +726,33 @@ public class BufferFormatter {
 	}
 
 	private static void put(final CharBuffer buffer, double v, int precision) {
+		if (Double.isNaN(v)){
+			append(buffer, NAN);
+			return;
+		}
+
+		long d = Double.doubleToRawLongBits(v);
+
+		boolean isNegative = (d & SIGN_MASK) != 0;
+		if (isNegative){
+			// reset sign bit
+			d = d & ~SIGN_MASK;
+			v = Double.longBitsToDouble(d);
+			buffer.put('-');
+		}
+		if (v == Double.POSITIVE_INFINITY){
+			append(buffer, INFINITY);
+			return;
+		}
+		if (d == 0){
+			append(buffer, ZERO_DOT_ZERO);
+			return;
+		}
+
 		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
 				(v < 0 && (v < -1e18 || v > -1e-18))){
 			put(buffer, v);
 			return;
-		}
-
-		final long d = Double.doubleToRawLongBits(v);
-
-		boolean isNegative = (d & SIGN_MASK) != 0;
-		if (isNegative){
-			v = Double.longBitsToDouble(d & ~SIGN_MASK);
-			buffer.put('-');
 		}
 
 		long x = (long)v;

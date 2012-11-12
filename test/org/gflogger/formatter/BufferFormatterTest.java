@@ -14,20 +14,23 @@
 
 package org.gflogger.formatter;
 
+import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Locale;
 
-import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * BufferFormatterTest
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class BufferFormatterTest extends TestCase {
+public class BufferFormatterTest {
 
+	@Test
 	public void testStringLength() throws Exception {
 		final int[] numbers = new int[]{0, 1, 7, 11, 123, 7895, 100, 101,
 			10007, 1000000, 123456789,
@@ -38,6 +41,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendByteBufferString() throws Exception {
 		final String[] values = new String[]{"true", null, "value"};
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(50);
@@ -49,6 +53,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendCharBufferBoolean() throws Exception {
 		final boolean[] booleans = new boolean[]{true, false};
 		final CharBuffer buffer = ByteBuffer.allocateDirect(50).asCharBuffer();
@@ -59,6 +64,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendByteBufferBoolean() throws Exception {
 		final boolean[] booleans = new boolean[]{true, false};
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(50);
@@ -69,6 +75,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendByte() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(50).asCharBuffer();
 		for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
@@ -78,6 +85,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendShort() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(50).asCharBuffer();
 		for (short s = Short.MIN_VALUE; s < Short.MAX_VALUE; s++) {
@@ -87,6 +95,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendInt() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(30).asCharBuffer();
 
@@ -106,6 +115,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendLong() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(50).asCharBuffer();
 
@@ -131,6 +141,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendDoubleCharBufferWithPrecision() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(100).asCharBuffer();
 		{
@@ -171,7 +182,9 @@ public class BufferFormatterTest extends TestCase {
 			buffer.clear();
 		}
 
-		final double[] numbers4 = new double[]{1e-19, 1e19};
+		final double[] numbers4 = new double[]{1e-19, 1e19,
+			Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			0.0, -0.0};
 		for (int i = 0; i < numbers4.length; i++) {
 			BufferFormatter.append(buffer, numbers4[i], 20);
 			buffer.append(' ');
@@ -181,6 +194,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendDoubleByteBufferWithPrecision() throws Exception {
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(200);
 		{
@@ -221,7 +235,9 @@ public class BufferFormatterTest extends TestCase {
 			buffer.clear();
 		}
 
-		final double[] numbers4 = new double[]{1e-19, 1e19};
+		final double[] numbers4 = new double[]{1e-19, 1e19,
+			Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			0.0, -0.0};
 		for (int i = 0; i < numbers4.length; i++) {
 			BufferFormatter.append(buffer, numbers4[i], 20);
 			buffer.put((byte) ' ');
@@ -231,6 +247,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendDoubleByteBuffer() throws Exception {
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(200);
 
@@ -246,6 +263,7 @@ public class BufferFormatterTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAppendDoubleCharBuffer() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(100).asCharBuffer();
 
@@ -259,6 +277,29 @@ public class BufferFormatterTest extends TestCase {
 			// check
 			buffer.clear();
 		}
+	}
+
+	@Test
+	@Ignore
+	public void testname() throws Exception {
+		double v = 6.06;
+		long d = Double.doubleToRawLongBits(v);
+		System.out.println(toBinary(0L));
+		System.out.println(toBinary(1L));
+		System.out.println(toBinary(-1L));
+		System.out.println();
+		System.out.println(toBinary(d));
+		System.out.println();
+		int exp = (int)( (d & BufferFormatter.EXP_MASK) >>> 52L );
+		System.out.println(toBinary(exp));
+	}
+
+	private static String toBinary(final long x){
+		final StringBuilder s = new StringBuilder(Long.SIZE);
+		for(int i = 0; i < Long.SIZE; i++){
+			s.append( (x & (1L << (Long.SIZE - 1 - i))) != 0 ? '1' : '0');
+		}
+		return s.toString();
 	}
 
 	static String toString(final CharBuffer buffer) {
