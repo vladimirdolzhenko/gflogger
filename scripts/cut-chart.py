@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+#
+# import -window root -pause 2 -crop 1000x500+50+50 $1.png
+#
+
 import sys;
 from math import sqrt;
 
@@ -53,8 +57,8 @@ if __name__ == '__main__':
 		a = line.split()
 
 		if idx == 0 :
-			name = a[0]
-			threads = a[4]
+			name = a[0].replace(",", "")
+			threads = a[4].replace(",", "")
 			messages = a[6]
 
 			loggerMap[name] = True
@@ -152,14 +156,14 @@ if __name__ == '__main__':
 \n\
 		var options = {\n\
 		  width: %d, height: %d,\n\
-		  title: "Throughput: %s threads / %s msgs / %s series",\n\
+		  title: "Throughput: %s threads / %s msgs @ %s series",\n\
 		  hAxis: {\n\
 				title: "", \n\
 				textStyle: {color: "black", fontSize: 14},\n\
 				maxAlternation: 1\n\
 				},\n\
           vAxis: {title: "messages / ms", gridlines: {color: "#ccc", count: 9}},\n\
-          colors: ["#600"],\n\
+          colors: ["#00A"],\n\
    		  legend: "none"\n\
      };\n\
 \n\
@@ -172,14 +176,14 @@ if __name__ == '__main__':
 \n\
 		var options = {\n\
 		  width: %d, height: %d,\n\
-		  title: "Total stop the world: %s threads / %s msgs / %s series",\n\
+		  title: "Total stop the world: %s threads / %s msgs @ %s series",\n\
 		  hAxis: {\n\
 				title: "", \n\
 				textStyle: {color: "black", fontSize: 14},\n\
 				maxAlternation: 1\n\
 				},\n\
           vAxis: {title: "ms", gridlines: {color: "#ccc", count: 9}},\n\
-          colors: ["#600"],\n\
+          colors: ["#00A"],\n\
 		  legend: "none"\n\
         };\n\
 \n\
