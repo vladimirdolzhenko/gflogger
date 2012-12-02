@@ -44,9 +44,17 @@ public interface GFLogEntry extends Appendable {
 
 	GFLogEntry append(double i, int precision);
 
+	/**
+	 * append heterogeneous items (items of the same class) of an array
+	 *
+	 * @param array
+	 * @param separator
+	 * @return
+	 */
 	<T> GFLogEntry append(T[] array, String separator);
 
 	/**
+	 * append heterogeneous items (items of the same class) of an iterator
 	 * <b>Note</b>: leads to garbage footprint
 	 *
 	 * @param iterable
@@ -60,9 +68,8 @@ public interface GFLogEntry extends Appendable {
 	GFLogEntry append(Loggable loggable);
 
 	/**
-	 * appends string representation of an object using <code>o.toString()</code> method
-	 *
-	 * Leads to garbage footprint !
+	 * appends an object using {@link ObjectFormatter} if it is available for object's class.
+	 * Otherwise <code>toString()</code> method will be used. It leads to garbage footprint !
 	 *
 	 * @param o
 	 * @return
@@ -95,9 +102,16 @@ public interface GFLogEntry extends Appendable {
 
 	void appendLast(double i, int precision);
 
+	/**
+	 * append last heterogeneous items (items of the same class) of an array
+	 *
+	 * @param array
+	 * @param separator
+	 */
 	<T> void appendLast(T[] array, String separator);
 
 	/**
+	 * append heterogeneous items (items of the same class) of an iterator
 	 * <b>Note</b>: leads to garbage footprint
 	 *
 	 * @param iterable
@@ -111,10 +125,8 @@ public interface GFLogEntry extends Appendable {
 	void appendLast(Loggable loggable);
 
 	/**
-	 * appends last string representation of an object
-	 * using <code>o.toString()</code> method
-	 *
-	 * Leads to garbage footprint !
+	 * appends last an object using {@link ObjectFormatter} if it is available for object's class.
+	 * Otherwise <code>toString()</code> method will be used. It leads to garbage footprint !
 	 *
 	 * @param o
 	 * @return

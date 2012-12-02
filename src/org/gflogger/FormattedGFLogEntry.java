@@ -21,7 +21,8 @@ package org.gflogger;
 public interface FormattedGFLogEntry {
 
 	/**
-	 * appends with a single char parameter
+	 * appends pattern parameter with a single char parameter
+	 *
 	 * @return a reference to this object.
 	 */
 	FormattedGFLogEntry with(char c);
@@ -40,9 +41,17 @@ public interface FormattedGFLogEntry {
 
 	FormattedGFLogEntry with(double i, int precision);
 
+	/**
+	 * appends pattern parameter with heterogeneous items (items of the same class) of an array
+	 *
+	 * @param array
+	 * @param separator
+	 * @return
+	 */
 	<T> FormattedGFLogEntry with(T[] array, String separator);
 
 	/**
+	 * appends pattern parameter with heterogeneous items (items of the same class) of an iterator
 	 * <b>Note</b>: leads to garbage footprint
 	 *
 	 * @param iterable
@@ -56,9 +65,9 @@ public interface FormattedGFLogEntry {
 	FormattedGFLogEntry with(Loggable loggable);
 
 	/**
-	 * appends with a string representation of an object using <code>o.toString()</code> method
-	 *
-	 * <b>Note</b>: could lead to garbage footprint
+	 * appends pattern parameter with an object using {@link ObjectFormatter} if it is available
+	 * for object's class.
+	 * Otherwise <code>toString()</code> method will be used. It leads to garbage footprint !
 	 *
 	 * @param o
 	 * @return
@@ -66,7 +75,7 @@ public interface FormattedGFLogEntry {
 	FormattedGFLogEntry with(Object o);
 
 	/**
-	 * with a last single char parameter
+	 * appends pattern parameter with a last single char parameter
 	 * @return a reference to this object.
 	 */
 	void withLast(char c);
@@ -85,9 +94,16 @@ public interface FormattedGFLogEntry {
 
 	void withLast(double i, int precision);
 
+	/**
+	 * appends last pattern parameter with heterogeneous items (items of the same class) of an array
+	 *
+	 * @param array
+	 * @param separator
+	 */
 	<T> void withLast(T[] array, String separator);
 
 	/**
+	 * appends last pattern parameter with heterogeneous items (items of the same class) of an iterator
 	 * <b>Note</b>: leads to garbage footprint
 	 *
 	 * @param iterable
@@ -100,9 +116,9 @@ public interface FormattedGFLogEntry {
 	void withLast(Loggable loggable);
 
 	/**
-	 * with a last parameter string representation of an object using <code>o.toString()</code> method
-	 *
-	 * Leads to garbage footprint !
+	 * appends last pattern parameter with an object using {@link ObjectFormatter} if it is
+	 * available for an object's class.
+	 * Otherwise <code>toString()</code> method will be used. It leads to garbage footprint !
 	 *
 	 * @param o
 	 */
