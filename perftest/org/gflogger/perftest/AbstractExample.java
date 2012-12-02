@@ -105,6 +105,7 @@ public abstract class AbstractExample {
 
 		final Thread[] threads = new Thread[threadCount];
 		for (int i = 0; i < threads.length; i++) {
+			final int threadNo = i;
 			threads[i] = new Thread(new Runnable() {
 
 				private String name;
@@ -130,20 +131,32 @@ public abstract class AbstractExample {
 
 				public void doSmth() throws Throwable{
 					final int warmupCount = 10000;
-					final int[] bogus = new int[warmupCount];
+
+					int sm = 0;
 
 					// bogus before
 					for(int k = 0; k < 5; k++){
 						for(int j = 0; j < warmupCount; j++){
-							bogus[j] = j * 29;
+							sm += someMath(threadNo, j);
 						}
+					}
+
+					for(int j = 0; j < n; j++){
+						sm += someMath(threadNo, j);
 					}
 
 					for(int k = 0; k < 5; k++){
 						for(int j = 0; j < warmupCount; j++){
 							logMessage("warm", j);
+							sm += someMath(threadNo,j);
 						}
 					}
+
+					final long mStart = System.nanoTime();
+					for(int j = 0; j < n; j++){
+						sm += someMath(threadNo,j);
+					}
+					final long mEnd = System.nanoTime();
 
 					latch.await();
 					System.gc();
@@ -161,15 +174,16 @@ public abstract class AbstractExample {
 
 					for(int j = 0; j < n; j++){
 						logMessage("test", j);
+						sm += someMath(threadNo,j);
 					}
 					final long e = System.nanoTime();
-					logFinalMessage(n, t, e);
+					logFinalMessage(n, t, e - (mEnd - mStart));
 					finalLatch.countDown();
 
 					// bogus after
 					for(int k = 0; k < 5; k++){
 						for(int j = 0; j < warmupCount; j++){
-							bogus[j] = j * 31;
+							sm += someMath(threadNo, j);
 						}
 					}
 
@@ -200,6 +214,14 @@ public abstract class AbstractExample {
 		System.out.println("stopped.");
 
 		//System.exit(0);
+	}
+
+	protected int someMath(int k, int j){
+		int c = 0;
+		for(int i = 1; i < 5 * (k + 1); i++){
+			c += (int)(Math.log((j + 1) * i)) & 0xFFFFFF;
+		}
+		return c;
 	}
 
 	protected abstract void stop();
