@@ -29,7 +29,7 @@ import org.gflogger.helpers.LogLog;
  */
 abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
-	protected final String threadName;
+	protected String threadName;
 	protected final LoggerService loggerService;
 	protected final ObjectFormatterFactory	formatterFactory;
 	protected final String logErrorsMessage;
@@ -43,6 +43,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	protected String pattern;
 	protected int pPos;
+
+	AbstractLocalLogEntry(final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService,
+			final String logErrorsMessage){
+		this.formatterFactory = formatterFactory;
+		this.loggerService = loggerService;
+		this.logErrorsMessage = logErrorsMessage;
+	}
 
 	public AbstractLocalLogEntry(final Thread owner,
 			final ObjectFormatterFactory formatterFactory,
