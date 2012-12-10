@@ -148,7 +148,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		}
 	}
 
+	protected void checkIfCommitted(){
+		if (commited){
+			throw new IllegalStateException("Entry has been commited.");
+		}
+	}
+
 	protected void checkPlaceholder(){
+		checkIfCommitted();
 		if (pattern == null){
 			throw new IllegalStateException("Entry has been commited.");
 		}
@@ -185,6 +192,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public GFLogEntry append(Loggable loggable) {
+		checkIfCommitted();
 		if (loggable != null){
 			try {
 				loggable.appendTo(this);
@@ -199,6 +207,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public <T> GFLogEntry append(T[] array, String separator) {
+		checkIfCommitted();
 		if (array == null){
 			append('n').append('u').append('l').append('l');
 		} else {
@@ -229,6 +238,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public <T> GFLogEntry append(Iterable<T> iterable, String separator) {
+		checkIfCommitted();
 		if (iterable == null){
 			append('n').append('u').append('l').append('l');
 		} else {
@@ -259,6 +269,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public GFLogEntry append(Throwable e) {
+		checkIfCommitted();
 		if (e != null){
 			try {
 				append(e.getClass().getName());
@@ -315,6 +326,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public GFLogEntry append(double v) {
+		checkIfCommitted();
 		append(v, 10);
 //		long    dBits = Double.doubleToLongBits( v );
 //        long    fractBits;
@@ -489,6 +501,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public GFLogEntry append(Object o) {
+		checkIfCommitted();
 		try {
 			if (o != null){
 				final ObjectFormatter formatter = formatterFactory.getObjectFormatter(o);
@@ -764,7 +777,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	@Override
 	public final void commit() {
-		if (commited) return;
+		checkIfCommitted();
 		commit0();
 		loggerService.entryFlushed(this);
 		commited = true;

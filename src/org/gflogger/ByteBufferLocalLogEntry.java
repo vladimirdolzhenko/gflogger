@@ -77,6 +77,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBufferLocalLogEntry append(final char c) {
+		checkIfCommitted();
 		try {
 			BufferFormatter.append(byteBuffer, c);
 		} catch (Throwable e){
@@ -87,6 +88,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq) {
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, csq);
 		} catch (Throwable e){
@@ -97,6 +99,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq, final int start, final int end) {
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, csq, start, end);
 		} catch (Throwable e){
@@ -107,6 +110,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(final boolean b) {
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, b);
 		} catch (Throwable e){
@@ -117,6 +121,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public ByteBufferLocalLogEntry append(final int i){
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, i);
 		} catch (Throwable e){
@@ -127,6 +132,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(final long i) {
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, i);
 		} catch (Throwable e){
@@ -137,6 +143,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(final double i, final int precision) {
+		checkIfCommitted();
 		try{
 			BufferFormatter.append(byteBuffer, i, precision);
 		} catch (Throwable e){

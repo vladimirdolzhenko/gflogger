@@ -773,6 +773,70 @@ public abstract class AbstractTestLoggerService {
 		assertEquals("say hello v:5 world", string);
 	}
 
+	@Test
+	public void testUseLoggerAfterCommit() throws Exception {
+		final int maxMessageSize = 64;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+
+		final DefaultObjectFormatterFactory defaultObjectFormatterFactory =
+				new DefaultObjectFormatterFactory();
+		defaultObjectFormatterFactory.registerObjectFormatter(Foo.class, new FooObjectFormatter());
+		final LoggerService loggerService = createLoggerService(maxMessageSize,
+				defaultObjectFormatterFactory,
+				new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+		final GFLogEntry info = log.info();
+		info.append("test");
+		info.commit();
+
+		try {
+			info.append("test");
+			fail();
+		} catch (IllegalStateException e){
+			// ok
+		}
+
+		try {
+			info.append(true);
+			fail();
+		} catch (IllegalStateException e){
+			// ok
+		}
+
+		try {
+			info.append(0);
+			fail();
+		} catch (IllegalStateException e){
+			// ok
+		}
+
+		try {
+			info.append(Long.MAX_VALUE - 100000L);
+			fail();
+		} catch (IllegalStateException e){
+			// ok
+		}
+
+		try {
+			info.commit();
+			fail();
+		} catch (IllegalStateException e){
+			// ok
+		}
+
+		GFLogFactory.stop();
+
+		final String string = buffer.toString();
+		assertEquals("test", string);
+	}
+
 	@Ignore
 	@Test
 	public void testMemoryConsumption() throws Exception {
