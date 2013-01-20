@@ -15,16 +15,10 @@
 package org.gflogger.config.xml;
 
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Stack;
-import java.util.TimeZone;
 
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.Layout;
@@ -81,88 +75,30 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private String getAttribute(Attributes attributes, String name) {
+		//TODO RC: doing this way will always replace unresolved ${..} to empty string,
+		//which is odd, since it is easier to find out root cause having message like
+		//'${no-set-property} is not appropriate format', then 'empty string is not allowed'
 		return OptionConverter.substVars(attributes.getValue(name), System.getProperties());
-	}
-
-	private void setProperty(Object bean, String property, Object value) throws Exception {
-		if (value == null) return;
-		final String setterMethodName = "set" +
-			Character.toTitleCase(property.charAt(0)) + property.substring(1);
-		final Class<? extends Object> clazz = bean.getClass();
-		final Method[] methods = clazz.getMethods();
-
-		Class<? extends Object> valueClass = value.getClass();
-		Method targetMethod = null;
-
-		// there is no reason to register all mapping
-		final Class[] mappings = new Class[]{
-			boolean.class, Boolean.class,
-			int.class, Integer.class,
-			long.class, Long.class
-		};
-
-		for (final Method method : methods) {
-			if (setterMethodName.equals(method.getName()) &&
-				method.getParameterTypes().length == 1){
-				Class paramClass = method.getParameterTypes()[0];
-
-
-				if (paramClass.isPrimitive()){
-					for(int i = 0; i < mappings.length; i+= 2){
-						if (mappings[i].equals(paramClass) && (mappings[i + 1].equals(valueClass))){
-							paramClass = valueClass;
-							break;
-						}
-
-						if (mappings[i].equals(paramClass) && (String.class.equals(valueClass))){
-							paramClass = mappings[i + 1];
-							break;
-						}
-					}
-				}
-
-				// handle valueOf(String) case
-				if (value != null &&
-					String.class.equals(valueClass) &&
-					!String.class.equals(paramClass)){
-					final Method valueOfMethod =
-						paramClass.getMethod("valueOf", new Class[]{String.class});
-					value = valueOfMethod.invoke(null, new Object[]{value});
-					valueClass = value.getClass();
-				}
-
-				if (paramClass.equals(valueClass) ||
-						paramClass.isAssignableFrom(valueClass)){
-					targetMethod = method;
-					break;
-				}
-			}
-		}
-		if (targetMethod == null){
-			throw new IllegalArgumentException("there is no proper setter for property "
-				+ property + " at " + clazz.getName());
-		}
-		targetMethod.invoke(bean, value);
 	}
 
 	private void startAppender(Attributes attributes) throws Exception {
 		final String name = getAttribute(attributes, "name");
-		final String clazz = getAttribute(attributes, "class");
-		final String timeZone = getAttribute(attributes, "timeZone");
-		final String locale = getAttribute(attributes, "locale");
+		final String factoryClassName = getAttribute(attributes, "class");
 
-		final AppenderFactory appenderFactory = (AppenderFactory)Class.forName(clazz).newInstance();
+		//TODO RC: allow to specify plain Appender implementation as class,
+		// in addition of factory style.
+		final Class factoryClazz = Class.forName( factoryClassName );
+		final AppenderFactory appenderFactory = (AppenderFactory) factoryClazz.newInstance();
 
-		for(final String attributeName : new String[]{"datePattern", "patternLayout",
-				"append", "bufferSize", "multibyte", "immediateFlush", "fileName", "enabled", "logLevel"}){
-			setProperty(appenderFactory, attributeName, getAttribute(attributes, attributeName));
-		}
-
-		if (timeZone != null) {
-			setProperty(appenderFactory, "timeZone", TimeZone.getTimeZone(timeZone) );
-		}
-		if (locale != null) {
-			setProperty(appenderFactory, "locale", new Locale(locale) );
+		for( final PropertyDescriptor property : BeanUtils.classProperties( factoryClazz ) ) {
+			if( property.getWriteMethod() != null ){
+				final String propertyName = property.getName();
+				//TODO RC: skip 'name' and 'class' properties?
+				final String attributeValue = getAttribute( attributes, propertyName );
+				if( attributeValue != null ){ //property is writeable
+					BeanUtils.setPropertyStringValue( appenderFactory, property, attributeValue );
+				}
+			}
 		}
 
 		stack.push(appenderFactory);
@@ -181,7 +117,7 @@ public class Configuration extends DefaultHandler {
 		final Constructor constructor = clazz.getConstructor(String.class,
 				String.class, String.class);
 		final Layout layout = (Layout)constructor.newInstance(pattern, timeZoneId, language);
-		setProperty(stack.peek(), "layout", layout);
+		BeanUtils.setPropertyValue( stack.peek(), "layout", layout );
 	}
 
 	private void startLoggerService(Attributes attributes) throws Exception {
@@ -190,8 +126,15 @@ public class Configuration extends DefaultHandler {
 				Class.forName(className) :
 				DLoggerServiceFactory.class;
 		loggerServiceFactory = (LoggerServiceFactory)clazz.newInstance();
-		for(final String attributeName : new String[]{"count", "maxMessageSize"}){
-			setProperty(loggerServiceFactory, attributeName, getAttribute(attributes, attributeName));
+		for( final PropertyDescriptor property : BeanUtils.classProperties( clazz ) ) {
+			final String propertyName = property.getName();
+			if( property.getWriteMethod() != null ){
+				BeanUtils.setPropertyStringValue(
+						loggerServiceFactory,
+						property,
+						getAttribute( attributes, propertyName )
+				);
+			}
 		}
 	}
 
@@ -221,8 +164,15 @@ public class Configuration extends DefaultHandler {
 	private void startLogger(Attributes attributes) throws Exception {
 		final GFLoggerBuilder builder = new GFLoggerBuilder();
 
-		for(final String attributeName : new String[]{"name", "additivity", "logLevel"}){
-			setProperty(builder, attributeName, getAttribute(attributes, attributeName));
+		for( final PropertyDescriptor property : BeanUtils.classProperties( builder.getClass() ) ) {
+			final String propertyName = property.getName();
+			if( property.getWriteMethod() != null ){
+				BeanUtils.setPropertyStringValue(
+						builder,
+						property,
+						getAttribute( attributes, propertyName )
+				);
+			}
 		}
 
 		final String name = builder.getName();
