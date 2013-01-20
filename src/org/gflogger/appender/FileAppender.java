@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
 
 import org.gflogger.Layout;
 import org.gflogger.helpers.LogLog;
@@ -86,18 +85,10 @@ public class FileAppender extends AbstractAsyncAppender {
 			store("remaining < sizeOfBuffer");
 		}
 
-		CoderResult result;
 		charBuffer.flip();
-		do{
-			result = encoder.encode(charBuffer, byteBuffer, true);
-			//*/
-			if (result.isOverflow()){
-				store("result.isOverflow()");
-			}
-			/*/
-			store("force");
-			//*/
-		} while(result.isOverflow());
+		encoder.encode(charBuffer, byteBuffer, true);
+		// there is no reason to check encoding result
+		// as it has been already checked that buffer has enough space
 		charBuffer.clear();
 	}
 
