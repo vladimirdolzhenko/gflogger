@@ -14,14 +14,13 @@
 
 package org.gflogger.formatter;
 
-import static org.junit.Assert.assertEquals;
-
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * BufferFormatterTest
@@ -155,11 +154,16 @@ public class BufferFormatterTest {
 			}
 		}
 
-		final double[] numbers = new double[]{1.4328, -123.9487, -0.5};
+		final double[] numbers = new double[]{
+			1.025292, 1.0025292, 1.00025292, 1.000025292, 1.0000025292, 1.00000025292,
+			10.025292, 10.0025292, 10.00025292, 10.000025292,
+			-1.025292, -1.0025292, -1.00025292, -1.000025292, -1.0000025292, -1.00000025292,
+			-10.025292, -10.0025292, -10.00025292, -10.000025292,
+			1.4328, -123.9487, -0.5};
 		for (int i = 0; i < numbers.length; i++) {
-			BufferFormatter.append(buffer, numbers[i], 6);
+			BufferFormatter.append(buffer, numbers[i], 8);
 			buffer.append(' ');
-			assertEquals(String.format(Locale.ENGLISH, "%.6f", numbers[i]) + " ", toString(buffer));
+			assertEquals(String.format(Locale.ENGLISH, "%.8f", numbers[i]) + " ", toString(buffer));
 			// check
 			buffer.clear();
 		}
@@ -251,13 +255,31 @@ public class BufferFormatterTest {
 	public void testAppendDoubleByteBuffer() throws Exception {
 		final ByteBuffer buffer = ByteBuffer.allocateDirect(200);
 
-		final double[] numbers4 = new double[]{1e-19, 1e19, 0.0035,
-				Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
-				-0.0, 0.0, 1235, -1235, 0.005, -0.5};
-		for (int i = 0; i < numbers4.length; i++) {
-			BufferFormatter.append(buffer, numbers4[i]);
+		final double[] numbers = new double[]{
+			0.0035,
+			1e-19, 1e19,
+			Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			-0.0, 0.0,
+			1235,
+			-1235, 0.005, -0.5};
+
+		final String[] strings = new String[]{
+			"0.003500000000000",
+			Double.toString(1e-19),
+			Double.toString(1e19),
+			Double.toString(Double.NaN),
+			Double.toString(Double.POSITIVE_INFINITY),
+			Double.toString(Double.NEGATIVE_INFINITY),
+			Double.toString(-0.0),
+			Double.toString(0.0),
+			"1235.0",
+			"-1235.0",
+			"0.005000000000000",
+			"-0.500000000000000"};
+		for (int i = 0; i < numbers.length; i++) {
+			BufferFormatter.append(buffer, numbers[i]);
 			buffer.put((byte) ' ');
-			assertEquals(Double.toString(numbers4[i]) + " ", toString(buffer));
+			assertEquals(strings[i] + " ", toString(buffer));
 			// check
 			buffer.clear();
 		}
@@ -267,39 +289,34 @@ public class BufferFormatterTest {
 	public void testAppendDoubleCharBuffer() throws Exception {
 		final CharBuffer buffer = ByteBuffer.allocateDirect(100).asCharBuffer();
 
-		final double[] numbers4 = new double[]{1e-19, 1e19, 0.0035,
-				Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
-				-0.0, 0.0, 1235, -1235, 0.005, -0.5};
-		for (int i = 0; i < numbers4.length; i++) {
-			BufferFormatter.append(buffer, numbers4[i]);
+		final double[] numbers = new double[]{
+			0.0035,
+			1e-19, 1e19,
+			Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			-0.0, 0.0,
+			1235,
+			-1235, 0.005, -0.5};
+
+		final String[] strings = new String[]{
+			"0.003500000000000",
+			Double.toString(1e-19),
+			Double.toString(1e19),
+			Double.toString(Double.NaN),
+			Double.toString(Double.POSITIVE_INFINITY),
+			Double.toString(Double.NEGATIVE_INFINITY),
+			Double.toString(-0.0),
+			Double.toString(0.0),
+			"1235.0",
+			"-1235.0",
+			"0.005000000000000",
+			"-0.500000000000000"};
+		for (int i = 0; i < numbers.length; i++) {
+			BufferFormatter.append(buffer, numbers[i]);
 			buffer.put(' ');
-			assertEquals(Double.toString(numbers4[i]) + " ", toString(buffer));
+			assertEquals(strings[i] + " ", toString(buffer));
 			// check
 			buffer.clear();
 		}
-	}
-
-	@Test
-	@Ignore
-	public void testname() throws Exception {
-		double v = 6.06;
-		long d = Double.doubleToRawLongBits(v);
-		System.out.println(toBinary(0L));
-		System.out.println(toBinary(1L));
-		System.out.println(toBinary(-1L));
-		System.out.println();
-		System.out.println(toBinary(d));
-		System.out.println();
-		int exp = (int)( (d & BufferFormatter.EXP_MASK) >>> 52L );
-		System.out.println(toBinary(exp));
-	}
-
-	private static String toBinary(final long x){
-		final StringBuilder s = new StringBuilder(Long.SIZE);
-		for(int i = 0; i < Long.SIZE; i++){
-			s.append( (x & (1L << (Long.SIZE - 1 - i))) != 0 ? '1' : '0');
-		}
-		return s.toString();
 	}
 
 	static String toString(final CharBuffer buffer) {
@@ -315,7 +332,5 @@ public class BufferFormatterTest {
 		buffer.get(chs);
 		return new String(chs);
 	}
-
-
 
 }

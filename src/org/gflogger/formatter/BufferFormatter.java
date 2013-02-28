@@ -194,12 +194,12 @@ public class BufferFormatter {
 
 
 	public static ByteBuffer append(final ByteBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 8 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision, true);
 		return buffer;
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, double i, int precision) {
-		put(buffer, i, precision < 0 ? 8 : precision);
+		put(buffer, i, precision < 0 ? 8 : precision, true);
 		return buffer;
 	}
 
@@ -580,28 +580,50 @@ public class BufferFormatter {
 		buffer.put((byte) b);
 	}
 
-
 	/**
 	 * Bit 63 represents the sign of the floating-point number.
+	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long SIGN_MASK = 0x8000000000000000L;
+	public final static long	SIGN_MASK		= 0x8000000000000000L;
 
 	/**
 	 * Bits 62-52 represent the exponent.
+	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long EXP_MASK = 0x7ff0000000000000L;
+	public final static long	EXP_MASK		= 0x7ff0000000000000L;
 
 	/**
-	 * Bits 51-0 represent the significant (sometimes called the mantissa) of the floating-point number.
+	 * Bits 51-0 represent the significant (sometimes called the mantissa) of
+	 * the floating-point number.
+	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long MANTISA_MASK = 0x000fffffffffffffL;
+	public final static long	MANTISA_MASK	= 0x000fffffffffffffL;
 
-	private static final String	INFINITY		= "Infinity";
-	private static final String	NAN				= "NaN";
-	private static final String	ZERO_DOT_ZERO	= "0.0";
+	public static final long	EXP_BIAS		= 1023;
+
+	public static final int		EXP_SHIFT		= 52;
+
+	/**
+	 * assumed High-Order bit
+	 */
+	public static final long	FRACT_HOB		= (1L << EXP_SHIFT);
+
+	/**
+	 * exponent of 1.0
+	 */
+	public static final long	EXP_ONE			= EXP_BIAS << EXP_SHIFT;
+
+	public static final String	INFINITY		= "Infinity";
+	public static final String	NAN				= "NaN";
+	public static final String	ZERO_DOT_ZERO	= "0.0";
+
+	/**
+	 * log2(2^53) = 15.9
+	 */
+	public static final int		DOUBLE_DIGITS	= 15;
 
 	private static void put(final ByteBuffer buffer, double v) {
 		if (Double.isNaN(v)){
@@ -625,12 +647,18 @@ public class BufferFormatter {
 			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
-		// TODO: this leads to garbage
-		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
-		append(buffer, javaFormatString);
+
+		long exp = ((BufferFormatter.EXP_MASK & d) >> BufferFormatter.EXP_SHIFT) - BufferFormatter.EXP_BIAS;
+		long mants = (1L << (BufferFormatter.EXP_SHIFT + 1)) | (BufferFormatter.MANTISA_MASK & d);
+		long fractBits = mants;
+		double d2 = Double.longBitsToDouble( BufferFormatter.EXP_ONE | ( fractBits &~ BufferFormatter.FRACT_HOB ) );
+		int decExp = (int)Math.floor((d2-1.5D)*0.289529654D + 0.176091259 + exp * 0.301029995663981 );
+
+		// do not handle negative dec exp
+		put(buffer, v, DOUBLE_DIGITS - (decExp > 0 ? decExp : 0), false);
 	}
 
-	private static void put(final ByteBuffer buffer, double v, int precision) {
+	private static void put(final ByteBuffer buffer, double v, int precision, boolean forceTailZeros) {
 		if (Double.isNaN(v)){
 			append(buffer, NAN);
 			return;
@@ -656,41 +684,51 @@ public class BufferFormatter {
 
 		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
 				(v < 0 && (v < -1e18 || v > -1e-18))){
-			put(buffer, v);
+			append(buffer, toString(v));
 			return;
 		}
 
 		long x = (long)v;
 		put(buffer, x);
 		buffer.put((byte) '.');
-		x = (long)((v - x) * (precision > 0 ?
-				precision - 1 < LONG_SIZE_TABLE.length ?
-						LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
-				1));
+		final long usedPrecision = precision > 0 ?
+			precision - 1 < LONG_SIZE_TABLE.length ?
+				LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+			1;
+
+		x = Math.round((v - x) * usedPrecision);
 
 		int oldPos = buffer.position();
 
 		// add leading zeros
 
-		final int stringSize = stringSize(x);
+		if (x != 0){
+			final int stringSize = stringSize(x);
 
-		int leadingZeros = precision - stringSize - 2;
-		if (leadingZeros > 0){
-			for(int i = 0; i < leadingZeros; i++){
-				buffer.put((byte) '0');
+			int leadingZeros = (
+				precision > 0 ?
+					precision - 1 < LONG_SIZE_TABLE.length ? precision - 1 : LONG_SIZE_TABLE.length - 2 :
+				0)
+				- stringSize;
+			if (leadingZeros >= 0){
+				for(int i = 0; i <= leadingZeros; i++){
+					buffer.put((byte) '0');
+				}
 			}
 		}
 
 		put(buffer, x);
 
-		int pos = buffer.position();
-		final int limit = buffer.limit();
+		if (x !=0 || forceTailZeros){
+			int pos = buffer.position();
+			final int limit = buffer.limit();
 
-		if (pos - oldPos < precision && pos < limit){
-			int j = precision - (pos - oldPos);
-			j = j < limit - pos ? j : limit - pos;
-			for(int i = 0; i < j; i++){
-				buffer.put((byte) '0');
+			if (pos - oldPos < precision && pos < limit){
+				int j = precision - (pos - oldPos);
+				j = j < limit - pos ? j : limit - pos;
+				for(int i = 0; i < j; i++){
+					buffer.put((byte) '0');
+				}
 			}
 		}
 	}
@@ -719,13 +757,25 @@ public class BufferFormatter {
 			return;
 		}
 
+
+		long exp = ((BufferFormatter.EXP_MASK & d) >> BufferFormatter.EXP_SHIFT) - BufferFormatter.EXP_BIAS;
+		long mants = (1L << (BufferFormatter.EXP_SHIFT + 1)) | (BufferFormatter.MANTISA_MASK & d);
+		long fractBits = mants;
+		double d2 = Double.longBitsToDouble( BufferFormatter.EXP_ONE | ( fractBits &~ BufferFormatter.FRACT_HOB ) );
+		int decExp = (int)Math.floor((d2-1.5D)*0.289529654D + 0.176091259 + exp * 0.301029995663981 );
+
+		// do not handle negative dec exp
+		put(buffer, v, DOUBLE_DIGITS - (decExp > 0 ? decExp : 0), false);
+	}
+
+	private static String toString(double v) {
 		// All exceptional cases have been covered
 		// TODO: this leads to garbage
 		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
-		append(buffer, javaFormatString);
+		return javaFormatString;
 	}
 
-	private static void put(final CharBuffer buffer, double v, int precision) {
+	private static void put(final CharBuffer buffer, double v, int precision, boolean forceTailZeros) {
 		if (Double.isNaN(v)){
 			append(buffer, NAN);
 			return;
@@ -751,41 +801,52 @@ public class BufferFormatter {
 
 		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
 				(v < 0 && (v < -1e18 || v > -1e-18))){
-			put(buffer, v);
+			append(buffer, toString(v));
 			return;
 		}
 
 		long x = (long)v;
 		put(buffer, x);
 		buffer.put('.');
-		x = (long)((v - x) * (precision > 0 ?
+
+		final long usedPrecision = precision > 0 ?
 			precision - 1 < LONG_SIZE_TABLE.length ?
-					LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
-			1));
+				LONG_SIZE_TABLE[precision - 1] : LONG_SIZE_TABLE[LONG_SIZE_TABLE.length - 2] :
+			1;
+
+		x = Math.round((v - x) * usedPrecision);
 
 		int oldPos = buffer.position();
 
-		// add leading zeros
+		if (x != 0){
+			// add leading zeros
 
-		final int stringSize = stringSize(x);
+			final int stringSize = stringSize(x);
 
-		int leadingZeros = precision - stringSize - 2;
-		if (leadingZeros > 0){
-			for(int i = 0; i < leadingZeros; i++){
-				buffer.put('0');
+			int leadingZeros = (
+				precision > 0 ?
+					precision - 1 < LONG_SIZE_TABLE.length ? precision - 1 : LONG_SIZE_TABLE.length - 2 :
+				0)
+				- stringSize;
+			if (leadingZeros >= 0){
+				for(int i = 0; i <= leadingZeros; i++){
+					buffer.put('0');
+				}
 			}
 		}
 
 		put(buffer, x);
 
-		int pos = buffer.position();
-		final int limit = buffer.limit();
+		if (x != 0 || forceTailZeros){
+			int pos = buffer.position();
+			final int limit = buffer.limit();
 
-		if (pos - oldPos < precision && pos < limit){
-			int j = precision - (pos - oldPos);
-			j = j < limit - pos ? j : limit - pos;
-			for(int i = 0; i < j; i++){
-				buffer.put('0');
+			if (pos - oldPos < precision && pos < limit){
+				int j = precision - (pos - oldPos);
+				j = j < limit - pos ? j : limit - pos;
+				for(int i = 0; i < j; i++){
+					buffer.put('0');
+				}
 			}
 		}
 	}
