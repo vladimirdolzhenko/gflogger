@@ -1,11 +1,5 @@
 package org.gflogger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
 
@@ -16,6 +10,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -109,7 +109,7 @@ public abstract class AbstractTestLoggerService {
 		//System.in.read();
 		GFLogFactory.stop();
 
-		assertEquals("6.000000000060.00000000006.0E1000.60000000000.00000006006.0E-100", buffer.toString());
+		assertEquals("6.000000000060.00000000006.0E1000.60000000000.00000000066.0E-100", buffer.toString());
 	}
 
 	@Test
@@ -330,6 +330,38 @@ public abstract class AbstractTestLoggerService {
 		assertEquals("com.db.fxpricing.Logger.info", buffer.toString());
 
 		assertEquals("com.info", buffer2.toString());
+	}
+
+	@Test
+	public void testHigherLoggerLevelAppender() throws Exception {
+		final int maxMessageSize = 32;
+
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+
+		final ConsoleAppenderFactory factory2 = new ConsoleAppenderFactory();
+		factory2.setLayoutPattern("%m");
+		final StringBuffer buffer2 = new StringBuffer();
+		factory2.setOutputStream(buffer2);
+		factory2.setLogLevel(LogLevel.FATAL);
+
+		final LoggerService loggerService = createLoggerService(maxMessageSize,
+			new GFLoggerBuilder[]{new GFLoggerBuilder(factory)},
+			factory2);
+
+		GFLogFactory.init(loggerService);
+
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		log.info().append("com.db.fxpricing.Logger.info").commit();
+
+		GFLogFactory.stop();
+
+		//assertEquals("com.db.fxpricing.Logger.info", buffer.toString());
+		assertEquals("", buffer2.toString());
 	}
 
 	@Test
