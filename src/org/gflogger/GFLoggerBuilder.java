@@ -169,7 +169,7 @@ public final class GFLoggerBuilder {
 
 		@Override
 		public long getAppenderMask(final LogLevel level) {
-			return this.logLevel.isHigher(level) ? mask : 0;
+			return !this.logLevel.greaterThan(level) ? mask : 0;
 		}
 
 		@Override

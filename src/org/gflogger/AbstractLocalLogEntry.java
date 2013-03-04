@@ -776,7 +776,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
-	public final void commit() {
+	public void commit() {
 		checkIfCommitted();
 		commit0();
 		loggerService.entryFlushed(this);

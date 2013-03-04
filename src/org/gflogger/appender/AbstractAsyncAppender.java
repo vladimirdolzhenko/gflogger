@@ -110,7 +110,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	@Override
 	public void process(LogEntryItemImpl entry) {
 
-		if(!logLevel.isHigher( entry.getLogLevel() )) return;
+		if(!!logLevel.greaterThan(entry.getLogLevel())) return;
 
 		if (multibyte) {
 			final CharBuffer buffer = entry.getCharBuffer();

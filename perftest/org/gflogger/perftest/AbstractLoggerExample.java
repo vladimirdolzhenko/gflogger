@@ -27,7 +27,7 @@ public abstract class AbstractLoggerExample extends AbstractExample {
 	protected LoggerService service;
 
 	@Override
-	protected void initLogger() {
+	protected void initLogger() throws Throwable {
 		service = createLoggerImpl();
 
 		GFLogFactory.init(service);
@@ -48,10 +48,10 @@ public abstract class AbstractLoggerExample extends AbstractExample {
 
 	protected abstract String fileAppenderFileName();
 
-	protected abstract LoggerService createLoggerImpl();
+	protected abstract LoggerService createLoggerImpl() throws Throwable;
 
 	@Override
-	protected void stop() {
+	protected void stop() throws Throwable {
 		GFLogFactory.stop();
 	}
 

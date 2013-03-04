@@ -52,7 +52,7 @@ public class GFLogView implements GFLog {
 
 			for (final GFLogger gfLogger : loggers) {
 				final LogLevel loggerLevel = gfLogger.getLogLevel();
-				if (loggerLevel.isHigher(level)) {
+				if (!loggerLevel.greaterThan(level)) {
 					final long m = gfLogger.getAppenderMask(level);
 					appenderMask[ordinal] |= m;
 					if (!gfLogger.hasAdditivity()) break;
@@ -63,14 +63,14 @@ public class GFLogView implements GFLog {
 		this.level = LogLevel.FATAL;
 		for (final GFLogger gfLogger : loggers) {
 			final LogLevel loggerLevel = gfLogger.getLogLevel();
-			this.level = this.level.isHigher(loggerLevel) ? this.level : loggerLevel;
+			this.level = !this.level.greaterThan(loggerLevel) ? this.level : loggerLevel;
 		}
 
 		this.valid = loggerService != null;
 		return this.loggerService;
 	}
 	private boolean hasNecessaryLevel(LogLevel level) {
-		return loggerService() != null && this.level.isHigher(level);
+		return loggerService() != null && !this.level.greaterThan(level);
 	}
 
 	private LoggerService loggerService() {

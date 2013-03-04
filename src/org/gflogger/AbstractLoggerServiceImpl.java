@@ -130,7 +130,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		LogLevel level = LogLevel.FATAL;
 		for (int i = 0; i < loggers.length; i++) {
 			final LogLevel l = loggers[i].getLogLevel();
-			level = level.isHigher(l) ? level : l;
+			level = !level.greaterThan(l) ? level : l;
 		}
 		return level;
 	}

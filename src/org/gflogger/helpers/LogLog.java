@@ -58,7 +58,7 @@ public class LogLog {
 	private static final String WARN_PREFIX	   = "gflogger:WARN ";
 
 	private static boolean isLoggable(final LogLevel level){
-		return !quietMode && internalLogLevel.isHigher(level);
+		return !quietMode && !internalLogLevel.greaterThan(level);
 	}
 
 	/**

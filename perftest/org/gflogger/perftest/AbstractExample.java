@@ -224,9 +224,9 @@ public abstract class AbstractExample {
 		return c;
 	}
 
-	protected abstract void stop();
+	protected abstract void stop() throws Throwable;
 
-	protected abstract void initLogger();
+	protected abstract void initLogger() throws Throwable;
 
 	protected abstract void logDebugTestMessage(int i);
 

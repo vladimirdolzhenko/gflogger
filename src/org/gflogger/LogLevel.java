@@ -25,7 +25,11 @@ public enum LogLevel {
 
 	public static LogLevel[] values = values();
 
-	public boolean isHigher(final LogLevel level){
-		return this.ordinal() <= level.ordinal();
+	public boolean lessThan(final LogLevel level){
+		return this.ordinal() < level.ordinal();
+	}
+
+	public boolean greaterThan(final LogLevel level){
+		return this.ordinal() > level.ordinal();
 	}
 }
