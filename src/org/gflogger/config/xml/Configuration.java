@@ -17,8 +17,12 @@ package org.gflogger.config.xml;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Stack;
 
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.Layout;
@@ -39,17 +43,17 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class Configuration extends DefaultHandler {
 
-	private final Stack<Object> stack = new Stack<Object>();
+	private final Stack<Object>					stack				= new Stack<Object>();
 
-	private final Map<String, AppenderFactory> appenderFactories = new LinkedHashMap<String, AppenderFactory>();
+	private final Map<String, AppenderFactory>	appenderFactories	= new LinkedHashMap<String, AppenderFactory>();
 
-	private final List<GFLoggerBuilder> loggerBuilders = new ArrayList<GFLoggerBuilder>();
+	private final List<GFLoggerBuilder>			loggerBuilders		= new ArrayList<GFLoggerBuilder>();
 
-	private final Map<Class, ObjectFormatter> objectFormatters = new LinkedHashMap<Class, ObjectFormatter>();
+	private final Map<Class, ObjectFormatter>	objectFormatters	= new LinkedHashMap<Class, ObjectFormatter>();
 
-	private LoggerServiceFactory loggerServiceFactory;
+	private LoggerServiceFactory				loggerServiceFactory;
 
-	private LoggerService loggerService;
+	private LoggerService						loggerService;
 
 	public Map<String, AppenderFactory> getAppenderFactories() {
 		return appenderFactories;
@@ -241,7 +245,7 @@ public class Configuration extends DefaultHandler {
 	}
 
 	private static void error(String message) {
-		System.err.println("[GFLogger-Init] " + message);
+		LogLog.error("[GFLogger-Init] " + message);
 	}
 
 	private static void debug(String message) {

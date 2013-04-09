@@ -14,10 +14,10 @@
 
 package org.gflogger.helpers;
 
+import org.gflogger.LogLevel;
+
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 import static org.gflogger.helpers.OptionConverter.getStringProperty;
-
-import org.gflogger.LogLevel;
 
 /**
  * This class used to output log statements from within the gflogger package.
@@ -58,7 +58,11 @@ public class LogLog {
 	private static final String WARN_PREFIX	   = "gflogger:WARN ";
 
 	private static boolean isLoggable(final LogLevel level){
-		return !quietMode && !internalLogLevel.greaterThan(level);
+		return !quietMode && isLoggable0(level);
+	}
+
+	public static boolean isLoggable0(final LogLevel level) {
+		return !internalLogLevel.greaterThan(level);
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void error(String msg) {
-		if (isLoggable(LogLevel.ERROR)) {
+		if (isLoggable0(LogLevel.ERROR)) {
 			System.err.println(ERR_PREFIX + msg);
 		}
 	}
@@ -110,7 +114,7 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void error(String msg, Throwable t) {
-		if (isLoggable(LogLevel.ERROR)) {
+		if (isLoggable0(LogLevel.ERROR)) {
 			System.err.println(ERR_PREFIX + msg);
 			if (t != null) {
 				t.printStackTrace();
@@ -135,7 +139,7 @@ public class LogLog {
 	 * <code>System.err</code>.
 	 */
 	public static void warn(String msg) {
-		if (isLoggable(LogLevel.WARN)) {
+		if (isLoggable0(LogLevel.WARN)) {
 			System.err.println(WARN_PREFIX + msg);
 		}
 	}
@@ -145,7 +149,7 @@ public class LogLog {
 	 * disable warning statements. Output goes to <code>System.err</code>.
 	 */
 	public static void warn(String msg, Throwable t) {
-		if (isLoggable(LogLevel.WARN)) {
+		if (isLoggable0(LogLevel.WARN)) {
 			System.err.println(WARN_PREFIX + msg);
 			if (t != null) {
 				t.printStackTrace();

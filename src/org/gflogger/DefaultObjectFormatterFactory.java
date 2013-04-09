@@ -13,25 +13,21 @@
  */
 package org.gflogger;
 
-import static org.gflogger.DefaultObjectFormatter.DEFAULT_OBJECT_FORMATTER;
-
 import java.util.Map;
+
+import static org.gflogger.DefaultObjectFormatter.DEFAULT_OBJECT_FORMATTER;
 
 /**
  * @author Ruslan Cheremin, cheremin@gmail.com
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
+public final class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 
-	private final TypeEntityRegistry<ObjectFormatter> formatters = new TypeEntityRegistry<ObjectFormatter>(
-			DEFAULT_OBJECT_FORMATTER
-	);
-
-	public DefaultObjectFormatterFactory() {
-	}
+	private final TypeEntityRegistry<ObjectFormatter> formatters =
+		new TypeEntityRegistry<ObjectFormatter>( DEFAULT_OBJECT_FORMATTER );
 
 	public <T> void registerObjectFormatter( final Class<T> clazz,
-	                                         final ObjectFormatter<T> formatter ) {
+			final ObjectFormatter<T> formatter ) {
 		formatters.register( clazz, formatter );
 	}
 
@@ -43,9 +39,7 @@ public class DefaultObjectFormatterFactory implements ObjectFormatterFactory {
 
 	@Override
 	public ObjectFormatter getObjectFormatter( final Object obj ) {
-		if( obj == null ) {
-			return DEFAULT_OBJECT_FORMATTER;
-		}
+		if( obj == null ) return DEFAULT_OBJECT_FORMATTER;
 
 		final Class type = obj.getClass();
 		return formatters.forType( type );
