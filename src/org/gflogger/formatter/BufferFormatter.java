@@ -16,6 +16,7 @@ package org.gflogger.formatter;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 
 import sun.misc.Cleaner;
@@ -31,7 +32,9 @@ public class BufferFormatter {
 
 	public static ByteBuffer allocate(final int capacity){
 		final boolean direct = Boolean.parseBoolean(System.getProperty("gflogger.direct", "true"));
-		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+		return direct ?
+			ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder()) :
+			ByteBuffer.allocate(capacity);
 	}
 
 	public static void purge(Buffer buffer){
