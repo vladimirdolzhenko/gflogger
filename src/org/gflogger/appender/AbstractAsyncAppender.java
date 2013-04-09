@@ -34,22 +34,22 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl> {
 
 	// inner thread buffer
-	protected final CharBuffer charBuffer;
-	protected final ByteBuffer byteBuffer;
+	protected final CharBuffer	charBuffer;
+	protected final ByteBuffer	byteBuffer;
 
-	protected LogLevel logLevel = LogLevel.TRACE;
-	protected Layout layout;
-	protected boolean immediateFlush = false;
-	protected int bufferedIOThreshold = 100;
-	protected long awaitTimeout = 10L;
-	protected boolean enabled = true;
-	protected int index;
+	protected LogLevel			logLevel			= LogLevel.TRACE;
+	protected Layout			layout;
+	protected boolean			immediateFlush		= false;
+	protected int				bufferedIOThreshold	= 100;
+	protected long				awaitTimeout		= 10L;
+	protected boolean			enabled				= true;
+	protected int				index;
 
 	// runtime changing properties
 
-	protected volatile boolean running = false;
+	protected volatile boolean	running				= false;
 
-	protected final boolean multibyte;
+	protected final boolean		multibyte;
 
 	public AbstractAsyncAppender(final boolean multibyte) {
 		// 4M
@@ -99,6 +99,11 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
 	public int getIndex() {
 		return index;
 	}
@@ -109,8 +114,7 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	@Override
 	public void process(LogEntryItemImpl entry) {
-
-		if(!!logLevel.greaterThan(entry.getLogLevel())) return;
+		if(!enabled || logLevel.greaterThan(entry.getLogLevel())) return;
 
 		if (multibyte) {
 			final CharBuffer buffer = entry.getCharBuffer();

@@ -14,9 +14,6 @@
 package org.gflogger;
 
 
-import static org.gflogger.formatter.BufferFormatter.allocate;
-import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +27,9 @@ import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.LoggerServiceImpl;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.util.NamedThreadFactory;
+
+import static org.gflogger.formatter.BufferFormatter.allocate;
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 
 /**
  * abstract garbage-free logger service
@@ -170,7 +170,9 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected void start() {
 		for (int i = 0; i < appenders.length; i++) {
-			appenders[i].start();
+			if (appenders[i].isEnabled()){
+				appenders[i].start();
+			}
 		}
 
 		running = true;

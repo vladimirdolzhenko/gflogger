@@ -24,6 +24,8 @@ public interface Appender<T extends LogEntryItem> {
 
 	boolean isMultibyte();
 
+	boolean isEnabled();
+
 	LogLevel getLogLevel();
 
 	String getName();
