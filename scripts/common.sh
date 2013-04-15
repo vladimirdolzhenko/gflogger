@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPTS_DIR=`dirname $0`
+LOG_DIR=${SCRIPTS_DIR}/../logs/
 run(){
 	NAME=$1
 	LOG_NAME=$2
@@ -9,7 +11,7 @@ run(){
 	JAVA_EXTRA_OPTS=$6
 	
 	echo "${NAME}, number of threads: "${THREADS}", messages: ${MESSAGES}"
-	
+
 	JAVA_ASSEMBLY=""
 	
 	#JAVA_ASSEMBLY="-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly"
@@ -22,10 +24,13 @@ run(){
 		"
 	
 	JAVA_OPTS="
+	${JAVA_OPTS}
 	
 	${JAVA_EXTRA_OPTS}
 	
 	${GFLOGGER_OPTS}
+
+	-Dlog.dir=${LOG_DIR}
 	
 	-Xss2m
 	-Xms512m
@@ -68,34 +73,36 @@ run(){
 	"
 	
 	OUT=${LOG_NAME}.std
-	if [ -f logs/${OUT} ]; then
-		rm logs/${OUT}
-	fi
+	test -f ${LOG_DIR}/$OUT && rm ${LOG_DIR}/${OUT}
 	
-	CLASSPATH="out"
-	for j in libs/*jar;
+	CLASSPATH="$SCRIPTS_DIR/../out"
+	for j in $SCRIPTS_DIR/../libs/*jar;
 	do
 		CLASSPATH="$CLASSPATH:$j"
 	done
-	
-	java -cp ${CLASSPATH} ${JAVA_OPTS} ${MAINCLASS} ${THREADS} ${MESSAGES} 1>logs/${OUT} 2>&1
 
-	#LOG_ENTRIES=`grep -c "test" logs/${LOG_NAME}.log`
-	#AVG_TIME=`grep "final" logs/${LOG_NAME}.log | awk '{t+=$5;c++}END{OFMT = "%.0f";print t/c;}'`
-	AVG_TIME=`grep "final" logs/${OUT} | awk '{t+=$5;c++}END{OFMT = "%.0f";print t/c;}'`
-	LOG_ENTRIES=`grep "final" logs/${OUT} | awk '{n+=$3;c++}END{OFMT = "%.0f";print n/c;}'`
+	STD_LOG=${LOG_DIR}/${OUT}
+	
+	${JAVA_HOME}/bin/java -cp ${CLASSPATH} ${JAVA_OPTS} ${MAINCLASS} ${THREADS} ${MESSAGES} 1> ${STD_LOG} 2>&1
+
+	#echo ${STD_LOG}
+	#cat ${STD_LOG}
+
+	AVG_TIME=`grep "final" ${STD_LOG} | awk '{t+=$5;c++}END{print t/c;}'`
+	LOG_ENTRIES=`grep "final" ${STD_LOG} | awk '{n+=$3;c++}END{print n/c;}'`
 	MPS=`echo ${LOG_ENTRIES} ${AVG_TIME} | awk '{OFMT = "%.0f";print 1000*$1/$2;}'`
  
 	echo "${LOG_ENTRIES} avg time: ${AVG_TIME} mps: ${MPS}"	 
-	WARMED_LINE=`nl logs/${OUT} | grep "warmed up ---" | tail -1 | cut -f1 | sed "s/ //g"`
-	STOPPING_LINE=`nl logs/${OUT} | grep "stopping" | head -1 | cut -f1 | sed "s/ //g"`
+	WARMED_LINE=`nl ${STD_LOG} | grep "warmed up ---" | tail -1 | cut -f1 | sed "s/ //g"`
+	STOPPING_LINE=`nl ${STD_LOG} | grep "stopping" | head -1 | cut -f1 | sed "s/ //g"`
 
-	cat logs/${OUT} | sed -n "${WARMED_LINE},${STOPPING_LINE}p" | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
+	cat ${STD_LOG} | sed -n "${WARMED_LINE},${STOPPING_LINE}p" | grep "Total time for which application threads were stopped" | awk '{t+=$9;}END{print t}'
 	
 	for f in ${LOG_NAME}.log ${OUT};
 	do
-		if [ -f logs/$f ]; then	
-			mv logs/$f logs/${THREADS}-${MESSAGES}-$f
+		fn=${LOG_DIR}/$f	
+		if [ -f $fn ]; then	
+			mv $fn ${LOG_DIR}/${THREADS}-${MESSAGES}-$f
 		fi	
 	done
 }

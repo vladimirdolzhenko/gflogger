@@ -1,6 +1,7 @@
 #!/bin/sh
 
-REPORT=report-`date +%y%m%d-%H%M`.txt
+SCRIPTS_DIR=`dirname $0`
+REPORT=${SCRIPTS_DIR}/../report-`date +%y%m%d-%H%M`.txt
 
 run(){
 	SCRIPT=$1
@@ -8,31 +9,31 @@ run(){
 	MESSAGES=$3
 	OPTS=$4
 	
-	for a in {1..10}; do
+	for a in {1..1}; do
+	#for a in {1..10}; do
+		echo $SCRIPT ${THREADS} ${MESSAGES} ${OPTS}
 		$SCRIPT ${THREADS} ${MESSAGES} ${OPTS} 1>>${REPORT} 2>&1
-		rm logs/*
+
+		for f in $SCRIPTS_DIR/../logs/*; 
+		do
+			test -f $f && rm $f
+		done
 	done
 }
 
-for t in 1 2 4 6 ;
+for t in 1;
 do
-	for c in 65536 131072 524288 1048576 2097152 4194304;
+	for c in 1024
+	#for c in 65536 131072 524288 1048576 2097152 4194304
 	do
-		run scripts/log4j.sh $t $c 
-		sleep 5
-		run scripts/logback.sh $t $c
-		sleep 5
-		run scripts/gflog4j.sh $t $c
-		sleep 5
-		run scripts/logger.sh $t $c
-		sleep 5
-		run scripts/dlogger.sh $t $c
-		sleep 5
-		run scripts/jcl-logger.sh $t $c
-		sleep 5
-		run scripts/logger.sh $t $c false
-		sleep 5
-		run scripts/dlogger.sh $t $c false
-		sleep 5
+		for app in log4j.sh gflog4j.sh logger.sh dlogger.sh jcl-logger.sh
+		do	
+			run ${SCRIPTS_DIR}/$app $t $c && sleep 5
+		done	
+
+		for app in logger.sh dlogger.sh
+		do		
+			run ${SCRIPTS_DIR}/$app $t $c false && sleep 5
+		done	
 	done
 done

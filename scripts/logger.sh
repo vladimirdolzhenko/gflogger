@@ -10,5 +10,4 @@ if [ -n "$3" ]; then
 	NAME="gflogger-d"
 fi
 
-#run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=/dev/null"
-run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=./logs/gflogger.log"
+run $NAME gflogger "$1" "$2" org.gflogger.perftest.LoggerExample  "-Dgflogger.direct=$DIRECT -Dgflogger.filename=${LOG_DIR}/gflogger.log"

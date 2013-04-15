@@ -10,4 +10,4 @@ if [ -n "$3" ]; then
 	NAME="dgflogger_m-d"
 fi
 
-run $NAME dgflogger_m "$1" "$2" org.gflogger.perftest.DLoggerExample "-Dgflogger.direct=$DIRECT -Dgflogger.filename=./logs/dgflogger_m.log -Dgflogger.multibyte=true -Dgflogger.service.count=1024 -Dgflogger.append=false -Dgflogger.internalDebugEnabled=false"
+run $NAME dgflogger_m "$1" "$2" org.gflogger.perftest.DLoggerExample "-Dgflogger.direct=$DIRECT -Dgflogger.filename=${LOG_DIR}/dgflogger_m.log -Dgflogger.multibyte=true -Dgflogger.service.count=1024 -Dgflogger.append=false -Dgflogger.internalDebugEnabled=false"
