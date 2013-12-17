@@ -15,15 +15,16 @@
 package org.gflogger.appender;
 
 
+import org.gflogger.Layout;
+import org.gflogger.helpers.LogLog;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-
-import org.gflogger.Layout;
-import org.gflogger.helpers.LogLog;
 
 /**
  * FileAppender
@@ -118,7 +119,14 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	protected void createFileChannel() throws FileNotFoundException {
-		final FileOutputStream fout = new FileOutputStream(fileName, append);
+		final File file = new File(fileName);
+		final File folder = file.getParentFile();
+		if(!folder.exists()){
+			if(!folder.mkdirs()){
+				throw new FileNotFoundException("Can't create folder " + folder.getAbsolutePath());
+			}
+		}
+		final FileOutputStream fout = new FileOutputStream(file, append);
 		channel = fout.getChannel();
 	}
 

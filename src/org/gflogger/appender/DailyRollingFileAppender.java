@@ -15,22 +15,17 @@
 package org.gflogger.appender;
 
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.InterruptedIOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.Locale;
-
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.PatternLayout;
 import org.gflogger.helpers.LogLog;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * DailyRollingFileAppender extends {@link FileAppender} so that the underlying
@@ -235,8 +230,7 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	@Override
 	protected void createFileChannel() throws FileNotFoundException {
-		final FileOutputStream fout = new FileOutputStream(fileName, append);
-		channel = fout.getChannel();
+		super.createFileChannel();
 		scheduledFilename = fileName + sdf.format(now);
 	}
 

@@ -6,3 +6,4 @@ syntax: regexp
 .*(log|std)
 syntax: regexp
 report*
+.idea
