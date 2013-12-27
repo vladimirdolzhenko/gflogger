@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.org.gflogger</groupId>
+	<artifactId>parent</artifactId>
+	<packaging>pom</packaging>
+	<version>0.1.0-SNAPSHOT</version>
+	<name>Garbage Free Logger</name>
+
+	<url>https://bitbucket.org/vladimir.dolzhenko/org.gflogger/</url>
+
+	<properties>
+		<disruptor.version>3.2.0</disruptor.version>
+		<disruptor.version>2.10.3</disruptor.version>
+
+		<allocation.version>2.1</allocation.version>
+
+		<log4j.version>1.2.17</log4j.version>
+		<logback.version>1.0.13</logback.version>
+
+		<spring.version>3.2.4.RELEASE</spring.version>
+
+		<junit.version>4.8.2</junit.version>
+		<jmh.version>0.2</jmh.version>
+	</properties>
+
+	<modules>
+		<module>core</module>
+		<module>altest</module>
+		<module>perftest</module>
+	</modules>
+
+	<dependencies></dependencies>
+
+</project>
