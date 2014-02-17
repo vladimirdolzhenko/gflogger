@@ -1,8 +1,0 @@
-syntax: regexp
-^build$
-^target$
-org.gflogger.*(zip|jar)
-.*(log|std)
-report*
-\.idea
-.*\.iml

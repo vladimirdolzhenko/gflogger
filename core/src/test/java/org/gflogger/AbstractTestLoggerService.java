@@ -30,7 +30,7 @@ public abstract class AbstractTestLoggerService {
 
 	@Before
 	public void setUp(){
-		System.setProperty("org.gflogger.errorMessage", "");
+		System.setProperty("gflogger.errorMessage", "");
 	}
 
 	protected abstract LoggerService createLoggerService(final int maxMessageSize,
@@ -369,7 +369,7 @@ public abstract class AbstractTestLoggerService {
 	public void testAppendTruncatedMessage() throws Exception {
 		// TODO
 		final String placeholder = ">>>";
-		System.setProperty("org.gflogger.errorMessage", placeholder);
+		System.setProperty("gflogger.errorMessage", placeholder);
 
 		final String tooLongMessage = "too long message!";
 		final int maxMessageSize = tooLongMessage.length() - 1;
@@ -413,7 +413,7 @@ public abstract class AbstractTestLoggerService {
 	@Test
 	public void testAppendTruncatedMessageWithDigits() throws Exception {
 		final String placeholder = ">";
-		System.setProperty("org.gflogger.errorMessage", placeholder);
+		System.setProperty("gflogger.errorMessage", placeholder);
 
 		final String tooLongMessage = "value is %s%s";
 		final int maxMessageSize = "value is  ".length();

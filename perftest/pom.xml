@@ -11,26 +11,26 @@
 
 	<name>Garbage Free Logger performance tests</name>
 
-	<parent>
-		<groupId>org.gflogger</groupId>
-		<artifactId>parent</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
-	</parent>
+	<!--<parent>-->
+		<!--<groupId>org.gflogger</groupId>-->
+		<!--<artifactId>parent</artifactId>-->
+		<!--<version>0.1.0-SNAPSHOT</version>-->
+	<!--</parent>-->
 
-	<properties>
-		<disruptor.version>3.2.0</disruptor.version>
-		<disruptor.version>2.10.3</disruptor.version>
+    <properties>
+        <disruptor.version>3.2.0</disruptor.version>
+        <disruptor.version>2.10.3</disruptor.version>
 
-		<allocation.version>2.1</allocation.version>
+        <allocation.version>2.1</allocation.version>
 
-		<log4j.version>1.2.17</log4j.version>
-		<logback.version>1.0.13</logback.version>
+        <log4j.version>1.2.17</log4j.version>
+        <logback.version>1.0.13</logback.version>
 
-		<spring.version>3.2.4.RELEASE</spring.version>
+        <spring.version>3.2.4.RELEASE</spring.version>
 
-		<junit.version>4.8.2</junit.version>
-		<jmh.version>0.2</jmh.version>
-	</properties>
+        <junit.version>4.8.2</junit.version>
+        <jmh.version>0.2</jmh.version>
+    </properties>
 
 
 	<dependencies>
