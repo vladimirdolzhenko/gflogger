@@ -379,7 +379,11 @@ public class DailyRollingFileAppender extends FileAppender {
 			final PatternLayout patternLayout = (PatternLayout) layout;
 			timeZone = patternLayout.getTimeZone();
 		}
-		rc = new RollingCalendar(timeZone != null ? timeZone : TimeZone.getDefault());
+		if (timeZone == null) {
+			timeZone = TimeZone.getDefault();
+		}
+		sdf.setTimeZone(timeZone);
+		rc = new RollingCalendar(timeZone);
 		rc.setType(type);
 
 		super.start();
