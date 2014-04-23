@@ -21,10 +21,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
 		http://bitbucket.org/vladimir.dolzhenko/org.gflogger
-		https://bitbucket.org/vladimir.dolzhenko/org.gflogger/raw/0.1.0/src/org.gflogger.xsd">
+		https://bitbucket.org/vladimir.dolzhenko/gflogger/raw/default/core/src/main/resources/gflogger.xsd">
 
-	<appender name="consoleAppender" class="org.org.gflogger.appender.ConsoleAppenderFactory">
-		<layout class="org.org.gflogger.PatternLayout"
+	<appender name="consoleAppender" class="org.gflogger.appender.ConsoleAppenderFactory">
+		<layout class="org.gflogger.PatternLayout"
 			pattern="%d{MMM d HH:mm:ss,SSS zzz} %p - %m [%c{2}] [%t]%n"
 			timeZoneId="${TZ}"
 			language="EN"/>
@@ -40,8 +40,8 @@
 
 	<service count="1024" maxMessageSize="4096">
 		<object-formatter
-			class="org.org.gflogger.perftest.SomeObject"
-			formatter="org.org.gflogger.perftest.SomeObjectFormatter"/>
+			class="org.gflogger.perftest.SomeObject"
+			formatter="org.gflogger.perftest.SomeObjectFormatter"/>
 	</service>
 
 </configuration>

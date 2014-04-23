@@ -8,12 +8,12 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 	<util:list id="appenderFactories">
-		<bean class="org.org.gflogger.appender.ConsoleAppenderFactory"
+		<bean class="org.gflogger.appender.ConsoleAppenderFactory"
 			p:layoutPattern="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"
 			p:timeZoneId="GMT"
 			p:logLevel="INFO"
 			p:index="0"/>
-		<bean class="org.org.gflogger.appender.DailyRollingFileAppenderFactory"
+		<bean class="org.gflogger.appender.DailyRollingFileAppenderFactory"
 			p:timeZoneId="GMT"
 			p:append="false"
 			p:immediateFlush="false"
@@ -24,7 +24,7 @@
 			p:index="1"/>
 	</util:list>
 
-	<bean id="loggerService" class="org.org.gflogger.disruptor.LoggerServiceImpl">
+	<bean id="loggerService" class="org.gflogger.disruptor.LoggerServiceImpl">
 		<!-- count a number of items in the ring -->
 		<constructor-arg index="0" value="1024"/>
 		<!-- maxMessageSize max message size in the ring
@@ -33,10 +33,10 @@
 		<constructor-arg index="1" value="4096"/>
 		<constructor-arg index="2">
 			<list>
-				<bean class="org.org.gflogger.GFLoggerBuilder"
+				<bean class="org.gflogger.GFLoggerBuilder"
 					p:logLevel="WARN"
 					p:appenderFactories-ref="appenderFactories"/>
-				<bean class="org.org.gflogger.GFLoggerBuilder"
+				<bean class="org.gflogger.GFLoggerBuilder"
 					p:logLevel="INFO"
 					p:name="com.db"
 					p:appenderFactories-ref="appenderFactories"/>
@@ -46,7 +46,7 @@
 		<constructor-arg index="3" ref="appenderFactories"/>
 	</bean>
 
-	<bean class="org.org.gflogger.GFLogFactory" factory-method="init" destroy-method="stop">
+	<bean class="org.gflogger.GFLogFactory" factory-method="init" destroy-method="stop">
 		<constructor-arg ref="loggerService"/>
 	</bean>
 

@@ -60,7 +60,7 @@ public final class XmlLogFactoryConfigurator {
 	}
 
 	public static void configure() throws Exception {
-		configure(System.getProperty("gflogger.configuration", "/gflogger.xml"));
+		configure(System.getProperty("gflogger.configuration", "gflogger.xml"));
 	}
 
 	private XmlLogFactoryConfigurator(final InputStream in) throws Exception {
@@ -69,7 +69,7 @@ public final class XmlLogFactoryConfigurator {
 			final SAXParserFactory factory = SAXParserFactory.newInstance();
 			final SAXParser saxParser;
 
-			final InputStream is = getClass().getResourceAsStream("/gflogger.xsd");
+			final InputStream is = getClass().getClassLoader().getResourceAsStream("gflogger.xsd");
 
 			if (is != null){
 				factory.setNamespaceAware(true);

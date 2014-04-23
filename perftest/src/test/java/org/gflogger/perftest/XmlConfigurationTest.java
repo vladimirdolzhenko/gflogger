@@ -16,8 +16,6 @@ package org.gflogger.perftest;
 import org.gflogger.GFLogFactory;
 import org.gflogger.config.xml.XmlLogFactoryConfigurator;
 
-
-
 /**
  * XmlConfigurationTest
  *

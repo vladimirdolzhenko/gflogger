@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class XmlConfiguration {
 	private final StringBuffer buffer = new StringBuffer();
@@ -19,7 +19,24 @@ public class XmlConfiguration {
 	public void setUp(){
 		buffer.setLength(0);
 		System.setProperty("TZ", "GMT");
+		System.setProperty("gflogger.configuration", "gflogger.xml");
 		StreamAppenderFactory.outputStream = buffer;
+	}
+
+	@Test
+	public void testDefault() throws Throwable {
+		try {
+			XmlLogFactoryConfigurator.configure();
+			fail();
+		} catch (Throwable e){
+
+		}
+
+		System.setProperty("gflogger.configuration", "gflogger1.xml");
+
+		XmlLogFactoryConfigurator.configure();
+
+		test();
 	}
 
 	@Test
@@ -30,6 +47,7 @@ public class XmlConfiguration {
 
 		test();
 	}
+
 	@Test
 	public void testAbsolutePath() throws Throwable {
 		final URL resource = XmlConfiguration.class.getResource("/gflogger1.xml");
