@@ -17,8 +17,8 @@
  -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-		   xmlns="http://bitbucket.org/vladimir.dolzhenko/gflogger"
-		   targetNamespace="http://bitbucket.org/vladimir.dolzhenko/gflogger"
+		   xmlns="http://bitbucket.org/vladimir.dolzhenko/org.gflogger"
+		   targetNamespace="http://bitbucket.org/vladimir.dolzhenko/org.gflogger"
 		   elementFormDefault="qualified"
 		   attributeFormDefault="unqualified">
 

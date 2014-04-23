@@ -14,6 +14,8 @@
 
 package org.gflogger.config.xml;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
@@ -28,12 +30,33 @@ import org.gflogger.GFLogFactory;
  */
 public final class XmlLogFactoryConfigurator {
 
+	private static final String CLASSPATH_PREFIX = "classpath:/";
+	private static final String FILE_PREFIX = "file:/";
+
 	public static void configure(InputStream in) throws Exception {
+		if (in == null){
+			throw new IllegalArgumentException("Non null input stream is expected");
+		}
 		new XmlLogFactoryConfigurator(in);
 	}
 
 	public static void configure(final String xmlFileName) throws Exception {
-		configure(XmlLogFactoryConfigurator.class.getResourceAsStream(xmlFileName));
+		if (xmlFileName == null){
+			throw new IllegalArgumentException("Non null xml file is expected");
+		}
+		final InputStream is;
+		final File file = new File(xmlFileName);
+		if (file.exists()) {
+			// loading from a real file
+			is = new FileInputStream(file);
+		} else if (xmlFileName.startsWith(CLASSPATH_PREFIX)){
+			final String f = xmlFileName.substring(CLASSPATH_PREFIX.length());
+			is = XmlLogFactoryConfigurator.class.getClassLoader().getResourceAsStream(f);
+		} else {
+			final String f = xmlFileName.startsWith(FILE_PREFIX) ? xmlFileName.substring(FILE_PREFIX.length()) : xmlFileName;
+			is = XmlLogFactoryConfigurator.class.getClassLoader().getResourceAsStream(f);
+		}
+		configure(is);
 	}
 
 	public static void configure() throws Exception {
