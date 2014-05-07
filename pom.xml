@@ -21,7 +21,7 @@
 		<spring.version>3.2.4.RELEASE</spring.version>
 
 		<junit.version>4.8.2</junit.version>
-		<jmh.version>0.2</jmh.version>
+		<jmh.version>0.7</jmh.version>
 	</properties>
 
 	<modules>
@@ -39,7 +39,20 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
