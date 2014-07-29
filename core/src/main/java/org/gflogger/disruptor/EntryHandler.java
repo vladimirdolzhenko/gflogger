@@ -27,10 +27,10 @@ import com.lmax.disruptor.LifecycleAware;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public final class EntryHandler extends AbstractEntryHandler implements EventHandler<LogEntryItemImpl>, LifecycleAware {
+public final class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implements EventHandler<LogEntryItemImpl>, LifecycleAware {
 
-	public EntryHandler(Appender[] appenders) {
-		super(appenders);
+	public EntryHandler(LoggerServiceImpl service, Appender[] appenders) {
+		super(service, appenders);
 	}
 
 	@Override

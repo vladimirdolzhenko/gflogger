@@ -23,19 +23,26 @@ import org.gflogger.helpers.LogLog;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public abstract class AbstractEntryHandler {
+public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> {
 
 	protected final AtomicBoolean running = new AtomicBoolean();
 
+	protected final T service;
+
 	protected final Appender[] appenders;
 
-	public AbstractEntryHandler(Appender[] appenders) {
+	public AbstractEntryHandler(T service, Appender[] appenders) {
+		this.service = service;
 		this.appenders = appenders;
 	}
 
 	protected void workerIsAboutToFinish() {
-		for(int i = 0; i < appenders.length; i++){
-			appenders[i].workerIsAboutToFinish();
+		for (int i = 0; i < appenders.length; i++) {
+			try {
+				appenders[i].workerIsAboutToFinish();
+			} catch (Throwable e){
+				LogLog.error("unhanled exception at " + Thread.currentThread().getName() +  " in " + appenders[i].getClass().getName() + ".workerIsAboutToFinish: " + e.getMessage() , e);
+			}
 		}
 	}
 
@@ -78,6 +85,8 @@ public abstract class AbstractEntryHandler {
 
 	public void stop(){
 		if (!running.getAndSet(false)) return;
+
+		service.running = false;
 
 		for(int i = 0; i < appenders.length; i++){
 			LogLog.debug("going to stop appender " + appenders[i].getName());

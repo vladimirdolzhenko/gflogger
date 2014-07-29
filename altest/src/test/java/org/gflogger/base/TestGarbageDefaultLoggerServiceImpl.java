@@ -8,6 +8,7 @@ import org.gflogger.appender.ConsoleAppenderFactory;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -115,8 +116,20 @@ public class TestGarbageDefaultLoggerServiceImpl {
 	@Before
 	public void setUp(){
 		resetObjectCounting();
+
+		objectCounting.set(true);
+
+		final StringBuilder builder = new StringBuilder();
+		builder.append("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+		assertEquals(74, builder.length());
+		assertTrue("-javaagent:java-allocation-instrumenter.jar is not enabled", objectCount.get() > 0);
+
+		resetObjectCounting();
 	}
 
+	// TODO
+	@Ignore
 	@Test
 	public void testGFLoggerAppendLongAndDouble() throws Exception {
 		final int maxMessageSize = 20;

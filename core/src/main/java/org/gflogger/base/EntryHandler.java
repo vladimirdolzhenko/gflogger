@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.gflogger.AbstractEntryHandler;
 import org.gflogger.Appender;
 import org.gflogger.LogEntryItemImpl;
+import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.ring.*;
 
@@ -26,7 +27,7 @@ import org.gflogger.ring.*;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class EntryHandler extends AbstractEntryHandler implements EntryProcessor, RingBufferAware<LogEntryItemImpl> {
+public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implements EntryProcessor, RingBufferAware<LogEntryItemImpl> {
 
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 
@@ -38,8 +39,13 @@ public class EntryHandler extends AbstractEntryHandler implements EntryProcessor
 	protected int bufferedIOThreshold = 10000;
 	protected long awaitTimeout = 10L;
 
-	public EntryHandler(Appender[] appenders) {
-		super(appenders);
+	public EntryHandler(LoggerServiceImpl service, Appender[] appenders) {
+		super(service, appenders);
+		for (Appender appender : appenders) {
+			if (appender instanceof AbstractAsyncAppender) {
+				immediateFlush |= ((AbstractAsyncAppender) appender).isImmediateFlush();
+			}
+		}
 	}
 
 	@Override
@@ -53,18 +59,17 @@ public class EntryHandler extends AbstractEntryHandler implements EntryProcessor
 
 		long idx = RingBuffer.INITIAL_CURSOR_VALUE;
 		long loopCounter = 0;
-		try {
-			while(true){
-
+		while(true) {
+			try {
 				long maxIndex =
 					/*/
 					ringBuffer.waitFor(idx + 1);
 					/*/
-					ringBuffer.waitFor(idx + 1, awaitTimeout, TimeUnit.MILLISECONDS);
-					//*/
+						ringBuffer.waitFor(idx + 1, awaitTimeout, TimeUnit.MILLISECONDS);
+				//*/
 
-			 // handle all available changes in a row
-				while (maxIndex > idx){
+				// handle all available changes in a row
+				while (maxIndex > idx) {
 					final LogEntryItemImpl entry = ringBuffer.get(idx + 1);
 
 					assert entry.isPublished();
@@ -78,28 +83,31 @@ public class EntryHandler extends AbstractEntryHandler implements EntryProcessor
 						idx++;
 					}
 
-					if (immediateFlush){
+					if (immediateFlush) {
 						flushBuffer(false);
 						loopCounter = 0;
 					}
 
 				}
 
-				if (loopCounter > bufferedIOThreshold){
+				if (loopCounter > bufferedIOThreshold) {
 					flushBuffer();
 					loopCounter = 0;
 				}
 
 				loopCounter++;
+			} catch (InterruptedException e) {
+				//
+			} catch (AlertException e) {
+				if (!service.isRunning()) {
+					break;
+				}
+			} catch (Throwable e) {
+				LogLog.error("Unhandled exception " + e.getMessage() + " at " + Thread.currentThread().getName(), e);
 			}
-		} catch (InterruptedException e){
-			//
-		} catch (AlertException e){
-			// nothing
-		} catch (Throwable e){
-			e.printStackTrace();
 		}
 		workerIsAboutToFinish();
+		stop();
 		LogLog.debug(Thread.currentThread().getName() + " is finished. ");
 	}
 

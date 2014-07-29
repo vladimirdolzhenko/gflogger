@@ -1,7 +1,9 @@
 package org.gflogger;
 
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.appender.ConsoleAppenderFactory;
@@ -75,10 +77,83 @@ public abstract class AbstractTestLoggerService {
 
 		log.info().append("commited").commit();
 
-		//System.in.read();
 		GFLogFactory.stop();
 
 		assertEquals("commited", buffer.toString());
+	}
+
+	@Test
+	public void testCommitOnFailedProcessing() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final int maxMessageSize = 32;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		final int limit = "commited".length() * 2;
+		final CountDownLatch latch = new CountDownLatch(limit);
+		final Appendable buffer = new Appendable() {
+
+			final StringBuilder builder = new StringBuilder();
+			int count = 0;
+			@Override
+			public Appendable append(CharSequence charSequence) throws IOException {
+				t();
+				builder.append(charSequence);
+
+				return this;
+			}
+
+			private void t() {
+				latch.countDown();
+				if (count++ >= limit) {
+					throw new RuntimeException();
+				}
+			}
+
+			@Override
+			public Appendable append(CharSequence charSequence, int i, int i1) throws IOException {
+				t();
+				builder.append(charSequence, i, i1);
+
+				return this;
+			}
+
+			@Override
+			public Appendable append(char c) throws IOException {
+				t();
+				builder.append(c);
+
+				return this;
+			}
+
+			@Override
+			public String toString() {
+				return builder.toString();
+			}
+		};
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		factory.setImmediateFlush(true);
+		final LoggerService loggerService =
+				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		log.info().append("commited").commit();
+		log.info().append("commited").commit();
+
+		latch.await();
+
+		Thread.sleep(100);
+
+		for(int i = 0; i < (1 << 10); i++) {
+			log.info().append("ignored").commit();
+		}
+
+		GFLogFactory.stop();
+
+		assertEquals("commitedcommited", buffer.toString());
 	}
 
 	@Test

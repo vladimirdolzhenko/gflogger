@@ -82,6 +82,10 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		this.layout = layout;
 	}
 
+	public boolean isImmediateFlush() {
+		return immediateFlush;
+	}
+
 	public void setImmediateFlush(final boolean immediateFlush) {
 		this.immediateFlush = immediateFlush;
 	}

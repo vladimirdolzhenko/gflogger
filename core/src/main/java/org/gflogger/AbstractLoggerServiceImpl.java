@@ -220,43 +220,6 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return entry;
 	}
 
-	/*/
-	@Override
-	public void entryFlushed(final LocalLogEntry localEntry){
-		final ByteBuffer localByteBuffer = multibyte ? null : localEntry.getByteBuffer();
-		final CharBuffer localCharBuffer = multibyte ? localEntry.getCharBuffer() : null;
-
-		final long id = acquireNextEntryId();
-		final LogEntryItemImpl entry = acquireEntry(id);
-
-		try {
-			final ByteBuffer byteBuffer = multibyte ? null : entry.getBuffer();
-			final CharBuffer charBuffer = multibyte ? entry.getCharBuffer() : null;
-
-			entry.copyFromEntry(localEntry);
-			entry.setTimestamp(System.currentTimeMillis());
-
-			if (multibyte) {
-				charBuffer.clear();
-				charBuffer.put(localCharBuffer);
-			} else {
-				byteBuffer.clear();
-				byteBuffer.put(localByteBuffer);
-			}
-		} finally {
-			releaseEntry(id);
-		}
-	}
-
-	protected abstract long acquireNextEntryId();
-
-	protected abstract LogEntryItemImpl acquireEntry(long id);
-
-	protected abstract void releaseEntry(long id);
-
-	/*/
-	//*/
-
 	@Override
 	public final GFLogger[] lookupLoggers(String name) {
 		List<GFLogger> list = new ArrayList<GFLogger>();
@@ -300,18 +263,13 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return level;
 	}
 
+	public boolean isRunning() {
+		return running;
+	}
+
 	@Override
 	public void stop(){
-//		running = false;
-//		for(int i = 0; i < appenders.length; i++){
-//			appenders[i].stop();
-//		}
-//		executorService.shutdown();
-//		try {
-//			executorService.awaitTermination(5, TimeUnit.SECONDS);
-//		} catch (InterruptedException e) {
-//			// ignore
-//		}
+		running = false;
 		logEntryThreadLocal.remove();
 	}
 

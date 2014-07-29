@@ -91,7 +91,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		final int c = (count & (count - 1)) != 0 ?
 			roundUpNextPower2(count) : count;
 
-		entryHandler = new EntryHandler(appenders);
+		entryHandler = new EntryHandler(this, appenders);
 		this.ringBuffer =
 				new RingBuffer<LogEntryItemImpl>(initEnties(c, maxMessageSize0), entryHandler);
 		entryHandler.start();
@@ -139,13 +139,6 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	@Override
 	public void stop(){
 		running = false;
-		//logEntryThreadLocal.remove();
-		/*/
-		for(int i = 0; i < appenders.length; i++){
-			appenders[i].stop();
-		}
-		/*/
-		//*/
 		ringBuffer.stop();
 		executorService.shutdown();
 		try {

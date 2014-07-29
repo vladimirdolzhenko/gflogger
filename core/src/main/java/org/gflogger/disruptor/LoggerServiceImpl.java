@@ -127,71 +127,13 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			}
 		});
 
-		final EntryHandler entryHandler = new EntryHandler(appenders);
+		final EntryHandler entryHandler = new EntryHandler(this, appenders);
 		disruptor.handleEventsWith(entryHandler);
 
 		ringBuffer = disruptor.start();
 		running = true;
 	}
 
-	/*/
-	@Override
-	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-
-		long sequence = ringBuffer.next();
-		final LogEntryItemImpl entry = ringBuffer.get(sequence);
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message '" + entry.stringValue()
-					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
-			entry.commit();
-		}
-
-		entry.setSequence(sequence);
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.setThreadName(logEntryThreadLocal.get().getThreadName());
-		entry.clear();
-		return entry;
-	}
-
-	@Override
-	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName,
-			String pattern, final long appenderMask) {
-		if (!running) throw new IllegalStateException("Logger was stopped.");
-
-		long sequence = ringBuffer.next();
-		final LogEntryItemImpl entry = ringBuffer.get(sequence);
-
-		if (!entry.isCommited()){
-			LogLog.error("ERROR! log message '" + entry.stringValue()
-					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
-			entry.commit();
-		}
-
-		entry.setSequence(sequence);
-		entry.setCommited(false);
-		entry.setLogLevel(level);
-		entry.setCategoryName(categoryName);
-		entry.setAppenderMask(appenderMask);
-		entry.setThreadName(logEntryThreadLocal.get().getThreadName());
-		entry.clear();
-		entry.setPattern(pattern);
-		return entry;
-	}
-
-	@Override
-	public void entryFlushed(LocalLogEntry localEntry) {
-		final long now = System.currentTimeMillis();
-		LogEntryItemImpl entryItemImpl = (LogEntryItemImpl)localEntry;
-		entryItemImpl.setTimestamp(now);
-		ringBuffer.publish(entryItemImpl.getSequence());
-	}
-
-	/*/
 	@Override
 	public void entryFlushed(LocalLogEntry localEntry) {
 		final String categoryName = localEntry.getCategoryName();
@@ -219,7 +161,6 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			ringBuffer.publish(sequence);
 		}
 	}
-	//*/
 
 	@Override
 	public void stop(){
