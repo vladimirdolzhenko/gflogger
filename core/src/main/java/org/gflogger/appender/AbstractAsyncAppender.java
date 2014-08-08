@@ -179,6 +179,11 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
+	public void onUncatchException(Throwable e) {
+		LogLog.error("Unhandled exception in " + Thread.currentThread().getName() + " :" + e.getMessage(), e);
+	}
+
+	@Override
 	public void start() {
 		if (running) throw new IllegalStateException();
 

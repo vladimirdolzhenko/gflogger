@@ -32,16 +32,17 @@ public interface Appender<T extends LogEntryItem> {
 
 	int getIndex();
 
-	void workerIsAboutToFinish();
-
 	void flush();
 
 	void flush(boolean force);
 
 	void process(T entry);
 
+	void workerIsAboutToFinish();
+
+	void onUncatchException(Throwable e);
+
 	void start();
 
 	void stop();
-
 }

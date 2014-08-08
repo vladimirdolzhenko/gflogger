@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
+import org.gflogger.helpers.LogLog;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -113,17 +114,17 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 			@Override
 			public void handleOnStartException(Throwable ex) {
-				ex.printStackTrace();
+				LogLog.error("Unhandled onStartException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 
 			@Override
 			public void handleOnShutdownException(Throwable ex) {
-				ex.printStackTrace();
+				LogLog.error("Unhandled onShutdownException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 
 			@Override
 			public void handleEventException(Throwable ex, long sequence, Object event) {
-				ex.printStackTrace();
+				LogLog.error("Unhandled onEventException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 		});
 

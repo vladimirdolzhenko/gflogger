@@ -66,7 +66,7 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 				try {
 					appenders[idx].process(entry);
 				} catch (Throwable e){
-					// TODO:
+					appenders[idx].onUncatchException(e);
 				}
 			}
 			idx++;
