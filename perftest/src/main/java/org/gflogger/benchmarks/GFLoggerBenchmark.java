@@ -182,32 +182,30 @@ public class GFLoggerBenchmark {
 
 					@Override
 					public void workerIsAboutToFinish() {
-
 					}
 
 					@Override
 					public void flush() {
-
 					}
 
 					@Override
 					public void flush( final boolean b ) {
-
 					}
 
 					@Override
 					public void process( final LogEntryItem logEntryItem ) {
-
 					}
 
 					@Override
 					public void start() {
-
 					}
 
 					@Override
 					public void stop() {
+					}
 
+					@Override
+					public void onUncatchException(Throwable e) {
 					}
 				};
 			}
