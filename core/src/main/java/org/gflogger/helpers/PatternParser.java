@@ -422,7 +422,7 @@ public class PatternParser {
 //				return event.getNDC();
 			case MESSAGE_CONVERTER: {
 				final ByteBuffer buffer = item.getBuffer();
-				return buffer.limit() - buffer.position();
+				return buffer.position();
 			}
 			default:
 			}
