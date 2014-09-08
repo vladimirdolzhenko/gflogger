@@ -26,6 +26,7 @@ import org.gflogger.LocalLogEntry;
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
 import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.State;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.ring.RingBuffer;
 
@@ -37,8 +38,8 @@ import org.gflogger.ring.RingBuffer;
  */
 public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
-	private final RingBuffer<LogEntryItemImpl>	ringBuffer;
-	private final EntryHandler					entryHandler;
+	private final RingBuffer<LogEntryItemImpl>		ringBuffer;
+	private final EntryHandler						entryHandler;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -98,7 +99,6 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		executorService.execute(entryHandler);
 
 		//*/
-		running = true;
 	}
 
 
@@ -138,8 +138,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 	@Override
 	public void stop(){
-		running = false;
 		ringBuffer.stop();
+		state = State.STOPPED;
 		executorService.shutdown();
 		try {
 			executorService.awaitTermination(5, TimeUnit.SECONDS);

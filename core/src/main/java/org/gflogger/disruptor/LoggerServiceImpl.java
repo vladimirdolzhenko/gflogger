@@ -44,7 +44,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	/**
 	 * @param count a number of items in the ring
 	 * @param maxMessageSize max message size in the ring (in chars)
-	 * @param appenders
+	 * @param appenderFactories
 	 */
 	public LoggerServiceImpl(final int count, final int maxMessageSize,
 		final GFLoggerBuilder[] loggerBuilders,
@@ -58,7 +58,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param count a number of items in the ring
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param objectFormatterFactory
-	 * @param appenders
+	 * @param appenderFactories
 	 */
 	public LoggerServiceImpl(final int count, final int maxMessageSize,
 		final ObjectFormatterFactory objectFormatterFactory,
@@ -132,7 +132,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		disruptor.handleEventsWith(entryHandler);
 
 		ringBuffer = disruptor.start();
-		running = true;
+		state = State.RUNNING;
 	}
 
 	@Override
@@ -165,8 +165,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 	@Override
 	public void stop(){
-		if (!running) return;
-		running = false;
+		if (state == State.STOPPED) return;
+		state = State.STOPPED;
 		strategy.signalAllWhenBlocking();
 //		for(int i = 0; i < appenders.length; i++){
 //			appenders[i].stop();
@@ -208,7 +208,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 				synchronized (lock) {
 					++numWaiters;
 					while ((availableSequence = cursor.get()) < sequence) {
-						if (!running){
+						if (state == State.STOPPED){
 							disruptor.halt();
 							throw AlertException.INSTANCE;
 						}
@@ -245,7 +245,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 					++numWaiters;
 					while ((availableSequence = cursor.get()) < sequence) {
 						barrier.checkAlert();
-						if (!running){
+						if (state == State.STOPPED){
 							disruptor.halt();
 							throw AlertException.INSTANCE;
 						}

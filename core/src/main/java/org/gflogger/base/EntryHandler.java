@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.gflogger.AbstractEntryHandler;
 import org.gflogger.Appender;
 import org.gflogger.LogEntryItemImpl;
+import org.gflogger.State;
 import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.helpers.LogLog;
 import org.gflogger.ring.*;
@@ -99,7 +100,7 @@ public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implem
 			} catch (InterruptedException e) {
 				//
 			} catch (AlertException e) {
-				if (!service.isRunning()) {
+				if (service.getState() == State.STOPPED) {
 					break;
 				}
 			} catch (Throwable e) {

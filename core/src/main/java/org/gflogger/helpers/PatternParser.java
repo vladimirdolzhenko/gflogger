@@ -47,13 +47,13 @@ import org.gflogger.formatter.FastDateFormat;
  */
 public class PatternParser {
 
-	private static final char ESCAPE_CHAR			   = '%';
+	private static final char	ESCAPE_CHAR				= '%';
 
-	private static final int  LITERAL_STATE			 = 0;
-	private static final int  CONVERTER_STATE		   = 1;
-	private static final int  DOT_STATE				 = 3;
-	private static final int  MIN_STATE				 = 4;
-	private static final int  MAX_STATE				 = 5;
+	private static final int	LITERAL_STATE			= 0;
+	private static final int	CONVERTER_STATE			= 1;
+	private static final int	DOT_STATE				= 3;
+	private static final int	MIN_STATE				= 4;
+	private static final int	MAX_STATE				= 5;
 
 //	static final int		  FULL_LOCATION_CONVERTER   = 1000;
 //	static final int		  METHOD_LOCATION_CONVERTER = 1001;
@@ -61,22 +61,22 @@ public class PatternParser {
 //	static final int		  LINE_LOCATION_CONVERTER   = 1003;
 //	static final int		  FILE_LOCATION_CONVERTER   = 1004;
 
-	static final int		  RELATIVE_TIME_CONVERTER   = 2000;
-	static final int		  THREAD_CONVERTER		  = 2001;
-	static final int		  LEVEL_CONVERTER		   = 2002;
-//	static final int		  NDC_CONVERTER			 = 2003;
-	static final int		  MESSAGE_CONVERTER		 = 2004;
+	static final int			RELATIVE_TIME_CONVERTER	= 2000;
+	static final int			THREAD_CONVERTER		= 2001;
+	static final int			LEVEL_CONVERTER			= 2002;
+//	static final int			NDC_CONVERTER			= 2003;
+	static final int			MESSAGE_CONVERTER		= 2004;
 
-	int					   state;
-	protected StringBuffer	currentLiteral			= new StringBuffer(32);
-	protected int			 patternLength;
-	protected int			 i;
-	PatternConverter		  head;
-	PatternConverter		  tail;
-	protected FormattingInfo  formattingInfo			= new FormattingInfo();
+	protected int				state;
+	protected StringBuffer		currentLiteral			= new StringBuffer(32);
+	protected int				patternLength;
+	protected int				i;
+	PatternConverter			head;
+	PatternConverter			tail;
+	protected FormattingInfo	formattingInfo			= new FormattingInfo();
 
-	protected final String	pattern;
-	protected final Locale	  locale;
+	protected final String		pattern;
+	protected final Locale		locale;
 	protected final TimeZone	timeZone;
 
 	public PatternParser(String pattern, Locale locale, TimeZone timeZone) {

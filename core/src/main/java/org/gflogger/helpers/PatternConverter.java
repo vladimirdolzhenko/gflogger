@@ -37,10 +37,10 @@ import org.gflogger.formatter.BufferFormatter;
  * @since 0.8.2
  */
 public abstract class PatternConverter {
-	public PatternConverter next;
-	int					 min	   = -1;
-	int					 max	   = 0x7FFFFFFF;
-	boolean				 leftAlign = false;
+	public PatternConverter	next;
+	int						min			= -1;
+	int						max			= 0x7FFFFFFF;
+	boolean					leftAlign	= false;
 
 	protected PatternConverter() {
 	}
@@ -57,41 +57,5 @@ public abstract class PatternConverter {
 
 	public abstract int size(LogEntryItem entry);
 
-	static String[] SPACES = {
-			" ",				// 1 space
-			"  ",			   // 2 spaces
-			"    ",			 // 4 spaces
-			"        ",		 // 8 spaces
-			"                ", // 16 spaces
-			"                                " }; // 32 spaces
-
-	/**
-	 * Fast space padding method.
-	 */
-	public void spacePad(ByteBuffer buffer, int length) {
-		while (length >= 32) {
-			BufferFormatter.append(buffer, SPACES[5]);
-			length -= 32;
-		}
-
-		for (int i = 4; i >= 0; i--) {
-			if ((length & (1 << i)) != 0) {
-				BufferFormatter.append(buffer, SPACES[i]);
-			}
-		}
-	}
-
-	public void spacePad(CharBuffer buffer, int length) {
-		while (length >= 32) {
-			buffer.append(SPACES[5]);
-			length -= 32;
-		}
-
-		for (int i = 4; i >= 0; i--) {
-			if ((length & (1 << i)) != 0) {
-				buffer.append(SPACES[i]);
-			}
-		}
-	}
 
 }

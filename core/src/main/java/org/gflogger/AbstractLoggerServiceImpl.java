@@ -48,7 +48,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected final boolean								multibyte;
 
-	protected volatile boolean							running	= false;
+	protected volatile State 							state = State.NOT_STARTED;
 
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
@@ -105,8 +105,6 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		};
 
 		executorService = initExecutorService();
-
-		//start();
 	}
 
 	protected static Appender[] createAppenders(AppenderFactory[] appenderFactories) {
@@ -175,12 +173,12 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 			}
 		}
 
-		running = true;
+		state = State.RUNNING;
 	}
 
 	@Override
 	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
-		if (!running) throw new IllegalStateException("Logger was stopped.");
+		if (state == State.STOPPED) throw new IllegalStateException("Logger was stopped.");
 
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
@@ -201,7 +199,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	@Override
 	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName,
 			String pattern, final long appenderMask) {
-		if (!running) throw new IllegalStateException("Logger was stopped.");
+		if (state == State.STOPPED) throw new IllegalStateException("Logger was stopped.");
 
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
@@ -263,13 +261,13 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return level;
 	}
 
-	public boolean isRunning() {
-		return running;
+	public State getState() {
+		return state;
 	}
 
 	@Override
 	public void stop(){
-		running = false;
+		state = State.STOPPED;
 		logEntryThreadLocal.remove();
 	}
 
