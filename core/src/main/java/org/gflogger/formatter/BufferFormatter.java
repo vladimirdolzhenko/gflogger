@@ -14,14 +14,10 @@
 
 package org.gflogger.formatter;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.CharBuffer;
+import java.nio.*;
 
-import sun.misc.Cleaner;
+import org.gflogger.util.DirectBufferUtils;
 import sun.misc.FloatingDecimal;
-import sun.nio.ch.DirectBuffer;
 
 /**
  * BufferFormatter
@@ -30,29 +26,17 @@ import sun.nio.ch.DirectBuffer;
  */
 public class BufferFormatter {
 
+	private static final boolean USE_DIRECT_BUFFER = Boolean.parseBoolean( System.getProperty( "gflogger.direct", "true" ) );
+
 	public static ByteBuffer allocate(final int capacity){
-		final boolean direct = Boolean.parseBoolean(System.getProperty("gflogger.direct", "true"));
-		return direct ?
+		return USE_DIRECT_BUFFER ?
 			ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder()) :
 			ByteBuffer.allocate(capacity);
 	}
 
 	public static void purge(Buffer buffer){
-		if(!(buffer instanceof DirectBuffer)) return;
-		DirectBuffer db = (DirectBuffer) buffer;
-
-		Cleaner cleaner = db.cleaner();
-		if (cleaner != null) {
-			cleaner.clean();
-		} else {
-			// char buffer doesn't have a cleaner
-			// it has reference to underlying byte buffer
-			// TODO
-//			final Object viewedBuffer = db.viewedBuffer();
-//			if (viewedBuffer instanceof Buffer){
-//				purge((Buffer) viewedBuffer);
-//			}
-		}
+		//TODO RC: move .allocate() to DirectBufferUtils also?
+		DirectBufferUtils.releaseBuffer( buffer );
 	}
 
 	public static int roundUpNextPower2(int x) {
