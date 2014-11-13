@@ -58,7 +58,8 @@ public class DirectBufferUtils {
 	 * @param toBeReleased The direct buffer that will be "cleaned". Utilizes reflection.
 	 */
 	public static void releaseBuffer( final Buffer toBeReleased ) {
-		if( !toBeReleased.isDirect() ) {
+		if( toBeReleased==null
+				|| !toBeReleased.isDirect() ) {
 			return;
 		}
 
