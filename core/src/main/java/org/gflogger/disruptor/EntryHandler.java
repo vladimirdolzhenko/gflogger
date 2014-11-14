@@ -40,6 +40,7 @@ public final class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> 
 
 	@Override
 	public void onShutdown() {
+		workerIsAboutToFinish();
 		stop();
 	}
 

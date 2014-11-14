@@ -41,7 +41,7 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 			try {
 				appenders[i].workerIsAboutToFinish();
 			} catch (Throwable e){
-				LogLog.error("unhanled exception at " + Thread.currentThread().getName() +  " in " + appenders[i].getClass().getName() + ".workerIsAboutToFinish: " + e.getMessage() , e);
+				LogLog.error("unhandled exception at " + Thread.currentThread().getName() +  " in " + appenders[i].getClass().getName() + ".workerIsAboutToFinish: " + e.getMessage() , e);
 			}
 		}
 	}

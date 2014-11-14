@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.gflogger.appender.AbstractAppenderFactory;
+import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.appender.ConsoleAppenderFactory;
 import org.gflogger.formatter.BytesOverflow;
@@ -83,6 +87,166 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void workerIsAboutToFinishIsCalledBeforeGfloggerStops() throws Exception {
+
+
+		final AtomicInteger workerIsAboutToFinishCalled = new AtomicInteger();
+		final AtomicInteger startCalled = new AtomicInteger();
+		final AtomicInteger stopCalled = new AtomicInteger();
+		final AbstractAppenderFactory factory = new AbstractAppenderFactory(){
+			@Override
+			public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
+				return new Appender<LogEntryItemImpl>() {
+					@Override
+					public boolean isMultibyte() {
+						return false;
+					}
+
+					@Override
+					public boolean isEnabled() {
+						return true;
+					}
+
+					@Override
+					public LogLevel getLogLevel() {
+						return LogLevel.FATAL;
+					}
+
+					@Override
+					public String getName() {
+						return "";
+					}
+
+					@Override
+					public int getIndex() {
+						return 0;
+					}
+
+					@Override
+					public void flush() {}
+
+					@Override
+					public void flush( final boolean force ) {}
+
+					@Override
+					public void process( final LogEntryItemImpl entry ) {}
+
+					@Override
+					public void workerIsAboutToFinish() {
+						workerIsAboutToFinishCalled.incrementAndGet();
+					}
+
+					@Override
+					public void onUncatchException( final Throwable e ) {}
+
+					@Override
+					public void start() {
+						startCalled.incrementAndGet();
+					}
+
+					@Override
+					public void stop() {
+						stopCalled.incrementAndGet();
+					}
+				};
+			}
+		};
+
+		final LoggerService loggerService = createLoggerService(
+				1,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				".workerIsAboutToFinish() called once",
+				1,
+				workerIsAboutToFinishCalled.get()
+		);
+		assertEquals(
+				".start() called once",
+				1,
+				startCalled.get()
+		);
+
+		assertEquals(
+				".stop() called once",
+				1,
+				stopCalled.get()
+		);
+	}
+
+	@Test
+	public void everyMessageDeliveredToAppenderEvenIfAppenderThrowsExceptions() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final String message = "anything";
+		final int maxMessageSize = message.length();
+
+		final CountingAppenderFactory factory = new CountingAppenderFactory( maxMessageSize );
+		factory.setLogLevel(LogLevel.INFO);
+		factory.setImmediateFlush( true );
+
+		final LoggerService loggerService = createLoggerService(
+				maxMessageSize,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		final int messagesLogged = 1 << 10;
+		for(int i = 0; i < messagesLogged; i++) {
+			log.info().append( message ).commit();
+		}
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				"Every message was delivered to appender",
+				messagesLogged,
+				factory.getMessagesProcessed()
+		);
+	}
+
+		@Test
+	public void everyExceptionThrownByAppenderIsDeliveredToOnUncatchException() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final String message = "anything";
+		final int maxMessageSize = message.length();
+
+		final CountingAppenderFactory factory = new CountingAppenderFactory( maxMessageSize );
+		factory.setLogLevel(LogLevel.INFO);
+		factory.setImmediateFlush(true);
+
+		final LoggerService loggerService = createLoggerService(
+				maxMessageSize,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		final int messagesLogged = 1 << 10;
+		for(int i = 0; i < messagesLogged; i++) {
+			log.info().append( message ).commit();
+		}
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				"Every exception was delivered to appender.onUncatchException()",
+				messagesLogged,
+				factory.getUncatchExceptionsProcessed()
+		);
+	}
+
+	@Test
 	public void testCommitOnFailedProcessing() throws Exception {
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 
@@ -107,7 +271,7 @@ public abstract class AbstractTestLoggerService {
 			private void t() {
 				latch.countDown();
 				if (count++ >= limit) {
-					throw new RuntimeException();
+					throw new RuntimeException("(Expected): count="+count+" > limit="+limit);
 				}
 			}
 
@@ -990,6 +1154,49 @@ public abstract class AbstractTestLoggerService {
 		@Override
 		public void append(Foo obj, GFLogEntry entry) {
 			entry.append("v:").append(obj.v);
+		}
+	}
+
+	private static class CountingAppenderFactory extends AbstractAppenderFactory {
+		private final int maxMessageSize;
+
+		private final AtomicLong messagesProcessed = new AtomicLong( 0 );
+		private final AtomicLong uncatchExceptionsProcessed = new AtomicLong( 0 );
+
+		public CountingAppenderFactory( final int maxMessageSize ) {
+			this.maxMessageSize = maxMessageSize;
+		}
+
+		@Override
+		public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
+			return new AbstractAsyncAppender( maxMessageSize, false) {
+				@Override
+				public String getName() {
+					return "CountingAppender";
+				}
+
+				@Override
+				public void process( final LogEntryItemImpl entry ) {
+					messagesProcessed.incrementAndGet();
+					throw new RuntimeException( "Intentionally (!) thrown exception" );
+				}
+
+				@Override
+				public void onUncatchException( final Throwable e ) {
+					uncatchExceptionsProcessed.incrementAndGet();
+				}
+
+				@Override
+				public void flush( final boolean force ) {}
+			};
+		}
+
+		public long getMessagesProcessed() {
+			return messagesProcessed.get();
+		}
+
+		public long getUncatchExceptionsProcessed() {
+			return uncatchExceptionsProcessed.get();
 		}
 	}
 }
