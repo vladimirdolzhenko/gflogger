@@ -1,0 +1,5 @@
+syntax: regexp
+^.*/target/.*$
+^.*\.iml$
+^.*\.log$
+^\.idea.*$

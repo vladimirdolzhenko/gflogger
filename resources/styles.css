@@ -1,0 +1,100 @@
+.background {
+  fill:white;
+}
+rect.frame {
+  fill:white;
+  stroke:black;
+  stroke-width:2;
+  stroke-dasharray:5, 2;
+  opacity:1;
+}
+rect.frame2 {
+  fill:white;stroke:black;stroke-width:1.2;opacity:1;
+}
+
+.tip {
+	font-size:10px;
+	fill:#000000;
+	font-family:PT Serif;
+}
+
+.note {
+	font-size:12px;
+	fill:#000000;
+	font-family:PT Serif;
+}
+
+.code {
+	font-size:14px;
+	fill:#000000;
+	font-family:PT Sans;
+}
+
+.code2 {
+	font-size:14px;
+	fill:#000000;
+	font-family:PT Mono;
+}
+
+circle.object0 {
+	stroke:black;
+	fill:#ccc;
+	stroke-width:1.2;
+}
+circle.object {
+	stroke:black;
+	fill:#f29c1c;
+	stroke-width:1.2;
+}
+circle.object1 {
+	stroke:black;
+	fill:#fFaf2f;
+	stroke-width:1.2;
+}
+circle.object2{
+  	stroke:black;
+	fill:#00ff00;
+	stroke-width:1.2;
+}
+circle.object3{
+  	stroke:black;
+	fill:purple;
+	stroke-width:1.2;
+}
+.link {
+  fill:none;		
+  stroke:black;
+  stroke-width:1.2;
+  marker-end:url(#TriangleOutL);
+}
+.weak-link {
+  fill:none;		
+  stroke:black;
+  stroke-width:1.2;
+  stroke-dasharray:5, 2;
+  marker-end:url(#TriangleOutL);
+}
+.link-pointer {
+	fill:none;
+	stroke:#000000;
+	stroke-width:2;
+	stroke-miterlimit:4;
+	stroke-dasharray:none;
+	marker-end:url(#TriangleOutL);	
+}
+.arrow1 {
+  stroke:#ec902b;
+  stroke-width:1;
+  fill:url(#lg1);
+}
+.arrow2 {
+  stroke: #428cd7;
+  stroke-width:1;
+  fill:url(#lg2);
+}
+
+.line {
+	stroke:black;
+	stroke-width:1;
+	fill:none;
+}

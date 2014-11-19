@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+    
+    <appender name="sync.file" class="org.apache.log4j.FileAppender">
+        <param name="file" value="${log.dir}/log4j.log"/>
+        <param name="threshold" value="INFO"/>
+        <param name="append" value="false"/>
+        <param name="bufferedIO" value="true"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="conversionPattern" value="%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n"/>
+        </layout>
+    </appender>
+
+    <appender name="file" class="org.apache.log4j.AsyncAppender">
+        <param name="bufferSize" value="1024"/>
+        <param name="blocking" value="true"/>
+        <appender-ref ref="sync.file" />
+    </appender>
+
+    <logger name="com.db" additivity="false">
+        <level value="info"/>
+        <appender-ref ref="file"/>
+    </logger>
+
+    <root/>
+
+</log4j:configuration>
