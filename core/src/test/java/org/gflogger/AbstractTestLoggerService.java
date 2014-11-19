@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.gflogger.appender.AbstractAppenderFactory;
 import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.appender.AppenderFactory;
+import org.gflogger.appender.ConsoleAppender;
 import org.gflogger.appender.ConsoleAppenderFactory;
 import org.gflogger.formatter.BytesOverflow;
 import org.junit.AfterClass;
@@ -93,7 +94,7 @@ public abstract class AbstractTestLoggerService {
 		final AtomicInteger workerIsAboutToFinishCalled = new AtomicInteger();
 		final AtomicInteger startCalled = new AtomicInteger();
 		final AtomicInteger stopCalled = new AtomicInteger();
-		final AbstractAppenderFactory factory = new AbstractAppenderFactory(){
+		final AbstractAppenderFactory factory = new AbstractAppenderFactory<Appender>(){
 			@Override
 			public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
 				return new Appender<LogEntryItemImpl>() {
@@ -1114,6 +1115,42 @@ public abstract class AbstractTestLoggerService {
 		assertEquals("test", string);
 	}
 
+	@Test
+	public void testAppenderIsAboutToFinish() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final int maxMessageSize = 32;
+		final StringBuffer buffer = new StringBuffer();
+		final AtomicInteger workerIsAboutToFinish = new AtomicInteger(0);
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory(){
+			@Override
+			protected ConsoleAppender createAppender() {
+				return new ConsoleAppender(bufferSize, multibyte, outputStream){
+					@Override
+					public void workerIsAboutToFinish() {
+						workerIsAboutToFinish.incrementAndGet();
+						super.workerIsAboutToFinish();
+					}
+				};
+			}
+		};
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService =
+				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		log.info().append("commited").commit();
+
+		GFLogFactory.stop();
+
+		assertEquals("commited", buffer.toString());
+		assertEquals(1, workerIsAboutToFinish.get());
+	}
+
 	@Ignore
 	@Test
 	public void testMemoryConsumption() throws Exception {
@@ -1157,7 +1194,7 @@ public abstract class AbstractTestLoggerService {
 		}
 	}
 
-	private static class CountingAppenderFactory extends AbstractAppenderFactory {
+	private static class CountingAppenderFactory extends AbstractAppenderFactory<Appender> {
 		private final int maxMessageSize;
 
 		private final AtomicLong messagesProcessed = new AtomicLong( 0 );

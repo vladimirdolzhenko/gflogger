@@ -19,6 +19,7 @@ import static org.gflogger.helpers.OptionConverter.*;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.gflogger.Appender;
 import org.gflogger.Layout;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
@@ -30,7 +31,7 @@ import org.gflogger.PatternLayout;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public abstract class AbstractAppenderFactory implements AppenderFactory {
+public abstract class AbstractAppenderFactory<A extends Appender> implements AppenderFactory<A> {
 
 	// 1M
 	protected int bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);

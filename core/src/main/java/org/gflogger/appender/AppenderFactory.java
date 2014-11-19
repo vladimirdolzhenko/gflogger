@@ -23,9 +23,9 @@ import org.gflogger.LoggerService;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public interface AppenderFactory {
+public interface AppenderFactory<A extends Appender> {
 
-	Appender createAppender(Class<? extends LoggerService> loggerServiceClass);
+	A createAppender(Class<? extends LoggerService> loggerServiceClass);
 
 	LogLevel getLogLevel();
 

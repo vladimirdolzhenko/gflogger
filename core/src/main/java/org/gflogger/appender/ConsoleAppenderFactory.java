@@ -14,7 +14,6 @@
 
 package org.gflogger.appender;
 
-import org.gflogger.Appender;
 import org.gflogger.LoggerService;
 
 
@@ -23,16 +22,15 @@ import org.gflogger.LoggerService;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class ConsoleAppenderFactory extends AbstractAppenderFactory {
+public class ConsoleAppenderFactory extends AbstractAppenderFactory<ConsoleAppender> {
 
 	protected Appendable outputStream = System.out;
 
 	@Override
-	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
+	public ConsoleAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		final org.gflogger.appender.ConsoleAppender appender =
-			new org.gflogger.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
 
+		ConsoleAppender appender = createAppender();
 		appender.setLogLevel(logLevel);
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
@@ -42,6 +40,10 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 		appender.setIndex(index);
 
 		return appender;
+	}
+
+	protected ConsoleAppender createAppender() {
+		return new ConsoleAppender(bufferSize, multibyte, outputStream);
 	}
 
 	/*
