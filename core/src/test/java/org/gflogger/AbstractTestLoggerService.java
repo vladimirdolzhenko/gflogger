@@ -1,12 +1,18 @@
 package org.gflogger;
 
+import java.io.BufferedOutputStream;
+import java.io.Flushable;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.gflogger.appender.AppenderFactory;
+import org.gflogger.appender.ConsoleAppender;
 import org.gflogger.appender.ConsoleAppenderFactory;
+import org.gflogger.appender.FileAppenderFactory;
 import org.gflogger.formatter.BytesOverflow;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -950,6 +956,42 @@ public abstract class AbstractTestLoggerService {
 		assertEquals("test", string);
 	}
 
+	@Test
+	public void testAppenderIsAboutToFinish() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final int maxMessageSize = 32;
+		final StringBuffer buffer = new StringBuffer();
+		final AtomicInteger workerIsAboutToFinish = new AtomicInteger(0);
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory(){
+			@Override
+			protected ConsoleAppender createAppender() {
+				return new ConsoleAppender(bufferSize, multibyte, outputStream){
+					@Override
+					public void workerIsAboutToFinish() {
+						workerIsAboutToFinish.incrementAndGet();
+						super.workerIsAboutToFinish();
+					}
+				};
+			}
+		};
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService =
+				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		log.info().append("commited").commit();
+
+		GFLogFactory.stop();
+
+		assertEquals("commited", buffer.toString());
+		assertEquals(1, workerIsAboutToFinish.get());
+	}
+
 	@Ignore
 	@Test
 	public void testMemoryConsumption() throws Exception {
@@ -990,6 +1032,33 @@ public abstract class AbstractTestLoggerService {
 		@Override
 		public void append(Foo obj, GFLogEntry entry) {
 			entry.append("v:").append(obj.v);
+		}
+	}
+
+	private static class AppendableFlushable implements Appendable, Flushable {
+		final StringBuffer buffer = new StringBuffer();
+		final StringBuffer target = new StringBuffer();
+
+		@Override
+		public Appendable append(CharSequence csq) throws IOException {
+			return buffer.append(csq);
+		}
+
+		@Override
+		public Appendable append(CharSequence csq, int start, int end) throws IOException {
+			return buffer.append(csq, start, end);
+		}
+
+		@Override
+		public Appendable append(char c) throws IOException {
+			return buffer.append(c);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			target.append(buffer);
+			buffer.setLength(0);
+			buffer.trimToSize();
 		}
 	}
 }

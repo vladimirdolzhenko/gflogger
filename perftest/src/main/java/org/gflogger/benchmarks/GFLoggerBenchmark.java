@@ -151,7 +151,7 @@ public class GFLoggerBenchmark {
 //		fileAppender.setImmediateFlush( false );
 //		fileAppender.setLayout( new PatternLayout( "%d{HH:mm:ss,SSS zzz} %p %m [%c{2}] [%t]%n" ) );
 
-		return new AppenderFactory[] { new AbstractAppenderFactory(){
+		return new AppenderFactory[] { new AbstractAppenderFactory<Appender>(){
 			@Override
 			public Appender createAppender( final Class<? extends LoggerService> aClass ) {
 				return new Appender() {

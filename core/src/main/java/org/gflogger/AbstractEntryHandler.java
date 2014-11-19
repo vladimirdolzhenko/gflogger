@@ -86,6 +86,8 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 	public void stop(){
 		if (!running.getAndSet(false)) return;
 
+		workerIsAboutToFinish();
+
 		service.state = State.STOPPED;
 
 		for(int i = 0; i < appenders.length; i++){
