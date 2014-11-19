@@ -181,10 +181,6 @@ public class GFLoggerBenchmark {
 					}
 
 					@Override
-					public void workerIsAboutToFinish() {
-					}
-
-					@Override
 					public void flush() {
 					}
 

@@ -88,10 +88,7 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
-	public void workerIsAboutToFinishIsCalledBeforeGfloggerStops() throws Exception {
-
-
-		final AtomicInteger workerIsAboutToFinishCalled = new AtomicInteger();
+	public void testStartAndStop() throws Exception {
 		final AtomicInteger startCalled = new AtomicInteger();
 		final AtomicInteger stopCalled = new AtomicInteger();
 		final AbstractAppenderFactory factory = new AbstractAppenderFactory<Appender>(){
@@ -133,11 +130,6 @@ public abstract class AbstractTestLoggerService {
 					public void process( final LogEntryItemImpl entry ) {}
 
 					@Override
-					public void workerIsAboutToFinish() {
-						workerIsAboutToFinishCalled.incrementAndGet();
-					}
-
-					@Override
 					public void onUncatchException( final Throwable e ) {}
 
 					@Override
@@ -163,11 +155,6 @@ public abstract class AbstractTestLoggerService {
 
 		GFLogFactory.stop();
 
-		assertEquals(
-				".workerIsAboutToFinish() called once",
-				1,
-				workerIsAboutToFinishCalled.get()
-		);
 		assertEquals(
 				".start() called once",
 				1,

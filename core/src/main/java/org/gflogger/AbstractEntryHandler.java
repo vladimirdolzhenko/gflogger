@@ -36,16 +36,6 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 		this.appenders = appenders;
 	}
 
-	protected void workerIsAboutToFinish() {
-		for (int i = 0; i < appenders.length; i++) {
-			try {
-				appenders[i].workerIsAboutToFinish();
-			} catch (Throwable e){
-				LogLog.error("unhandled exception at " + Thread.currentThread().getName() +  " in " + appenders[i].getClass().getName() + ".workerIsAboutToFinish: " + e.getMessage() , e);
-			}
-		}
-	}
-
 	protected final void flushBuffer() {
 		flushBuffer(true);
 	}
