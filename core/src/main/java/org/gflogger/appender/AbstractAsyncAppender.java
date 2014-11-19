@@ -167,13 +167,6 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
-	public void workerIsAboutToFinish(){
-		flush();
-		BufferFormatter.purge(byteBuffer);
-		BufferFormatter.purge(charBuffer);
-	}
-
-	@Override
 	public void flush(){
 		flush(true);
 	}
@@ -195,10 +188,17 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 		running = true;
 	}
 
+	protected void workerIsAboutToFinish(){
+		flush();
+		BufferFormatter.purge(byteBuffer);
+		BufferFormatter.purge(charBuffer);
+	}
+
 	@Override
 	public void stop(){
 		if (!running) return;
 		LogLog.debug(getName() + " is stopping ");
+		workerIsAboutToFinish();
 		running = false;
 	}
 }

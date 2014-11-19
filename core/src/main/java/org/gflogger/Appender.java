@@ -38,8 +38,6 @@ public interface Appender<T extends LogEntryItem> {
 
 	void process(T entry);
 
-	void workerIsAboutToFinish();
-
 	void onUncatchException(Throwable e);
 
 	void start();
