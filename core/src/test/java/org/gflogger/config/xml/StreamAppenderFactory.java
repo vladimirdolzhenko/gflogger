@@ -29,8 +29,7 @@ public class StreamAppenderFactory extends AbstractAppenderFactory<ConsoleAppend
 	@Override
 	public ConsoleAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		final ConsoleAppender appender =
-			new ConsoleAppender(bufferSize, multibyte, outputStream);
+		final ConsoleAppender appender = new ConsoleAppender(bufferSize, multibyte, outputStream);
 
 		appender.setLogLevel(logLevel);
 		appender.setLayout(layout);

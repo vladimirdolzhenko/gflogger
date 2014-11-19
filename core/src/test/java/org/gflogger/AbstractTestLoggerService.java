@@ -1,18 +1,17 @@
 package org.gflogger;
 
-import java.io.BufferedOutputStream;
-import java.io.Flushable;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.gflogger.appender.AbstractAppenderFactory;
+import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.appender.ConsoleAppender;
 import org.gflogger.appender.ConsoleAppenderFactory;
-import org.gflogger.appender.FileAppenderFactory;
 import org.gflogger.formatter.BytesOverflow;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -42,26 +41,26 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	protected abstract LoggerService createLoggerService(final int maxMessageSize,
-		final ObjectFormatterFactory objectFormatterFactory,
-		final GFLoggerBuilder[] loggers,
-		final AppenderFactory ... factories);
+	                                                     final ObjectFormatterFactory objectFormatterFactory,
+	                                                     final GFLoggerBuilder[] loggers,
+	                                                     final AppenderFactory ... factories);
 
 	protected LoggerService createLoggerService(final int maxMessageSize,
-			final ObjectFormatterFactory objectFormatterFactory,
-			final GFLoggerBuilder logger,
-			final AppenderFactory ... factories){
+	                                            final ObjectFormatterFactory objectFormatterFactory,
+	                                            final GFLoggerBuilder logger,
+	                                            final AppenderFactory ... factories){
 		return createLoggerService(maxMessageSize, objectFormatterFactory, new GFLoggerBuilder[]{logger}, factories);
 	}
 
 	protected LoggerService createLoggerService(final int maxMessageSize,
-		final GFLoggerBuilder[] loggers,
-		final AppenderFactory ... factories){
+	                                            final GFLoggerBuilder[] loggers,
+	                                            final AppenderFactory ... factories){
 		return createLoggerService(maxMessageSize, null, loggers, factories);
 	}
 
 	protected LoggerService createLoggerService(final int maxMessageSize,
-			final GFLoggerBuilder logger,
-			final AppenderFactory ... factories){
+	                                            final GFLoggerBuilder logger,
+	                                            final AppenderFactory ... factories){
 		return createLoggerService(maxMessageSize, null, new GFLoggerBuilder[]{logger}, factories);
 	}
 
@@ -89,6 +88,166 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Test
+	public void workerIsAboutToFinishIsCalledBeforeGfloggerStops() throws Exception {
+
+
+		final AtomicInteger workerIsAboutToFinishCalled = new AtomicInteger();
+		final AtomicInteger startCalled = new AtomicInteger();
+		final AtomicInteger stopCalled = new AtomicInteger();
+		final AbstractAppenderFactory factory = new AbstractAppenderFactory<Appender>(){
+			@Override
+			public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
+				return new Appender<LogEntryItemImpl>() {
+					@Override
+					public boolean isMultibyte() {
+						return false;
+					}
+
+					@Override
+					public boolean isEnabled() {
+						return true;
+					}
+
+					@Override
+					public LogLevel getLogLevel() {
+						return LogLevel.FATAL;
+					}
+
+					@Override
+					public String getName() {
+						return "";
+					}
+
+					@Override
+					public int getIndex() {
+						return 0;
+					}
+
+					@Override
+					public void flush() {}
+
+					@Override
+					public void flush( final boolean force ) {}
+
+					@Override
+					public void process( final LogEntryItemImpl entry ) {}
+
+					@Override
+					public void workerIsAboutToFinish() {
+						workerIsAboutToFinishCalled.incrementAndGet();
+					}
+
+					@Override
+					public void onUncatchException( final Throwable e ) {}
+
+					@Override
+					public void start() {
+						startCalled.incrementAndGet();
+					}
+
+					@Override
+					public void stop() {
+						stopCalled.incrementAndGet();
+					}
+				};
+			}
+		};
+
+		final LoggerService loggerService = createLoggerService(
+				1,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				".workerIsAboutToFinish() called once",
+				1,
+				workerIsAboutToFinishCalled.get()
+		);
+		assertEquals(
+				".start() called once",
+				1,
+				startCalled.get()
+		);
+
+		assertEquals(
+				".stop() called once",
+				1,
+				stopCalled.get()
+		);
+	}
+
+	@Test
+	public void everyMessageDeliveredToAppenderEvenIfAppenderThrowsExceptions() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final String message = "anything";
+		final int maxMessageSize = message.length();
+
+		final CountingAppenderFactory factory = new CountingAppenderFactory( maxMessageSize );
+		factory.setLogLevel(LogLevel.INFO);
+		factory.setImmediateFlush( true );
+
+		final LoggerService loggerService = createLoggerService(
+				maxMessageSize,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		final int messagesLogged = 1 << 10;
+		for(int i = 0; i < messagesLogged; i++) {
+			log.info().append( message ).commit();
+		}
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				"Every message was delivered to appender",
+				messagesLogged,
+				factory.getMessagesProcessed()
+		);
+	}
+
+	@Test
+	public void everyExceptionThrownByAppenderIsDeliveredToOnUncatchException() throws Exception {
+		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
+
+		final String message = "anything";
+		final int maxMessageSize = message.length();
+
+		final CountingAppenderFactory factory = new CountingAppenderFactory( maxMessageSize );
+		factory.setLogLevel(LogLevel.INFO);
+		factory.setImmediateFlush(true);
+
+		final LoggerService loggerService = createLoggerService(
+				maxMessageSize,
+				new GFLoggerBuilder("com.db", factory),
+				factory
+		);
+
+		GFLogFactory.init( loggerService );
+
+		final int messagesLogged = 1 << 10;
+		for(int i = 0; i < messagesLogged; i++) {
+			log.info().append( message ).commit();
+		}
+
+		GFLogFactory.stop();
+
+		assertEquals(
+				"Every exception was delivered to appender.onUncatchException()",
+				messagesLogged,
+				factory.getUncatchExceptionsProcessed()
+		);
+	}
+
+	@Test
 	public void testCommitOnFailedProcessing() throws Exception {
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 
@@ -113,7 +272,7 @@ public abstract class AbstractTestLoggerService {
 			private void t() {
 				latch.countDown();
 				if (count++ >= limit) {
-					throw new RuntimeException();
+					throw new RuntimeException("(Expected): count="+count+" > limit="+limit);
 				}
 			}
 
@@ -179,13 +338,13 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.init(loggerService);
 
 		log.info().
-			append(6.0).
-			append(6E1).
-			append(6E100).
-			append(6E-1).
-			append(6E-10).
-			append(6E-100).
-			commit();
+				append(6.0).
+				append(6E1).
+				append(6E100).
+				append(6E-1).
+				append(6E-10).
+				append(6E-100).
+				commit();
 
 		//System.in.read();
 		GFLogFactory.stop();
@@ -206,7 +365,7 @@ public abstract class AbstractTestLoggerService {
 			factory.setOutputStream(buffer);
 			factory.setLogLevel(LogLevel.INFO);
 			final LoggerService loggerService =
-				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
+					createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
 			GFLogFactory.init(loggerService);
 
@@ -276,8 +435,8 @@ public abstract class AbstractTestLoggerService {
 		final GFLoggerBuilder comDbLogger = new GFLoggerBuilder(LogLevel.INFO, "com.db", factory);
 		final GFLoggerBuilder rootLogger = new GFLoggerBuilder(LogLevel.DEBUG, null, factory);
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
-			new GFLoggerBuilder[]{rootLogger, comDbLogger},
-			factory);
+				new GFLoggerBuilder[]{rootLogger, comDbLogger},
+				factory);
 
 		GFLogFactory.init(loggerService);
 
@@ -314,8 +473,8 @@ public abstract class AbstractTestLoggerService {
 		final GFLoggerBuilder comDbLogger = new GFLoggerBuilder(LogLevel.INFO, "com.db", factory);
 		final GFLoggerBuilder rootLogger = new GFLoggerBuilder(LogLevel.WARN, null, factory);
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
-			new GFLoggerBuilder[]{rootLogger, comDbLogger},
-			factory);
+				new GFLoggerBuilder[]{rootLogger, comDbLogger},
+				factory);
 
 		GFLogFactory.init(loggerService);
 
@@ -349,8 +508,8 @@ public abstract class AbstractTestLoggerService {
 		final GFLoggerBuilder rootLogger = new GFLoggerBuilder(LogLevel.WARN, null, factory);
 
 		final LoggerService loggerService =
-			createLoggerService(maxMessageSize,
-				new GFLoggerBuilder[]{logger, logger2, rootLogger}, factory);
+				createLoggerService(maxMessageSize,
+						new GFLoggerBuilder[]{logger, logger2, rootLogger}, factory);
 
 		GFLogFactory.init(loggerService);
 
@@ -393,9 +552,9 @@ public abstract class AbstractTestLoggerService {
 		factory2.setLogLevel(LogLevel.INFO);
 
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
-			new GFLoggerBuilder[]{new GFLoggerBuilder(factory2),
-				new GFLoggerBuilder("com.db.", factory)},
-			factory, factory2);
+				new GFLoggerBuilder[]{new GFLoggerBuilder(factory2),
+						new GFLoggerBuilder("com.db.", factory)},
+				factory, factory2);
 
 		GFLogFactory.init(loggerService);
 
@@ -430,8 +589,8 @@ public abstract class AbstractTestLoggerService {
 		factory2.setLogLevel(LogLevel.FATAL);
 
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
-			new GFLoggerBuilder[]{new GFLoggerBuilder(factory)},
-			factory2);
+				new GFLoggerBuilder[]{new GFLoggerBuilder(factory)},
+				factory2);
 
 		GFLogFactory.init(loggerService);
 
@@ -474,9 +633,9 @@ public abstract class AbstractTestLoggerService {
 			assertNotNull(localLogEntry.getError());
 			final Class errorClass = localLogEntry.getError().getClass();
 			assertTrue("failed on buffer.position:" + errorClass.getName(),
-				BufferOverflowException.class.equals(errorClass) ||
-				BytesOverflow.class.equals(errorClass) ||
-				AssertionError.class.equals(errorClass));
+					BufferOverflowException.class.equals(errorClass) ||
+							BytesOverflow.class.equals(errorClass) ||
+							AssertionError.class.equals(errorClass));
 
 			info.commit();
 		}
@@ -487,7 +646,7 @@ public abstract class AbstractTestLoggerService {
 		assertEquals(string, maxMessageSize, string.length());
 
 		final String expected =
-			tooLongMessage.substring(0, maxMessageSize - placeholder.length()) + placeholder;
+				tooLongMessage.substring(0, maxMessageSize - placeholder.length()) + placeholder;
 		assertEquals(expected, string);
 	}
 
@@ -520,9 +679,9 @@ public abstract class AbstractTestLoggerService {
 			final Class errorClass =
 					localLogEntry.getError().getClass();
 			assertTrue("failed on buffer.position",
-				IllegalArgumentException.class.equals(errorClass) ||
-				BytesOverflow.class.equals(errorClass) ||
-				AssertionError.class.equals(errorClass));
+					IllegalArgumentException.class.equals(errorClass) ||
+							BytesOverflow.class.equals(errorClass) ||
+							AssertionError.class.equals(errorClass));
 			info.withLast("");
 		}
 
@@ -573,7 +732,7 @@ public abstract class AbstractTestLoggerService {
 				final Class<? extends Throwable> errorClazz = localLogEntry.getError().getClass();
 
 				assertTrue(BufferOverflowException.class.equals(errorClazz) ||
-					BytesOverflow.class.equals(errorClazz));
+						BytesOverflow.class.equals(errorClazz));
 			}
 
 
@@ -875,11 +1034,11 @@ public abstract class AbstractTestLoggerService {
 		factory.setLogLevel(LogLevel.INFO);
 
 		final DefaultObjectFormatterFactory defaultObjectFormatterFactory =
-			new DefaultObjectFormatterFactory();
+				new DefaultObjectFormatterFactory();
 		defaultObjectFormatterFactory.registerObjectFormatter(Foo.class, new FooObjectFormatter());
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
-			defaultObjectFormatterFactory,
-			new GFLoggerBuilder("com.db", factory), factory);
+				defaultObjectFormatterFactory,
+				new GFLoggerBuilder("com.db", factory), factory);
 
 		GFLogFactory.init(loggerService);
 
@@ -1035,30 +1194,46 @@ public abstract class AbstractTestLoggerService {
 		}
 	}
 
-	private static class AppendableFlushable implements Appendable, Flushable {
-		final StringBuffer buffer = new StringBuffer();
-		final StringBuffer target = new StringBuffer();
+	private static class CountingAppenderFactory extends AbstractAppenderFactory<Appender> {
+		private final int maxMessageSize;
 
-		@Override
-		public Appendable append(CharSequence csq) throws IOException {
-			return buffer.append(csq);
+		private final AtomicLong messagesProcessed = new AtomicLong( 0 );
+		private final AtomicLong uncatchExceptionsProcessed = new AtomicLong( 0 );
+
+		public CountingAppenderFactory( final int maxMessageSize ) {
+			this.maxMessageSize = maxMessageSize;
 		}
 
 		@Override
-		public Appendable append(CharSequence csq, int start, int end) throws IOException {
-			return buffer.append(csq, start, end);
+		public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
+			return new AbstractAsyncAppender( maxMessageSize, false) {
+				@Override
+				public String getName() {
+					return "CountingAppender";
+				}
+
+				@Override
+				public void process( final LogEntryItemImpl entry ) {
+					messagesProcessed.incrementAndGet();
+					throw new RuntimeException( "Intentionally (!) thrown exception" );
+				}
+
+				@Override
+				public void onUncatchException( final Throwable e ) {
+					uncatchExceptionsProcessed.incrementAndGet();
+				}
+
+				@Override
+				public void flush( final boolean force ) {}
+			};
 		}
 
-		@Override
-		public Appendable append(char c) throws IOException {
-			return buffer.append(c);
+		public long getMessagesProcessed() {
+			return messagesProcessed.get();
 		}
 
-		@Override
-		public void flush() throws IOException {
-			target.append(buffer);
-			buffer.setLength(0);
-			buffer.trimToSize();
+		public long getUncatchExceptionsProcessed() {
+			return uncatchExceptionsProcessed.get();
 		}
 	}
 }
