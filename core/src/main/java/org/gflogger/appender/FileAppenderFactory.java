@@ -36,15 +36,12 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
 		final org.gflogger.appender.FileAppender appender =
-			new org.gflogger.appender.FileAppender(bufferSize, multibyte);
+			new org.gflogger.appender.FileAppender(bufferSize, multibyte, logLevel, enabled);
 
-		appender.setLogLevel(logLevel);
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
 		appender.setBufferedIOThreshold(bufferedIOThreshold);
 		appender.setAwaitTimeout(awaitTimeout);
-		appender.setEnabled(enabled);
-		appender.setIndex(index);
 
 		appender.setFileName(fileName);
 		appender.setCodepage(codepage);

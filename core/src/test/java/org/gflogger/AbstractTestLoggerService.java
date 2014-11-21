@@ -118,11 +118,6 @@ public abstract class AbstractTestLoggerService {
 					}
 
 					@Override
-					public int getIndex() {
-						return 0;
-					}
-
-					@Override
 					public void flush() {}
 
 					@Override
@@ -1169,11 +1164,9 @@ public abstract class AbstractTestLoggerService {
 
 		@Override
 		public Appender createAppender( final Class<? extends LoggerService> loggerServiceClass ) {
-			return new AbstractAsyncAppender( maxMessageSize, false) {
-				@Override
-				public String getName() {
-					return "CountingAppender";
-				}
+			return new AbstractAsyncAppender( "CountingAppender",
+			                                  maxMessageSize, /*multibyte=*/false,
+			                                  LogLevel.TRACE, /*enabled  =*/true) {
 
 				@Override
 				public void process( final LogEntryItemImpl entry ) {

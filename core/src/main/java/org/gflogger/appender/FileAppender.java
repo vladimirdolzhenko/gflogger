@@ -16,6 +16,7 @@ package org.gflogger.appender;
 
 
 import org.gflogger.Layout;
+import org.gflogger.LogLevel;
 import org.gflogger.helpers.LogLog;
 
 import java.io.File;
@@ -33,6 +34,9 @@ import java.nio.charset.CharsetEncoder;
  */
 public class FileAppender extends AbstractAsyncAppender {
 
+	private static final int DEFAULT_BUFFER_SIZE = 1 << 20/*=1M*/;
+	private static final String DUMMY_NAME = null;
+
 	protected String fileName;
 	protected String codepage = "UTF-8";
 
@@ -43,23 +47,35 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	protected int maxBytesPerChar;
 
-	public FileAppender(final boolean multibyte) {
-		// 1M
-		this(1 << 20, multibyte);
+	public FileAppender(final boolean multibyte,
+	                    final LogLevel logLevel,
+	                    final boolean enabled ) {
+		this(DEFAULT_BUFFER_SIZE, multibyte, logLevel, enabled);
 	}
 
-	public FileAppender(final int bufferSize, final boolean multibyte) {
-		super(bufferSize, multibyte);
-		// unicode char has 2 bytes
+	public FileAppender(final int bufferSize,
+	                    final boolean multibyte,
+	                    final LogLevel logLevel,
+	                    final boolean enabled ) {
+		super(DUMMY_NAME,bufferSize, multibyte, logLevel, enabled);
 		immediateFlush = false;
 	}
 
-	public FileAppender(Layout layout, String filename, final boolean multibyte) {
-		this(1 << 20, layout, filename, multibyte);
+	public FileAppender(final Layout layout,
+	                    final String filename,
+	                    final boolean multibyte,
+	                    final LogLevel logLevel,
+	                    final boolean enabled ) {
+		this(DEFAULT_BUFFER_SIZE, layout, filename, multibyte, logLevel, enabled);
 	}
 
-	public FileAppender(int bufferSize, Layout layout, String filename, final boolean multibyte) {
-		this(bufferSize, multibyte);
+	public FileAppender(final int bufferSize,
+	                    final Layout layout,
+	                    final String filename,
+	                    final boolean multibyte,
+	                    final LogLevel logLevel,
+	                    final boolean enabled ) {
+		this(bufferSize, multibyte, logLevel, enabled);
 		this.layout = layout;
 		this.fileName = filename;
 	}
@@ -166,8 +182,9 @@ public class FileAppender extends AbstractAsyncAppender {
 		return true;
 	}
 
-	@Override
+
 	public String getName() {
+		//forced to overwrite since fileName could be dynamic
 		return "file:" + fileName;
 	}
 }

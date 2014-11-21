@@ -18,6 +18,7 @@ package org.gflogger.appender;
 import java.io.Flushable;
 import java.io.IOException;
 
+import org.gflogger.LogLevel;
 import org.gflogger.helpers.LogLog;
 
 /**
@@ -27,29 +28,44 @@ import org.gflogger.helpers.LogLog;
  */
 public class ConsoleAppender extends AbstractAsyncAppender {
 
+	private static final String NAME = "console";
+
 	private final Appendable out;
 	private final Flushable flushable;
 
-	public ConsoleAppender() {
-		this(false);
+	public ConsoleAppender(final LogLevel logLevel,
+	                       final boolean enabled) {
+		this(/*multibyte=*/false, logLevel, enabled );
 	}
 
-	public ConsoleAppender(final boolean multibyte) {
-		this(System.out, multibyte);
+	public ConsoleAppender(final boolean multibyte,
+	                       final LogLevel logLevel,
+	                       final boolean enabled) {
+		this(System.out, multibyte, logLevel, enabled);
 	}
 
-	public ConsoleAppender(final int bufferSize,final boolean multibyte) {
-		this(bufferSize, multibyte, System.out);
+	public ConsoleAppender(final int bufferSize,
+	                       final boolean multibyte,
+	                       final LogLevel logLevel,
+	                       final boolean enabled) {
+		this(bufferSize, multibyte, logLevel, enabled, System.out);
 	}
 
-	public ConsoleAppender(final Appendable out,final boolean multibyte) {
-		super(multibyte);
+	public ConsoleAppender(final Appendable out,
+	                       final boolean multibyte,
+	                       final LogLevel logLevel,
+	                       final boolean enabled) {
+		super(NAME, multibyte, logLevel, enabled);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
-	public ConsoleAppender(final int bufferSize, final boolean multibyte, final Appendable out) {
-		super(bufferSize, multibyte);
+	public ConsoleAppender(final int bufferSize,
+	                       final boolean multibyte,
+	                       final LogLevel logLevel,
+	                       final boolean enabled,
+	                       final Appendable out) {
+		super(NAME,bufferSize,multibyte,logLevel, enabled);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
@@ -80,7 +96,9 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 			if (byteBuffer.position() > 0){
 				byteBuffer.flip();
 				try {
-					while(byteBuffer.hasRemaining()) out.append((char) byteBuffer.get());
+					while(byteBuffer.hasRemaining()){
+						out.append((char) byteBuffer.get());
+					}
 
 					if (flushable != null) flushable.flush();
 				} catch (IOException e){

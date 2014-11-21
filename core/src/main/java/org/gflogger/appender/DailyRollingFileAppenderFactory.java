@@ -37,19 +37,20 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
 		final org.gflogger.appender.DailyRollingFileAppender appender =
-			new org.gflogger.appender.DailyRollingFileAppender(bufferSize, multibyte);
+			new org.gflogger.appender.DailyRollingFileAppender(
+					bufferSize,
+					multibyte,
+					logLevel, enabled
+			);
 
-		appender.setLogLevel(logLevel);
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
 		appender.setBufferedIOThreshold(bufferedIOThreshold);
 		appender.setAwaitTimeout(awaitTimeout);
-		appender.setEnabled(enabled);
 
 		appender.setFileName(fileName);
 		appender.setCodepage(codepage);
 		appender.setAppend(append);
-		appender.setIndex(index);
 
 		appender.setDatePattern(datePattern);
 		return appender;

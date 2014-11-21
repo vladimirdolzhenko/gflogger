@@ -31,15 +31,17 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory {
 	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
 		final org.gflogger.appender.ConsoleAppender appender =
-			new org.gflogger.appender.ConsoleAppender(bufferSize, multibyte, outputStream);
+			new org.gflogger.appender.ConsoleAppender(
+					bufferSize,
+					multibyte,
+					logLevel, enabled,
+			        outputStream
+			);
 
-		appender.setLogLevel(logLevel);
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
 		appender.setBufferedIOThreshold(bufferedIOThreshold);
 		appender.setAwaitTimeout(awaitTimeout);
-		appender.setEnabled(enabled);
-		appender.setIndex(index);
 
 		return appender;
 	}

@@ -17,6 +17,7 @@ package org.gflogger.appender;
 
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItemImpl;
+import org.gflogger.LogLevel;
 import org.gflogger.PatternLayout;
 import org.gflogger.helpers.LogLog;
 
@@ -190,12 +191,17 @@ public class DailyRollingFileAppender extends FileAppender {
 	/**
 	 * The default constructor does nothing.
 	 */
-	public DailyRollingFileAppender(final boolean multibyte) {
-		super(multibyte);
+	public DailyRollingFileAppender( final boolean multibyte,
+	                                 final LogLevel logLevel,
+	                                 final boolean enabled ) {
+		super(multibyte, logLevel, enabled );
 	}
 
-	public DailyRollingFileAppender(int bufferSize, final boolean multibyte) {
-		super(bufferSize, multibyte);
+	public DailyRollingFileAppender( final int bufferSize,
+	                                 final boolean multibyte,
+	                                 final LogLevel logLevel,
+	                                 final boolean enabled ) {
+		super(bufferSize, multibyte, logLevel, enabled );
 	}
 
 	/**
@@ -203,15 +209,24 @@ public class DailyRollingFileAppender extends FileAppender {
 	 * designated by <code>filename</code>. The opened filename will become the
 	 * ouput destination for this appender.
 	 */
-	public DailyRollingFileAppender(Layout layout, String filename,
-			String datePattern, final boolean multibyte) {
-		super(layout, filename, multibyte);
+	public DailyRollingFileAppender( final Layout layout,
+	                                 final String filename,
+	                                 final String datePattern,
+	                                 final boolean multibyte,
+	                                 final LogLevel logLevel,
+	                                 final boolean enabled ) {
+		super(layout, filename, multibyte, logLevel, enabled );
 		this.datePattern = datePattern;
 	}
 
-	public DailyRollingFileAppender(int bufferSize, Layout layout, String filename,
-			String datePattern, final boolean multibyte) {
-		super(bufferSize, layout, filename, multibyte);
+	public DailyRollingFileAppender( final int bufferSize,
+	                                 final Layout layout,
+	                                 final String filename,
+	                                 final String datePattern,
+	                                 final boolean multibyte,
+	                                 final LogLevel logLevel,
+	                                 final boolean enabled ) {
+		super(bufferSize, layout, filename, multibyte, logLevel, enabled );
 		this.datePattern = datePattern;
 	}
 

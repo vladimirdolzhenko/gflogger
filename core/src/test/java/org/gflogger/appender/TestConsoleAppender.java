@@ -30,15 +30,23 @@ public class TestConsoleAppender {
 	}
 
 	@Test
-	public void testBufferOverflow() throws UnsupportedEncodingException {
-		String firstMessage = "Hello world!"; // 12 length
-		simulateEntryProcessing(firstMessage);
-		simulateEntryProcessing("Hello bug!"); // 10 length
+	public void appenderFlushesBufferedMessagesThenNextMessageExceedsBufferCapacity() throws UnsupportedEncodingException {
+		final String firstMessage = stringWithLength( BUFFER_SIZE-1 );
+		processEntryWithMessage( firstMessage );
+		processEntryWithMessage( stringWithLength( 2 ) );
 		assertOutput(firstMessage);
 	}
 
-	private void simulateEntryProcessing(String message) throws UnsupportedEncodingException {
+	private void processEntryWithMessage( String message ) throws UnsupportedEncodingException {
 		appender.process(createEntry(message));
+	}
+
+	private static String stringWithLength(final int length){
+		final StringBuilder sb = new StringBuilder();
+		for( int i = 0; i < length; i++ ) {
+			sb.append( '*' );
+		}
+		return sb.toString();
 	}
 
 	private void assertOutput(String expected) {

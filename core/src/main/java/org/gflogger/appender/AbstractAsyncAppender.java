@@ -17,7 +17,6 @@ package org.gflogger.appender;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-import org.gflogger.Appender;
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
@@ -31,51 +30,44 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 *
 * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
 */
-public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl> {
+public abstract class AbstractAsyncAppender extends AbstractAppender {
+
+	private static final int DEFAULT_BUFFER_SIZE = 1 << 22;
 
 	// inner thread buffer
 	protected final CharBuffer	charBuffer;
 	protected final ByteBuffer	byteBuffer;
 
-	protected LogLevel			logLevel			= LogLevel.TRACE;
 	protected Layout			layout;
 	protected boolean			immediateFlush		= false;
 	protected int				bufferedIOThreshold	= 100;
 	protected long				awaitTimeout		= 10L;
-	protected boolean			enabled				= true;
-	protected int				index;
 
 	// runtime changing properties
 
 	protected volatile boolean	running				= false;
 
-	protected final boolean		multibyte;
-
-	public AbstractAsyncAppender(final boolean multibyte) {
-		// 4M
-		this(1 << 22, multibyte);
+	protected AbstractAsyncAppender(final String name,
+	                                final boolean multibyte,
+	                                final LogLevel logLevel,
+	                                final boolean enabled) {
+		this(name,
+		     DEFAULT_BUFFER_SIZE/*4Mb*/,
+		     multibyte,
+		     logLevel, enabled
+		);
 	}
 
-	public AbstractAsyncAppender(final int bufferSize, final boolean multibyte) {
-		this.multibyte = multibyte;
+	protected AbstractAsyncAppender(final String name,
+	                                final int bufferSize,
+	                                final boolean multibyte,
+	                                final LogLevel logLevel,
+	                                final boolean enabled) {
+		super(name, multibyte, logLevel, enabled);
 		// unicode char has 2 bytes
 		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
 		byteBuffer.clear();
 		charBuffer = multibyte ? allocate(multibyte ? bufferSize << 1 : bufferSize).asCharBuffer() : null;
-	}
-
-	@Override
-	public boolean isMultibyte() {
-		return multibyte;
-	}
-
-	@Override
-	public LogLevel getLogLevel() {
-		return logLevel;
-	}
-
-	public synchronized void setLogLevel(final LogLevel logLevel) {
-		this.logLevel = logLevel;
 	}
 
 	public void setLayout(final Layout layout) {
@@ -96,24 +88,6 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 
 	public void setAwaitTimeout(final long awaitTimeout) {
 		this.awaitTimeout = awaitTimeout;
-	}
-
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	@Override
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
 	}
 
 	@Override
@@ -179,13 +153,8 @@ public abstract class AbstractAsyncAppender implements Appender<LogEntryItemImpl
 	}
 
 	@Override
-	public void onUncatchException(Throwable e) {
-		LogLog.error("Unhandled exception in " + Thread.currentThread().getName() + " :" + e.getMessage(), e);
-	}
-
-	@Override
 	public void start() {
-		if (running) throw new IllegalStateException();
+		if (running) throw new IllegalStateException("Already running");
 
 		LogLog.debug(getName() + " is starting ");
 

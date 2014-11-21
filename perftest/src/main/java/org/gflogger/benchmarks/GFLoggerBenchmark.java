@@ -176,11 +176,6 @@ public class GFLoggerBenchmark {
 					}
 
 					@Override
-					public int getIndex() {
-						return index;
-					}
-
-					@Override
 					public void workerIsAboutToFinish() {
 					}
 
