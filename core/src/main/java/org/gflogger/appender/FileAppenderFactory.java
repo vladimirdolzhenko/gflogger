@@ -17,7 +17,6 @@ package org.gflogger.appender;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
-import org.gflogger.Appender;
 import org.gflogger.LoggerService;
 
 
@@ -26,17 +25,16 @@ import org.gflogger.LoggerService;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class FileAppenderFactory extends AbstractAppenderFactory {
+public class FileAppenderFactory<FA extends FileAppender> extends AbstractAppenderFactory<FA> {
 
 	protected String fileName = getStringProperty("gflogger.filename", null);
 	protected String codepage = getStringProperty("gflogger.codepage", "UTF-8");
 	protected boolean append = getBooleanProperty("gflogger.append", true);
 
 	@Override
-	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
+	public FA createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		final org.gflogger.appender.FileAppender appender =
-			new org.gflogger.appender.FileAppender(bufferSize, multibyte, logLevel, enabled);
+		final FA appender = createAppender();
 
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
@@ -46,12 +44,17 @@ public class FileAppenderFactory extends AbstractAppenderFactory {
 		appender.setFileName(fileName);
 		appender.setCodepage(codepage);
 		appender.setAppend(append);
+
 		return appender;
 	}
 
-	/*
-	 * Setters'n'Getters
-	 */
+	@SuppressWarnings("unchecked")
+	protected FA createAppender() {
+		return (FA) new FileAppender(bufferSize, multibyte, logLevel, enabled);
+	}
+
+	/*===================== Setters'n'Getters =================================*/
+
 	public String getFileName() {
 		return this.fileName;
 	}

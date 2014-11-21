@@ -41,7 +41,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	public ConsoleAppender(final boolean multibyte,
 	                       final LogLevel logLevel,
 	                       final boolean enabled) {
-		this(System.out, multibyte, logLevel, enabled);
+		this( multibyte, logLevel, enabled, System.out );
 	}
 
 	public ConsoleAppender(final int bufferSize,
@@ -51,10 +51,10 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 		this(bufferSize, multibyte, logLevel, enabled, System.out);
 	}
 
-	public ConsoleAppender(final Appendable out,
-	                       final boolean multibyte,
+	public ConsoleAppender(final boolean multibyte,
 	                       final LogLevel logLevel,
-	                       final boolean enabled) {
+	                       final boolean enabled,
+	                       final Appendable out ) {
 		super(NAME, multibyte, logLevel, enabled);
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;

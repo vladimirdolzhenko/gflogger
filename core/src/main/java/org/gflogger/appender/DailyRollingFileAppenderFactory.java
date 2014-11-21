@@ -16,7 +16,6 @@ package org.gflogger.appender;
 
 import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
-import org.gflogger.Appender;
 import org.gflogger.LoggerService;
 
 
@@ -25,7 +24,7 @@ import org.gflogger.LoggerService;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
+public class DailyRollingFileAppenderFactory extends FileAppenderFactory<DailyRollingFileAppender> {
 
 	/**
 	 * The date pattern. By default, the pattern is set to "'.'yyyy-MM-dd"
@@ -34,14 +33,9 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 	protected String datePattern = getStringProperty("gflogger.rolling.pattern", "'.'yyyy-MM-dd");
 
 	@Override
-	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
+	public DailyRollingFileAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		final org.gflogger.appender.DailyRollingFileAppender appender =
-			new org.gflogger.appender.DailyRollingFileAppender(
-					bufferSize,
-					multibyte,
-					logLevel, enabled
-			);
+		final DailyRollingFileAppender appender = createAppender();
 
 		appender.setLayout(layout);
 		appender.setImmediateFlush(immediateFlush);
@@ -53,12 +47,19 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory {
 		appender.setAppend(append);
 
 		appender.setDatePattern(datePattern);
+
 		return appender;
 	}
 
-	/*
-	 * Setters'n'Getters
-	 */
+	protected DailyRollingFileAppender createAppender() {
+		return new DailyRollingFileAppender(
+				bufferSize,
+				multibyte,
+				logLevel, enabled
+		);
+	}
+
+	/*===================== Setters'n'Getters =================================*/
 
 	public String getDatePattern() {
 		return this.datePattern;

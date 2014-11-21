@@ -36,13 +36,6 @@ public interface Appender<T extends LogEntryItem> {
 
 	void process(T entry);
 
-	/**
-	 * @deprecated we're going to replace all it's usage with {@linkplain #stop()}
-	 *             and remove it in future versions. Be aware
-	 */
-	@Deprecated
-	void workerIsAboutToFinish();
-
 	void onUncatchException(Throwable e);
 
 	void start();

@@ -19,20 +19,6 @@ public abstract class AbstractAppender implements Appender<LogEntryItemImpl> {
 
 	protected final String name;
 
-	protected AbstractAppender(final boolean multibyte,
-	                           final LogLevel logLevel,
-	                           final boolean enabled) {
-		//can't use this() notation since instance methods can't be called before ctors
-		this.name = defaultName();
-		this.multibyte = multibyte;
-		this.logLevel = logLevel;
-		this.enabled = enabled;
-	}
-
-	protected String defaultName() {
-		return getClass().getSimpleName();
-	}
-
 	protected AbstractAppender(final String name,
 	                           final boolean multibyte,
 	                           final LogLevel logLevel,

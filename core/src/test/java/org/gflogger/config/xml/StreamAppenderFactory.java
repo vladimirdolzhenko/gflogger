@@ -14,32 +14,32 @@
 
 package org.gflogger.config.xml;
 
-import org.gflogger.Appender;
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AbstractAppenderFactory;
+import org.gflogger.appender.ConsoleAppender;
 
 
 /**
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class StreamAppenderFactory extends AbstractAppenderFactory {
+public class StreamAppenderFactory extends AbstractAppenderFactory<ConsoleAppender> {
 
 	public static Appendable outputStream = System.out;
 
 	@Override
-	public Appender createAppender(Class<? extends LoggerService> loggerServiceClass) {
+	public ConsoleAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
 		preinit(loggerServiceClass);
-		final org.gflogger.appender.ConsoleAppender appender =
-			new org.gflogger.appender.ConsoleAppender(
+		final ConsoleAppender appender = new ConsoleAppender(
 					bufferSize,
 					multibyte,
-					logLevel, enabled
+					logLevel, enabled,
+			        outputStream
 			);
 
-		appender.setLayout(layout);
-		appender.setImmediateFlush(immediateFlush);
-		appender.setBufferedIOThreshold(bufferedIOThreshold);
-		appender.setAwaitTimeout(awaitTimeout);
+		appender.setLayout( layout );
+		appender.setImmediateFlush( immediateFlush );
+		appender.setBufferedIOThreshold( bufferedIOThreshold );
+		appender.setAwaitTimeout( awaitTimeout );
 
 		return appender;
 	}
