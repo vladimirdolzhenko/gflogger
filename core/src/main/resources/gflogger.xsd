@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns="http://bitbucket.org/vladimir.dolzhenko/org.gflogger"
+		   targetNamespace="http://bitbucket.org/vladimir.dolzhenko/org.gflogger"
+		   elementFormDefault="qualified"
+		   attributeFormDefault="unqualified">
+
+	<xs:element name="configuration">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="appender" type="appenderType" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="logger" type="loggerType" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="root" type="rootType" minOccurs="0" maxOccurs="1"/>
+				<xs:element name="service" type="serviceType" minOccurs="1" maxOccurs="1"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="appenderType">
+		<xs:sequence>
+			<xs:element name="layout" type="layoutType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+		<xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="class" type="xs:string" use="required"/>
+		<xs:attribute name="bufferSize" type="xs:int" use="optional"/>
+		<xs:attribute name="append" type="xs:boolean" use="optional"/>
+		<xs:attribute name="multibyte" type="xs:boolean" use="optional"/>
+		<xs:attribute name="immediateFlush" type="xs:boolean" use="optional"/>
+		<xs:attribute name="patternLayout" type="xs:string" use="optional"/>
+		<xs:attribute name="datePattern" type="xs:string" use="optional"/>
+		<xs:attribute name="timeZone" type="xs:string" use="optional"/>
+		<xs:attribute name="locale" type="xs:string" use="optional"/>
+		<xs:attribute name="fileName" type="xs:string" use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="layoutType">
+		<xs:sequence/>
+		<xs:attribute name="class" type="xs:string" use="required"/>
+		<xs:attribute name="pattern" type="xs:string" use="required"/>
+		<xs:attribute name="timeZoneId" type="xs:string" use="optional"/>
+		<xs:attribute name="language" type="xs:string" use="optional"/>
+	</xs:complexType>
+	
+	<xs:simpleType name="log-level">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="TRACE"/>
+			<xs:enumeration value="DEBUG"/>
+			<xs:enumeration value="INFO"/>
+			<xs:enumeration value="WARN"/>
+			<xs:enumeration value="ERROR"/>
+			<xs:enumeration value="FATAL"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="object-formatterType">
+		<xs:attribute name="class" type="xs:string" use="required"/>
+		<xs:attribute name="formatter" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="loggerType">
+		<xs:sequence>
+			<xs:element name="appender-ref" type="appender-refType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:ID" use="required"/>
+		<xs:attribute name="additivity" type="xs:boolean" use="optional"/>
+		<xs:attribute name="logLevel" type="log-level" use="required"/>
+	</xs:complexType>
+	
+	<xs:complexType name="rootType">
+		<xs:sequence>
+			<xs:element name="appender-ref" type="appender-refType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="additivity" type="xs:boolean" use="optional"/>
+		<xs:attribute name="logLevel" type="log-level" use="required"/>
+	</xs:complexType>
+	
+	<xs:complexType name="appender-refType">
+		<xs:attribute name="ref" type="xs:IDREF" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="serviceType">
+		<xs:sequence>
+			<xs:element name="object-formatter" type="object-formatterType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="class" type="xs:string" use="optional"/>
+		<xs:attribute name="count" type="xs:integer" use="required"/>
+		<xs:attribute name="maxMessageSize" type="xs:integer" use="required"/>
+	</xs:complexType>
+
+</xs:schema>
