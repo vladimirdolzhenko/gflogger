@@ -82,7 +82,12 @@ public class XmlConfiguration {
 
 		GFLogFactory.stop();
 
-		assertTrue(buffer.toString().matches("\\w+ \\d+ \\d{2}:\\d{2}:\\d{2},\\d{3} GMT ERROR - error \\[xml.XmlConfiguration\\] \\[main\\]\n"));
+		final String output = buffer.toString();
+		assertTrue(
+				"Output='"+output+"'",
+				output.matches( "\\w+ \\d+ \\d{2}:\\d{2}:\\d{2},\\d{3} GMT ERROR - error \\[xml.XmlConfiguration\\] \\[main\\]"
+						                + System.getProperty( "line.separator" ) )
+		);
 	}
 
 }

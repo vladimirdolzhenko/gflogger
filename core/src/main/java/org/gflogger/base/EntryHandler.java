@@ -107,7 +107,6 @@ public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implem
 				LogLog.error("Unhandled exception " + e.getMessage() + " at " + Thread.currentThread().getName(), e);
 			}
 		}
-		workerIsAboutToFinish();
 		stop();
 		LogLog.debug(Thread.currentThread().getName() + " is finished. ");
 	}

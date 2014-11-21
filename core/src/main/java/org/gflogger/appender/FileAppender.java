@@ -116,7 +116,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	@Override
-	public void workerIsAboutToFinish() {
+	protected void workerIsAboutToFinish() {
 		store("workerIsAboutFinish");
 		closeFile();
 	}

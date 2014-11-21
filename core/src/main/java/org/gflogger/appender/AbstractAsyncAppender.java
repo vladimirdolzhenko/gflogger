@@ -141,13 +141,6 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	}
 
 	@Override
-	public void workerIsAboutToFinish(){
-		flush();
-		BufferFormatter.purge(byteBuffer);
-		BufferFormatter.purge(charBuffer);
-	}
-
-	@Override
 	public void flush(){
 		flush(true);
 	}
@@ -164,10 +157,22 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 		running = true;
 	}
 
+	/**
+	 * @deprecated it is about to be removed in future versions, use {@linkplain #stop()}
+	 *             instead
+	 */
+	@Deprecated
+	protected void workerIsAboutToFinish(){
+		flush();
+		BufferFormatter.purge(byteBuffer);
+		BufferFormatter.purge(charBuffer);
+	}
+
 	@Override
 	public void stop(){
 		if (!running) return;
 		LogLog.debug(getName() + " is stopping ");
+		workerIsAboutToFinish();
 		running = false;
 	}
 }
