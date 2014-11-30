@@ -1,19 +1,16 @@
 package org.gflogger.base;
 
-import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import com.google.monitoring.runtime.instrumentation.Sampler;
-import org.gflogger.*;
-import org.gflogger.appender.FileAppenderFactory;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
+import com.google.monitoring.runtime.instrumentation.Sampler;
+import org.gflogger.*;
+import org.gflogger.appender.FileAppenderFactory;
+import org.junit.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * TestZODDefaultLoggerServiceImpl
@@ -127,8 +124,8 @@ public class TestZODDefaultLoggerServiceImpl {
 			log.info().append("warmup:").append(i).commit();
 		Thread.sleep(1000L);
 
-		assertTrue("have to run with jvm option -javaagent:libs/allocation.jar",
-				objectCount.get() > 0);
+		Assume.assumeTrue( "have to run with jvm option -javaagent:libs/allocation.jar",
+		                   objectCount.get() > 0 );
 		System.out.println(objectCount.get());
 
 		resetObjectCounting();

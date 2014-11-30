@@ -1,17 +1,6 @@
 package org.gflogger.base;
 
-import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
-import com.google.monitoring.runtime.instrumentation.Sampler;
-import org.apache.log4j.BasicConfigurator;
-import org.gflogger.*;
-import org.gflogger.appender.ConsoleAppenderFactory;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +9,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.junit.Assert.*;
+import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
+import com.google.monitoring.runtime.instrumentation.Sampler;
+import org.apache.log4j.BasicConfigurator;
+import org.gflogger.*;
+import org.gflogger.appender.ConsoleAppenderFactory;
+import org.junit.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * TestGarbageDefaultLoggerServiceImpl
@@ -123,7 +119,10 @@ public class TestGarbageDefaultLoggerServiceImpl {
 		builder.append("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		assertEquals(74, builder.length());
-		assertTrue("-javaagent:java-allocation-instrumenter.jar is not enabled", objectCount.get() > 0);
+		Assume.assumeTrue(
+				"-javaagent:java-allocation-instrumenter.jar is not enabled",
+				objectCount.get() > 0
+		);
 
 		resetObjectCounting();
 	}

@@ -13,19 +13,14 @@
  */
 package org.gflogger.formatter;
 
-import static org.gflogger.formatter.BufferFormatter.BDIGITS;
-import static org.gflogger.formatter.BufferFormatter.BDIGIT_ONES;
-import static org.gflogger.formatter.BufferFormatter.BDIGIT_TENS;
-import static org.gflogger.formatter.BufferFormatter.LONG_SIZE_TABLE;
-import static org.gflogger.formatter.BufferFormatter.stringSize;
-import static org.gflogger.formatter.BytesOverflow.BYTES_OVERFLOW;
-
 import java.nio.ByteBuffer;
 
+import com.lmax.disruptor.util.Util;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
-import com.lmax.disruptor.util.Util;
+import static org.gflogger.formatter.BufferFormatter.*;
+import static org.gflogger.formatter.BytesOverflow.BYTES_OVERFLOW;
 
 /**
  * Bytes
@@ -131,7 +126,7 @@ public final class Bytes {
 			return;
 		}
 
-		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+		int size = numberOfDigits( i );
 
 		if (remaining() < size)  throw BYTES_OVERFLOW;
 
@@ -181,7 +176,7 @@ public final class Bytes {
 			put(Long.toString(i));
 			return;
 		}
-		int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+		int size = numberOfDigits( i );
 
 		if (remaining() < size)  throw BYTES_OVERFLOW;
 

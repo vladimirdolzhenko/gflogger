@@ -22,7 +22,7 @@
 
 		<junit.version>4.11</junit.version>
 		<hamcrest.version>1.3</hamcrest.version>
-		<jmh.version>0.7</jmh.version>
+		<jmh.version>1.3</jmh.version>
 	</properties>
 
 	<modules>

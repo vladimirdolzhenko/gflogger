@@ -15,13 +15,11 @@
 package org.gflogger.formatter;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.nio.CharBuffer;
+import java.util.*;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Ignore;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
@@ -29,10 +27,8 @@ import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.runner.RunWith;
 
 import static org.gflogger.formatter.BufferFormatterPropertyTest.DoubleCloseTo.closeTo;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.gflogger.formatter.BufferFormatterPropertyTest.DoubleCloseTo.relativelyCloseTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
@@ -41,12 +37,14 @@ import static org.junit.Assume.assumeThat;
  */
 @RunWith( Theories.class )
 public class BufferFormatterPropertyTest {
+	/**
+	 * It could be 16, but guessing the number of fraction digits required inside
+	 * BufferFormatter is a little inaccurate
+	 */
+	private static final double TOLERANCE = 1e-15;
 
-	private static final double DOUBLE_FORMATTING_TOLERANCE = 1e-5;//Math.pow( 10, -BufferFormatter.DOUBLE_DIGITS );
 
-	//@DataPoints
-	//TODO RC: this was commented out since produce too much broken samples
-	// few samples extracted to IMPORTANT_DOUBLE_SAMPLES
+	@DataPoints
 	public static Double[] importantDoubles() {
 		//I was thinking about listed all doubles here, but was called to dinner,
 		// so forced to cut my dreams off. Feel free to extend this
@@ -61,9 +59,12 @@ public class BufferFormatterPropertyTest {
 
 				0.05,
 				0.5,
+				0.9, 0.99, 0.999,
+
 				1.0 / 3,
 				1.0 / 7,
 				1.0 / 9,
+
 				1, 2, 5,
 
 				10, 1e2, 1e3, 1e5, 1e10, 1e20, 1e200,
@@ -102,40 +103,91 @@ public class BufferFormatterPropertyTest {
 	}
 
 	@DataPoints
-	public static final Double[] IMPORTANT_DOUBLE_SAMPLES = {
-//			0.9,
-//			0.99,
-//			0.999,
-//			0.9999,
+	public static final Double[] OFFENDERS = {
+			1.0 - Math.ulp( 1.0 ),
+			1.0 + Math.ulp( 1.0 ),
+
+
+			-1.0000000000000001E15,
+			-1.0000000000000002E15,
+			-1.0000000000000010E15,
+			-1.0000000000000110E15,
+
+			1.025292, 1.0025292, 1.00025292, 1.000025292, 1.0000025292, 1.00000025292,
+			10.025292, 10.0025292, 10.00025292, 10.000025292,
+			-1.025292, -1.0025292, -1.00025292, -1.000025292, -1.0000025292, -1.00000025292,
+			-10.025292, -10.0025292, -10.00025292, -10.000025292,
+
+			-0.09999999999999999,
+
+			0.9,
+			0.99,
+			0.999,
+			0.9999,
 
 			-0.9,
 			-0.99,
 			-0.999,
 			-0.9999
+
 	};
 
-	/** Work well with IMPORTANT_DOUBLE_SAMPLES, but fails on importantDoubles() */
 	@Theory( nullsAccepted = false )
 	public void appendedDoubleParsesAsItself( final Double value ) {
-		final ByteBuffer buffer = ByteBuffer.allocate( 200 );
+		final ByteBuffer buffer = ByteBuffer.allocate( 50 );
 		BufferFormatter.append( buffer, value );
 		final String formatted = BufferFormatterTest.toString( buffer );
 		final double parsedValue = Double.parseDouble( formatted );
 
-		assertThat(
-				".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
-				parsedValue,
-				closeTo( value, DOUBLE_FORMATTING_TOLERANCE )
-		);
+		//RC: it's quite untrivial to find out correct tolerance here, since
+		//it depends on value itself. For value<1 tolerance is absolute,
+		// ~10^-14-10^-15, for value>1 it is relative, ~10^-14-10^-15*value
+		if( Math.abs( value ) < 1 ) {
+			assertThat(
+					".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+					parsedValue,
+					closeTo( value, TOLERANCE )
+			);
+		} else {
+			assertThat(
+					".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+					parsedValue,
+					relativelyCloseTo( value, TOLERANCE )
+			);
+		}
+	}
+
+	@Theory( nullsAccepted = false )
+	public void appendedDoubleParsesAsItselfCB( final Double value ) {
+		final CharBuffer buffer = CharBuffer.allocate( 50 );
+		BufferFormatter.append( buffer, value );
+		final String formatted = BufferFormatterTest.toString( buffer );
+		final double parsedValue = Double.parseDouble( formatted );
+
+		//RC: it's quite untrivial to find out correct tolerance here, since
+		//it depends on value itself. For value<1 tolerance is absolute,
+		// ~10^-14-10^-15, for value>1 it is relative, ~10^-14-10^-15*value
+		if( Math.abs( value ) < 1 ) {
+			assertThat(
+					".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+					parsedValue,
+					closeTo( value, TOLERANCE )
+			);
+		} else {
+			assertThat(
+					".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+					parsedValue,
+					relativelyCloseTo( value, TOLERANCE )
+			);
+		}
 	}
 
 
-	@Ignore( "Fails even on IMPORTANT_DOUBLE_SAMPLES" )
 	@Theory( nullsAccepted = false )
 	public void appendedDoubleWithPrecisionParsesAsItselfWithTolerance( final Double value,
-	                                                                    @TestedOn( ints = { 0, 1, 2, 3, 10/*, 19, 20*/ } )
+	                                                                    @TestedOn( ints = { 0, 1, 2, 3, 10, 16, 19, 20 } )
 	                                                                    final int digits ) {
-		final ByteBuffer buffer = ByteBuffer.allocate( 200 );
+		final ByteBuffer buffer = ByteBuffer.allocate( 50 );
 		BufferFormatter.append( buffer, value, digits );
 		final String formatted = BufferFormatterTest.toString( buffer );
 
@@ -144,7 +196,24 @@ public class BufferFormatterPropertyTest {
 		assertThat(
 				".append(" + value + "," + digits + ") -> [" + formatted + "] -> [" + parsedValue + "]",
 				parsedValue,
-				closeTo( value, Math.pow( 10, -digits ) )
+				closeTo( value, tolerance( digits ) )
+		);
+	}
+
+	@Theory( nullsAccepted = false )
+	public void appendedDoubleWithPrecisionParsesAsItselfWithToleranceCB( final Double value,
+	                                                                      @TestedOn( ints = { 0, 1, 2, 3, 10, 16, 19, 20 } )
+	                                                                      final int digits ) {
+		final CharBuffer buffer = CharBuffer.allocate( 50 );
+		BufferFormatter.append( buffer, value, digits );
+		final String formatted = BufferFormatterTest.toString( buffer );
+
+		final double parsedValue = Double.parseDouble( formatted );
+
+		assertThat(
+				".append(" + value + "," + digits + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+				parsedValue,
+				closeTo( value, tolerance( digits ) )
 		);
 	}
 
@@ -236,9 +305,24 @@ public class BufferFormatterPropertyTest {
 		);
 	}
 
+	@Theory( nullsAccepted = false )
+	public void appendedLongParsesAsItselfCB( final Long value ) {
+		final CharBuffer buffer = CharBuffer.allocate( 20 );
+		BufferFormatter.append( buffer, value );
+		final String formatted = BufferFormatterTest.toString( buffer );
+		final long parsedValue = Long.parseLong( formatted );
+
+		assertThat(
+				".append(" + value + ") -> [" + formatted + "] -> [" + parsedValue + "]",
+				parsedValue,
+				is( value )
+		);
+	}
+
 	@DataPoints
-	public static char[] allChars() {
-		final char[] chars = new char[0xffff];
+	public static char[] allOneByteChars() {
+		//byte buffers support only 1-byte chars
+		final char[] chars = new char[0xff];
 		for( int i = 0; i < chars.length; i++ ) {
 			chars[i] = ( char ) i;
 		}
@@ -291,6 +375,36 @@ public class BufferFormatterPropertyTest {
 		);
 	}
 
+	@Theory
+	public void numberOfDigitsResultConsistentWithToString( final Long value ) {
+		final int digits = BufferFormatter.numberOfDigits( value );
+		final String formatted = value.toString();
+		final int stringLength = formatted.length();
+		assertThat(
+				stringLength + "(" + formatted + ") <-> " + digits,
+				digits,
+				is( stringLength )
+		);
+	}
+
+	@Theory
+	public void numberOfDigitsResultConsistentWithToString( final Integer value ) {
+		final int digits = BufferFormatter.numberOfDigits( value );
+		final String formatted = value.toString();
+		final int stringLength = formatted.length();
+		assertThat(
+				stringLength + "(" + formatted + ") <-> " + digits,
+				digits,
+				is( stringLength )
+		);
+	}
+
+
+	private static double tolerance( final int digits ) {
+		//no more then 16 (15.9) digits for double
+		final int effectiveDigits = Math.min( digits, 16 );
+		return Math.pow( 10, -effectiveDigits ) * 2/*a little relax requirement*/;
+	}
 
 	/** {@linkplain org.hamcrest.number.IsCloseTo} not able to work with NaNs and Inf! */
 	public static class DoubleCloseTo extends TypeSafeMatcher<Double> {
@@ -327,10 +441,11 @@ public class BufferFormatterPropertyTest {
 		@Override
 		public void describeMismatchSafely( final Double actual,
 		                                    final Description mismatchDescription ) {
-			final double actualDelta = Math.abs( Math.abs( expected - actual ) - delta );
+			final double delta = Math.abs( expected - actual );
+//			final double actualDelta = Math.abs( delta - this.delta );
 			mismatchDescription.appendValue( actual )
 					.appendText( " differed by " )
-					.appendValue( actualDelta );
+					.appendValue( delta );
 		}
 
 		@Override
