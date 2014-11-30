@@ -19,8 +19,7 @@ package org.gflogger.helpers;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItem;
@@ -413,7 +412,7 @@ public class PatternParser {
 		public int size(LogEntryItem item) {
 			switch (type) {
 			case RELATIVE_TIME_CONVERTER:
-				return BufferFormatter.stringSize(item.getTimestamp() - LogEntryItem.startTime);
+				return BufferFormatter.numberOfDigits(item.getTimestamp() - LogEntryItem.startTime);
 			case THREAD_CONVERTER:
 				return item.getThreadName().length();
 			case LEVEL_CONVERTER:

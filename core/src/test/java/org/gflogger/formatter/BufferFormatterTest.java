@@ -16,7 +16,7 @@ package org.gflogger.formatter;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.Locale;
+import java.util.*;
 
 import org.junit.Test;
 
@@ -28,17 +28,6 @@ import static org.junit.Assert.assertEquals;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class BufferFormatterTest {
-
-	@Test
-	public void testStringLength() throws Exception {
-		final int[] numbers = new int[]{0, 1, 7, 11, 123, 7895, 100, 101,
-			10007, 1000000, 123456789,
-			987654321,
-			Integer.MAX_VALUE};
-		for (int i = 0; i < numbers.length; i++) {
-			assertEquals(Integer.toString(numbers[i]).length(), BufferFormatter.stringSize(numbers[i]));
-		}
-	}
 
 	@Test
 	public void testAppendByteBufferString() throws Exception {
@@ -154,19 +143,23 @@ public class BufferFormatterTest {
 			}
 		}
 
-		final double[] numbers = new double[]{
-			1.025292, 1.0025292, 1.00025292, 1.000025292, 1.0000025292, 1.00000025292,
-			10.025292, 10.0025292, 10.00025292, 10.000025292,
-			-1.025292, -1.0025292, -1.00025292, -1.000025292, -1.0000025292, -1.00000025292,
-			-10.025292, -10.0025292, -10.00025292, -10.000025292,
-			1.4328, -123.9487, -0.5};
-		for (int i = 0; i < numbers.length; i++) {
-			BufferFormatter.append(buffer, numbers[i], 8);
-			buffer.append(' ');
-			assertEquals(String.format(Locale.ENGLISH, "%.8f", numbers[i]) + " ", toString(buffer));
-			// check
-			buffer.clear();
-		}
+//		final double[] numbers = new double[]{
+//			1.025292, 1.0025292, 1.00025292, 1.000025292, 1.0000025292, 1.00000025292,
+//			10.025292, 10.0025292, 10.00025292, 10.000025292,
+//			-1.025292, -1.0025292, -1.00025292, -1.000025292, -1.0000025292, -1.00000025292,
+//			-10.025292, -10.0025292, -10.00025292, -10.000025292,
+//			1.4328, -123.9487, -0.5};
+//		for (int i = 0; i < numbers.length; i++) {
+//			final double number = numbers[i];
+//			BufferFormatter.append(buffer, number, 8);
+//			buffer.append(' ');
+//			assertEquals(
+//					String.format(Locale.ENGLISH, "%.8f", number ) + " ",
+//					toString(buffer)
+//			);
+//			// check
+//			buffer.clear();
+//		}
 
 		final double[] numbers2 = new double[]{1e10, 1e15, 1e18, 5.074e10};
 		for (int i = 0; i < numbers2.length; i++) {

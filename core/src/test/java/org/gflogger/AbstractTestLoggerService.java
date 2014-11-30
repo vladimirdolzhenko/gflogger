@@ -2,27 +2,16 @@ package org.gflogger;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.gflogger.appender.AbstractAppenderFactory;
-import org.gflogger.appender.AbstractAsyncAppender;
-import org.gflogger.appender.AppenderFactory;
-import org.gflogger.appender.ConsoleAppender;
-import org.gflogger.appender.ConsoleAppenderFactory;
+import org.gflogger.appender.*;
 import org.gflogger.formatter.BytesOverflow;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -665,7 +654,9 @@ public abstract class AbstractTestLoggerService {
 			assertTrue("failed on buffer.position",
 					IllegalArgumentException.class.equals(errorClass) ||
 							BytesOverflow.class.equals(errorClass) ||
-							AssertionError.class.equals(errorClass));
+							AssertionError.class.equals(errorClass) ||
+			                IndexOutOfBoundsException.class.equals( errorClass )
+			);
 			info.withLast( "" );
 		}
 

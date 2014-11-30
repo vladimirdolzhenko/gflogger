@@ -3,30 +3,13 @@ package org.gflogger.benchmarks;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.gflogger.Appender;
-import org.gflogger.FormattedGFLogEntry;
-import org.gflogger.GFLog;
-import org.gflogger.GFLogEntry;
-import org.gflogger.GFLogFactory;
-import org.gflogger.GFLoggerBuilder;
-import org.gflogger.LogEntryItem;
-import org.gflogger.LogLevel;
-import org.gflogger.LoggerService;
+import org.gflogger.*;
 import org.gflogger.appender.AbstractAppenderFactory;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.LoggerServiceImpl;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
-import org.openjdk.jmh.annotations.Group;
-import org.openjdk.jmh.annotations.GroupThreads;
-import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
-import org.openjdk.jmh.logic.BlackHole;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -50,6 +33,7 @@ public class GFLoggerBenchmark {
 	 * benchmarks
 	 */
 	public static final int CELLS_PER_RECORD = Integer.getInteger( "cells-per-record", 8 );//8longs = 1 cache line
+
 
 	public static final int MAX_MESSAGE_SIZE = getIntProperty( "gflogger.service.maxMessageSize", 1 << 7 );
 
@@ -85,16 +69,16 @@ public class GFLoggerBenchmark {
 	}
 
 	/*=============================================================================*/
-	@GenerateMicroBenchmark
+	@Benchmark
 	@Group( "payload" )
 	@GroupThreads( 3 )//to be consistent with others
 	public void payloadAlone() {
-		BlackHole.consumeCPU( PAYLOAD );
+		Blackhole.consumeCPU( PAYLOAD );
 	}
 
 
 	/*=============================================================================*/
-	@GenerateMicroBenchmark
+	@Benchmark
 	@Group( "logAppendingAndPayload" )
 	@GroupThreads( 3 )
 	public void writeLogAppending( final ThreadState ts ) {
@@ -107,11 +91,11 @@ public class GFLoggerBenchmark {
 		}
 		entry.commit();
 
-		BlackHole.consumeCPU( PAYLOAD );
+		Blackhole.consumeCPU( PAYLOAD );
 	}
 
 	/*=============================================================================*/
-	@GenerateMicroBenchmark
+	@Benchmark
 	@Group( "logFormattingAndPayload" )
 	@GroupThreads( 3 )
 	public void writeRawMessage( final ThreadState ts ) {
@@ -121,7 +105,7 @@ public class GFLoggerBenchmark {
 			entry.with( ( long ) i );
 		}
 
-		BlackHole.consumeCPU( PAYLOAD );
+		Blackhole.consumeCPU( PAYLOAD );
 	}
 
 	@State( Scope.Thread )

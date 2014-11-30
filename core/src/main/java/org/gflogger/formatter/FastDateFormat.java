@@ -1285,7 +1285,7 @@ public class FastDateFormat {
 					if (!(value > -1)) {
 						throw new IllegalArgumentException("Negative values should not be possible" + value);
 					}
-					digits = BufferFormatter.stringSize(value);
+					digits = BufferFormatter.numberOfDigits(value);
 				}
 				for (int i = mSize; --i >= digits; ) {
 					buffer.append('0');
@@ -1310,7 +1310,7 @@ public class FastDateFormat {
 					if (!(value > -1)) {
 						throw new IllegalArgumentException("Negative values should not be possible" + value);
 					}
-					digits = BufferFormatter.stringSize(value);
+					digits = BufferFormatter.numberOfDigits(value);
 				}
 				for (int i = mSize; --i >= digits; ) {
 					BufferFormatter.append(buffer, '0');
