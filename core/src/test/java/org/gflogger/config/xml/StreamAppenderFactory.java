@@ -14,6 +14,8 @@
 
 package org.gflogger.config.xml;
 
+import java.io.OutputStream;
+
 import org.gflogger.LoggerService;
 import org.gflogger.appender.AbstractAppenderFactory;
 import org.gflogger.appender.ConsoleAppender;
@@ -24,7 +26,7 @@ import org.gflogger.appender.ConsoleAppender;
  */
 public class StreamAppenderFactory extends AbstractAppenderFactory<ConsoleAppender> {
 
-	public static Appendable outputStream = System.out;
+	public static OutputStream outputStream = System.out;
 
 	@Override
 	public ConsoleAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
@@ -32,8 +34,7 @@ public class StreamAppenderFactory extends AbstractAppenderFactory<ConsoleAppend
 		final ConsoleAppender appender = new ConsoleAppender(
 					bufferSize,
 					multibyte,
-					logLevel, enabled,
-			        outputStream
+					logLevel, enabled, outputStream
 			);
 
 		appender.setLayout( layout );

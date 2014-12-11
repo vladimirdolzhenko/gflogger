@@ -390,6 +390,7 @@ public class DailyRollingFileAppender extends FileAppender {
 		printPeriodicity(type);
 
 		TimeZone timeZone = null;
+		final Layout layout = buffer.getLayout();
 		if (layout instanceof PatternLayout){
 			final PatternLayout patternLayout = (PatternLayout) layout;
 			timeZone = patternLayout.getTimeZone();

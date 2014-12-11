@@ -136,7 +136,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 		factory.setLayoutPattern("%m");
 		// 1k
 		final StringBuffer buffer = new StringBuffer(1<<20);
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = new LoggerServiceImpl(4, maxMessageSize,
 			new GFLoggerBuilder[]{new GFLoggerBuilder("com.db", factory)},

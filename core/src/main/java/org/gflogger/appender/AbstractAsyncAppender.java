@@ -14,17 +14,11 @@
 
 package org.gflogger.appender;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
 import org.gflogger.PatternLayout;
-import org.gflogger.formatter.BufferFormatter;
 import org.gflogger.helpers.LogLog;
-
-import static org.gflogger.formatter.BufferFormatter.allocate;
 
 /**
 *
@@ -34,11 +28,6 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 
 	private static final int DEFAULT_BUFFER_SIZE = 1 << 22;
 
-	// inner thread buffer
-	protected final CharBuffer	charBuffer;
-	protected final ByteBuffer	byteBuffer;
-
-	protected Layout			layout;
 	protected boolean			immediateFlush		= false;
 	protected int				bufferedIOThreshold	= 100;
 	protected long				awaitTimeout		= 10L;
@@ -52,9 +41,9 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	                                final LogLevel logLevel,
 	                                final boolean enabled) {
 		this(name,
-		     DEFAULT_BUFFER_SIZE/*4Mb*/,
-		     multibyte,
-		     logLevel, enabled
+				DEFAULT_BUFFER_SIZE/*4Mb*/,
+				multibyte,
+				logLevel, enabled
 		);
 	}
 
@@ -63,15 +52,11 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	                                final boolean multibyte,
 	                                final LogLevel logLevel,
 	                                final boolean enabled) {
-		super(name, multibyte, logLevel, enabled);
-		// unicode char has 2 bytes
-		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
-		byteBuffer.clear();
-		charBuffer = multibyte ? allocate(multibyte ? bufferSize << 1 : bufferSize).asCharBuffer() : null;
+		super(name, bufferSize, multibyte , logLevel, enabled);
 	}
 
 	public void setLayout(final Layout layout) {
-		this.layout = layout;
+		this.buffer.setLayout(layout);
 	}
 
 	public boolean isImmediateFlush() {
@@ -94,50 +79,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	public void process(LogEntryItemImpl entry) {
 		if(!enabled || logLevel.greaterThan(entry.getLogLevel())) return;
 
-		if (multibyte) {
-			final CharBuffer buffer = entry.getCharBuffer();
-			final int position0 = buffer.position();
-			final int limit0 = buffer.limit();
-
-			final int position = charBuffer.position();
-			final int limit = charBuffer.limit();
-			final int size = layout.size(entry);
-			if (position + size >= limit){
-				flush();
-				charBuffer.clear();
-			}
-
-			buffer.flip();
-
-			layout.format(charBuffer, entry);
-
-			buffer.limit(limit0).position(position0);
-
-			processCharBuffer();
-		} else {
-			final ByteBuffer buffer = entry.getBuffer();
-
-			final int position0 = buffer.position();
-			final int limit0 = buffer.limit();
-
-			final int position = byteBuffer.position();
-			final int limit = byteBuffer.limit();
-			final int size = layout.size(entry);
-			if (position + size >= limit){
-				flush();
-				byteBuffer.clear();
-			}
-
-			buffer.flip();
-
-			layout.format(byteBuffer, entry);
-
-			buffer.limit(limit0).position(position0);
-		}
-	}
-
-	protected void processCharBuffer(){
-		// empty
+		buffer.process(entry);
 	}
 
 	@Override
@@ -151,9 +93,10 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 
 		LogLog.debug(getName() + " is starting ");
 
-		if (layout == null){
-			layout = new PatternLayout();
+		if (buffer.getLayout() == null){
+			buffer.setLayout(new PatternLayout());
 		}
+		buffer.start();
 		running = true;
 	}
 
@@ -164,8 +107,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	@Deprecated
 	protected void workerIsAboutToFinish(){
 		flush();
-		BufferFormatter.purge(byteBuffer);
-		BufferFormatter.purge(charBuffer);
+		buffer.stop();
 	}
 
 	@Override

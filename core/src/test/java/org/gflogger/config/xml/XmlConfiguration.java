@@ -1,7 +1,9 @@
 package org.gflogger.config.xml;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 import org.gflogger.GFLog;
@@ -20,7 +22,12 @@ public class XmlConfiguration {
 		buffer.setLength(0);
 		System.setProperty("TZ", "GMT");
 		System.setProperty("gflogger.configuration", "gflogger.xml");
-		StreamAppenderFactory.outputStream = buffer;
+		StreamAppenderFactory.outputStream = new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				buffer.append((char)b);
+			}
+		};
 	}
 
 	@Test

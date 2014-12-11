@@ -23,9 +23,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 
 /**
  * FileAppender
@@ -38,14 +37,9 @@ public class FileAppender extends AbstractAsyncAppender {
 	private static final String DUMMY_NAME = null;
 
 	protected String fileName;
-	protected String codepage = "UTF-8";
-
-	protected CharsetEncoder encoder;
 	protected FileChannel channel;
 
 	protected boolean append = true;
-
-	protected int maxBytesPerChar;
 
 	public FileAppender(final boolean multibyte,
 	                    final LogLevel logLevel,
@@ -76,12 +70,16 @@ public class FileAppender extends AbstractAsyncAppender {
 	                    final LogLevel logLevel,
 	                    final boolean enabled ) {
 		this(bufferSize, multibyte, logLevel, enabled);
-		this.layout = layout;
+		this.setLayout(layout);
 		this.fileName = filename;
 	}
 
 	public synchronized void setCodepage(final String codepage) {
-		this.codepage = codepage;
+		//this.codepage = codepage;
+		if (buffer instanceof CharBufferImpl){
+			CharBufferImpl charBuffer = (CharBufferImpl)buffer;
+			charBuffer.setCodepage(codepage);
+		}
 	}
 
 	public synchronized void setFileName(final String fileName) {
@@ -90,23 +88,6 @@ public class FileAppender extends AbstractAsyncAppender {
 
 	public void setAppend(final boolean append) {
 		this.append = append;
-	}
-
-	@Override
-	protected void processCharBuffer() {
-		final int remaining = byteBuffer.remaining();
-		final int sizeOfBuffer = maxBytesPerChar * charBuffer.position();
-
-		// store buffer if there it could be no enough space for message
-		if (remaining < sizeOfBuffer){
-			store("remaining < sizeOfBuffer");
-		}
-
-		charBuffer.flip();
-		encoder.encode(charBuffer, byteBuffer, true);
-		// there is no reason to check encoding result
-		// as it has been already checked that buffer has enough space
-		charBuffer.clear();
 	}
 
 	@Override
@@ -124,8 +105,6 @@ public class FileAppender extends AbstractAsyncAppender {
 	@Override
 	public void start() {
 		try {
-			encoder = multibyte ? Charset.forName(codepage).newEncoder() : null;
-			maxBytesPerChar = multibyte ? (int) Math.floor(encoder.maxBytesPerChar()) : 1;
 			createFileChannel();
 		} catch (final FileNotFoundException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -157,6 +136,8 @@ public class FileAppender extends AbstractAsyncAppender {
 	}
 
 	protected boolean store(final String cause) {
+		final ByteBuffer byteBuffer = buffer.getBuffer();
+
 		if (byteBuffer.position() == 0) return false;
 		byteBuffer.flip();
 		try {

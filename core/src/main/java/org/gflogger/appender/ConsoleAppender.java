@@ -17,6 +17,8 @@ package org.gflogger.appender;
 
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import org.gflogger.LogLevel;
 import org.gflogger.helpers.LogLog;
@@ -30,12 +32,12 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 
 	private static final String NAME = "console";
 
-	private final Appendable out;
+	private final OutputStream out;
 	private final Flushable flushable;
 
 	public ConsoleAppender(final LogLevel logLevel,
 	                       final boolean enabled) {
-		this(/*multibyte=*/false, logLevel, enabled );
+		this( /*multibyte=*/false, logLevel, enabled );
 	}
 
 	public ConsoleAppender(final boolean multibyte,
@@ -48,14 +50,14 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	                       final boolean multibyte,
 	                       final LogLevel logLevel,
 	                       final boolean enabled) {
-		this(bufferSize, multibyte, logLevel, enabled, System.out);
+		this( bufferSize, multibyte, logLevel, enabled, System.out );
 	}
 
 	public ConsoleAppender(final boolean multibyte,
 	                       final LogLevel logLevel,
 	                       final boolean enabled,
-	                       final Appendable out ) {
-		super(NAME, multibyte, logLevel, enabled);
+	                       final OutputStream out ) {
+		super( NAME, multibyte, logLevel, enabled );
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
@@ -64,49 +66,28 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	                       final boolean multibyte,
 	                       final LogLevel logLevel,
 	                       final boolean enabled,
-	                       final Appendable out) {
-		super(NAME,bufferSize,multibyte,logLevel, enabled);
+	                       final OutputStream out) {
+		super( NAME, bufferSize, multibyte, logLevel, enabled );
 		this.out = out;
 		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	@Override
-	protected void processCharBuffer() {
-		flush();
-	}
-
-	@Override
 	public void flush(boolean force) {
 		if (!(force || immediateFlush)) return;
-		if (multibyte) {
-			if (charBuffer.position() > 0){
-				charBuffer.flip();
-				try {
-					while(charBuffer.hasRemaining()) out.append(charBuffer.get());
 
-					if (flushable != null) flushable.flush();
-				} catch (IOException e){
-					LogLog.error("[" + Thread.currentThread().getName() +
-						"] exception at " + getName() + " - " + e.getMessage(), e);
-				} finally {
-					charBuffer.clear();
-				}
-			}
-		} else {
-			if (byteBuffer.position() > 0){
-				byteBuffer.flip();
-				try {
-					while(byteBuffer.hasRemaining()){
-						out.append((char) byteBuffer.get());
-					}
+		final ByteBuffer byteBuffer = buffer.getBuffer();
+		if (byteBuffer.position() > 0){
+			byteBuffer.flip();
+			try {
+				while (byteBuffer.hasRemaining()) out.write(byteBuffer.get());
 
-					if (flushable != null) flushable.flush();
-				} catch (IOException e){
-					LogLog.error("[" + Thread.currentThread().getName() +
+				if (flushable != null) flushable.flush();
+			} catch (IOException e){
+				LogLog.error("[" + Thread.currentThread().getName() +
 						"] exception at " + getName() + " - " + e.getMessage(), e);
-				} finally {
-					byteBuffer.clear();
-				}
+			} finally {
+				byteBuffer.clear();
 			}
 		}
 	}

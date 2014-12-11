@@ -10,11 +10,10 @@ public class TestConsoleAppender extends AbstractFlushingAppenderHelper<ConsoleA
 
 	private final StringBuilder stream = new StringBuilder();
 
-
 	@Override
 	protected ConsoleAppender createAppender() {
 		ConsoleAppenderFactory appenderFactory = new ConsoleAppenderFactory();
-		appenderFactory.setOutputStream(stream);
+		appenderFactory.setAppendable(stream);
 		appenderFactory.setLayoutPattern(LAYOUT_PATTERN);
 		appenderFactory.setBufferSize(BUFFER_SIZE);
 		return appenderFactory.createAppender(null);
