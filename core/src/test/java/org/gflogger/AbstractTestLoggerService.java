@@ -62,7 +62,7 @@ public abstract class AbstractTestLoggerService {
 		factory.setLayoutPattern("%m");
 		factory.setMultibyte(false);
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService =
 				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
@@ -270,7 +270,7 @@ public abstract class AbstractTestLoggerService {
 				return builder.toString();
 			}
 		};
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		factory.setImmediateFlush(true);
 		final LoggerService loggerService =
@@ -303,7 +303,7 @@ public abstract class AbstractTestLoggerService {
 		factory.setLayoutPattern("%m");
 		factory.setMultibyte(false);
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService =
 				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
@@ -335,7 +335,7 @@ public abstract class AbstractTestLoggerService {
 			factory.setLayoutPattern("%m");
 			factory.setMultibyte(multibyte);
 			final StringBuffer buffer = new StringBuffer();
-			factory.setOutputStream(buffer);
+			factory.setAppendable(buffer);
 			factory.setLogLevel(LogLevel.INFO);
 			final LoggerService loggerService =
 					createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
@@ -360,7 +360,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -379,7 +379,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream( buffer );
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -402,7 +402,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.DEBUG);
 
 		final GFLoggerBuilder comDbLogger = new GFLoggerBuilder(LogLevel.INFO, "com.db", factory);
@@ -440,7 +440,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.DEBUG);
 
 		final GFLoggerBuilder comDbLogger = new GFLoggerBuilder(LogLevel.INFO, "com.db", factory);
@@ -474,7 +474,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 
 		final GFLoggerBuilder logger = new GFLoggerBuilder(LogLevel.INFO, "com.db.", factory);
 		final GFLoggerBuilder logger2 = new GFLoggerBuilder(LogLevel.ERROR, "com.db.messaging", factory);
@@ -515,13 +515,13 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 
 		final ConsoleAppenderFactory factory2 = new ConsoleAppenderFactory();
 		factory2.setLayoutPattern("%m");
 		final StringBuffer buffer2 = new StringBuffer();
-		factory2.setOutputStream( buffer2 );
+		factory2.setAppendable(buffer2);
 		factory2.setLogLevel(LogLevel.INFO);
 
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
@@ -552,13 +552,13 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 
 		final ConsoleAppenderFactory factory2 = new ConsoleAppenderFactory();
 		factory2.setLayoutPattern("%m");
 		final StringBuffer buffer2 = new StringBuffer();
-		factory2.setOutputStream(buffer2);
+		factory2.setAppendable(buffer2);
 		factory2.setLogLevel(LogLevel.FATAL);
 
 		final LoggerService loggerService = createLoggerService(maxMessageSize,
@@ -589,7 +589,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel( LogLevel.INFO );
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -633,7 +633,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -678,7 +678,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel( LogLevel.INFO );
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -735,7 +735,7 @@ public abstract class AbstractTestLoggerService {
 		factory.setLayoutPattern("%m");
 		factory.setLogLevel(LogLevel.INFO);
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream( buffer );
+		factory.setAppendable(buffer);
 
 		final GFLoggerBuilder logger = new GFLoggerBuilder("com.db.", factory);
 
@@ -792,7 +792,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream( buffer );
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -815,7 +815,7 @@ public abstract class AbstractTestLoggerService {
 		factory.setBufferSize(targetMsg.length() + 2);
 		factory.setLayoutPattern( "%m" );
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel( LogLevel.INFO );
 		final LoggerService loggerService = createLoggerService( maxMessageSize, new GFLoggerBuilder( "com.db", factory ), factory );
 
@@ -841,7 +841,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream( buffer );
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -862,7 +862,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -883,7 +883,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -908,7 +908,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -935,7 +935,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -956,7 +956,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -980,7 +980,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
 
@@ -1005,7 +1005,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 
 		final DefaultObjectFormatterFactory defaultObjectFormatterFactory =
@@ -1032,7 +1032,7 @@ public abstract class AbstractTestLoggerService {
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
 		final StringBuffer buffer = new StringBuffer();
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 
 		final DefaultObjectFormatterFactory defaultObjectFormatterFactory =
@@ -1115,7 +1115,7 @@ public abstract class AbstractTestLoggerService {
 		};
 		factory.setLayoutPattern("%m");
 		factory.setMultibyte(false);
-		factory.setOutputStream(buffer);
+		factory.setAppendable(buffer);
 		factory.setLogLevel(LogLevel.INFO);
 		final LoggerService loggerService =
 				createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
@@ -1138,7 +1138,7 @@ public abstract class AbstractTestLoggerService {
 			final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 			factory.setLayoutPattern("%m");
 			final StringBuffer buffer = new StringBuffer();
-			factory.setOutputStream(buffer);
+			factory.setAppendable(buffer);
 			factory.setLogLevel(LogLevel.INFO);
 			factory.setMultibyte(true);
 			final LoggerService loggerService = createLoggerService(maxMessageSize, new GFLoggerBuilder("com.db", factory), factory);
