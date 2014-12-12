@@ -8,10 +8,13 @@ import org.junit.After;
 
 import static org.junit.Assert.assertEquals;
 
-/** @author vladimir.dolzhenko@gmail.com */
+/**
+ * @author vladimir.dolzhenko@gmail.com
+ **/
 public class TestFileAppender extends AbstractFlushingAppenderHelper<FileAppender> {
 
-	private File tempFile;
+	protected File tempFile;
+	protected boolean multibyte = false;
 
 	@Override
 	protected FileAppender createAppender() throws Exception {
@@ -20,12 +23,12 @@ public class TestFileAppender extends AbstractFlushingAppenderHelper<FileAppende
 		appenderFactory.setFileName( tempFile.getAbsolutePath() );
 		appenderFactory.setLayoutPattern( LAYOUT_PATTERN );
 		appenderFactory.setBufferSize( BUFFER_SIZE );
+		appenderFactory.setMultibyte( multibyte );
 		final FileAppender appender = appenderFactory.createAppender( null );
 		appender.start();
 
 		return appender;
 	}
-
 
 	@After
 	public void tearDown() {

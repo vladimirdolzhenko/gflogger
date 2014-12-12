@@ -10,6 +10,9 @@ import org.gflogger.LogEntryItemImpl;
  */
 public interface Buffer {
 
+	Layout getLayout();
+	void setLayout(Layout layout);
+
 	boolean isMultibyte();
 
 	ByteBuffer getBuffer();
@@ -18,7 +21,4 @@ public interface Buffer {
 
 	void start();
 	void stop();
-
-	void setLayout(Layout layout);
-	Layout getLayout();
 }

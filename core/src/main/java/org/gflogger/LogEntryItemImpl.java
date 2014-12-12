@@ -46,7 +46,7 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	}
 
 	public LogEntryItemImpl(final int size, final boolean multibyte) {
-		this(allocate(size), multibyte);
+		this(allocate(multibyte ? size << 1 : size), multibyte);
 	}
 
 	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte) {

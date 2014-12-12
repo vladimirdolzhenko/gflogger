@@ -13,15 +13,10 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
  * @author vdolzhenko
  */
 public class BufferImpl implements Buffer {
-	protected static final int DEFAULT_BUFFER_SIZE = 1 << 22; /* 4Mb */
 
 	protected final ByteBuffer  byteBuffer;
 	protected final Appender    appender;
 	protected Layout            layout;
-
-	public BufferImpl(final Appender appender) {
-		this(DEFAULT_BUFFER_SIZE, appender);
-	}
 
 	public BufferImpl(final int bufferSize, final Appender appender) {
 		this.byteBuffer = allocate( bufferSize );

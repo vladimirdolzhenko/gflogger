@@ -51,7 +51,7 @@ public class FileAppender extends AbstractAsyncAppender {
 	                    final boolean multibyte,
 	                    final LogLevel logLevel,
 	                    final boolean enabled ) {
-		super(DUMMY_NAME,bufferSize, multibyte, logLevel, enabled);
+		super(DUMMY_NAME, bufferSize, multibyte, logLevel, enabled);
 		immediateFlush = false;
 	}
 
