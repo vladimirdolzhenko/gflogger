@@ -21,16 +21,11 @@ public class CharBufferImpl implements Buffer {
 	protected final CharBuffer  charBuffer;
 	protected final ByteBuffer  byteBuffer;
 	protected final Appender    appender;
+
 	protected Layout            layout;
-
-	protected String codepage = "UTF-8";
-
-	protected CharsetEncoder encoder;
-	protected int maxBytesPerChar;
-
-	public CharBufferImpl(final Appender appender) {
-		this(BufferImpl.DEFAULT_BUFFER_SIZE, appender);
-	}
+	protected String            codepage = "UTF-8";
+	protected CharsetEncoder    encoder;
+	protected int               maxBytesPerChar;
 
 	public CharBufferImpl(final int bufferSize, final Appender appender) {
 		this.byteBuffer = allocate(bufferSize << 1);
@@ -71,6 +66,7 @@ public class CharBufferImpl implements Buffer {
 		final int position = charBuffer.position();
 		final int limit = charBuffer.limit();
 		final int size = layout.size(entry);
+
 		if (position + size >= limit){
 			appender.flush();
 			charBuffer.clear();
