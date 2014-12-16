@@ -154,7 +154,7 @@ public class OptionConverter {
 		if (value != null) {
 			String s = value.trim();
 			try {
-				return Integer.valueOf(s).intValue();
+				return Integer.parseInt(s);
 			} catch (NumberFormatException e) {
 				LogLog.error("[" + s + "] is not in proper int form.");
 				e.printStackTrace();
@@ -183,7 +183,7 @@ public class OptionConverter {
 		}
 		if (s != null) {
 			try {
-				return Long.valueOf(s).longValue() * multiplier;
+				return Long.parseLong(s) * multiplier;
 			} catch (NumberFormatException e) {
 				LogLog.error("[" + s + "] is not in proper int form.");
 				LogLog.error("[" + value + "] not in expected format.", e);

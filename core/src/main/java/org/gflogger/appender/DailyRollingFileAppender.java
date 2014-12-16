@@ -24,7 +24,6 @@ import org.gflogger.helpers.LogLog;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -311,7 +310,7 @@ public class DailyRollingFileAppender extends FileAppender {
 	/**
 	 * Rollover the current file to a new file.
 	 */
-	void rollOver() throws IOException {
+	void rollOver() {
 		flush();
 		/* Compute filename, but only if datePattern is specified */
 		if (datePattern == null) {
@@ -330,9 +329,20 @@ public class DailyRollingFileAppender extends FileAppender {
 		// close current file, and rename it to datedFilename
 		closeFile();
 
-		File target = new File(scheduledFilename);
-		if (target.exists()) {
-			target.delete();
+		final String originalScheduledFilename = scheduledFilename;
+		File target;
+
+		for( int tryNo = 0; ; tryNo++ ) {
+			target = new File( scheduledFilename );
+			if ( target.exists() ) {
+				if ( target.delete() ) {
+					break;
+				}
+				// unable to delete - try to use another name
+				scheduledFilename = originalScheduledFilename + "." + tryNo;
+			} else {
+				break;
+			}
 		}
 
 		File file = new File(fileName);
@@ -370,14 +380,7 @@ public class DailyRollingFileAppender extends FileAppender {
 		if (n >= nextCheck) {
 			now.setTime(n);
 			nextCheck = rc.getNextCheckMillis(now);
-			try {
-				rollOver();
-			} catch (IOException ioe) {
-				if (ioe instanceof InterruptedIOException) {
-					Thread.currentThread().interrupt();
-				}
-				LogLog.error("rollOver() failed.", ioe);
-			}
+			rollOver();
 		}
 		super.process(entry);
 	}
