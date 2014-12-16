@@ -15,6 +15,7 @@
 package org.gflogger;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
+import static org.gflogger.formatter.BufferFormatter.size;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -46,17 +47,17 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	}
 
 	public LogEntryItemImpl(final int size, final boolean multibyte) {
-		this(allocate(multibyte ? size << 1 : size), multibyte);
+		this( allocate( size( size, multibyte ) ), multibyte );
 	}
 
 	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte) {
-		this(null, null, buffer, multibyte);
+		this( null, null, buffer, multibyte );
 	}
 
 	public LogEntryItemImpl(final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
 			final ByteBuffer buffer, final boolean multibyte) {
-		super(formatterFactory, loggerService, null);
+		super( formatterFactory, loggerService, null );
 		this.buffer = buffer;
 		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;
 	}
@@ -150,6 +151,7 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 		try {
 			BufferFormatter.append(buffer, message);
 		} catch (Throwable e){
+			// enjoy the silence
 		}
 	}
 

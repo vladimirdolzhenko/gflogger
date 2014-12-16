@@ -11,6 +11,7 @@ import org.gflogger.LogEntryItemImpl;
 import org.gflogger.formatter.BufferFormatter;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
+import static org.gflogger.formatter.BufferFormatter.size;
 
 /**
  * @author vdolzhenko
@@ -28,8 +29,9 @@ public class CharBufferImpl implements Buffer {
 	protected int               maxBytesPerChar;
 
 	public CharBufferImpl(final int bufferSize, final Appender appender) {
-		this.byteBuffer = allocate(bufferSize << 1);
-		this.charBuffer = allocate(bufferSize << 1).asCharBuffer();
+		final int size = size( bufferSize, true );
+		this.byteBuffer = allocate( size );
+		this.charBuffer = allocate( size ).asCharBuffer();
 		this.appender = appender;
 	}
 
@@ -59,24 +61,24 @@ public class CharBufferImpl implements Buffer {
 
 	@Override
 	public void process(LogEntryItemImpl entry) {
-		final CharBuffer buffer = entry.getCharBuffer();
-		final int position0 = buffer.position();
-		final int limit0 = buffer.limit();
+		final CharBuffer entryBuffer = entry.getCharBuffer();
+		final int entryPosition = entryBuffer.position();
+		final int entryLimit = entryBuffer.limit();
 
 		final int position = charBuffer.position();
 		final int limit = charBuffer.limit();
-		final int size = layout.size(entry);
+		final int size = layout.size( entry );
 
 		if (position + size >= limit){
 			appender.flush();
 			charBuffer.clear();
 		}
 
-		buffer.flip();
+		entryBuffer.flip();
 
-		layout.format(charBuffer, entry);
+		layout.format( charBuffer, entry );
 
-		buffer.limit(limit0).position(position0);
+		entryBuffer.limit( entryLimit ).position( entryPosition );
 
 		final int remaining = byteBuffer.remaining();
 		final int sizeOfBuffer = maxBytesPerChar * charBuffer.position();
@@ -87,7 +89,7 @@ public class CharBufferImpl implements Buffer {
 		}
 
 		charBuffer.flip();
-		encoder.encode(charBuffer, byteBuffer, true);
+		encoder.encode( charBuffer, byteBuffer, true );
 		// there is no reason to check encoding result
 		// as it has been already checked that buffer has enough space
 		charBuffer.clear();
