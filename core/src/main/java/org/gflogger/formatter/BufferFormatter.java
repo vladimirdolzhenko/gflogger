@@ -17,7 +17,8 @@ package org.gflogger.formatter;
 import java.nio.*;
 
 import org.gflogger.util.DirectBufferUtils;
-import sun.misc.FloatingDecimal;
+
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
 
 /**
  * BufferFormatter
@@ -26,12 +27,17 @@ import sun.misc.FloatingDecimal;
  */
 public class BufferFormatter {
 
-	private static final boolean USE_DIRECT_BUFFER = Boolean.parseBoolean( System.getProperty( "gflogger.direct", "true" ) );
+	private static final boolean USE_DIRECT_BUFFER = getBooleanProperty( "gflogger.direct", true );
 
 	public static ByteBuffer allocate(final int capacity){
 		return USE_DIRECT_BUFFER ?
 			ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder()) :
 			ByteBuffer.allocate(capacity);
+	}
+
+	public static int size(final int size, final boolean multibyte){
+		// unicode char has 2 bytes
+		return multibyte ? size << 1 : size;
 	}
 
 	public static void purge(Buffer buffer){
@@ -813,8 +819,8 @@ public class BufferFormatter {
 
 	private static String toString(double v) {
 		// All exceptional cases have been covered
-		// TODO: this leads to garbage
-		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		// TODO: this leads to garbage using new FloatingDecimal(d).toJavaFormatString() under the hood
+		final String javaFormatString = Double.toString( v );
 		return javaFormatString;
 	}
 

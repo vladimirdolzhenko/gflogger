@@ -15,6 +15,7 @@
 package org.gflogger.base;
 
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
+import static org.gflogger.formatter.BufferFormatter.size;
 
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +45,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
 	 * @param maxMessageSize max message size in the ring (in chars)
-	 * @param objectFormatterFactory
+	 * @param loggerBuilders
 	 * @param appenderFactories
 	 */
 	public LoggerServiceImpl(final int count,
@@ -67,9 +68,9 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			final ObjectFormatterFactory objectFormatterFactory,
 			final GFLoggerBuilder[] loggersBuilders,
 			final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, objectFormatterFactory,
-			createAppenders(appenderFactories),
-			createLoggers(appenderFactories, loggersBuilders));
+		this( count, maxMessageSize, objectFormatterFactory,
+			createAppenders( appenderFactories),
+			createLoggers( appenderFactories, loggersBuilders ));
 	}
 
 	/**
@@ -77,6 +78,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param objectFormatterFactory
 	 * @param appenders
+	 * @param loggers
 	 */
 	private LoggerServiceImpl(final int count,
 			final int maxMessageSize,
@@ -84,21 +86,18 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			final Appender[] appenders,
 			final GFLogger[] loggers) {
 
-		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
+		super( count, maxMessageSize, objectFormatterFactory, loggers, appenders );
 
-		// unicode char has 2 bytes
-		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
+		final int maxBufferSize = size( maxMessageSize, multibyte );
 
 		final int c = (count & (count - 1)) != 0 ?
-			roundUpNextPower2(count) : count;
+			roundUpNextPower2( count ) : count;
 
-		entryHandler = new EntryHandler(this, appenders);
+		entryHandler = new EntryHandler( this, appenders );
 		this.ringBuffer =
-				new RingBuffer<LogEntryItemImpl>(initEnties(c, maxMessageSize0), entryHandler);
+				new RingBuffer<LogEntryItemImpl>( initEnties( c, maxBufferSize ), entryHandler );
 		entryHandler.start();
-		executorService.execute(entryHandler);
-
-		//*/
+		executorService.execute( entryHandler );
 	}
 
 
