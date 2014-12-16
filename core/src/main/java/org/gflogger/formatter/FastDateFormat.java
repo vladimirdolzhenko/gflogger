@@ -242,7 +242,7 @@ public class FastDateFormat {
 	 *  pattern defined
 	 */
 	public static synchronized FastDateFormat getDateInstance(int style, TimeZone timeZone, Locale locale) {
-		Object key = new Integer(style);
+		Object key = Integer.valueOf( style );
 		if (timeZone != null) {
 			key = new Pair(key, timeZone);
 		}
@@ -327,7 +327,7 @@ public class FastDateFormat {
 	 *  pattern defined
 	 */
 	public static synchronized FastDateFormat getTimeInstance(int style, TimeZone timeZone, Locale locale) {
-		Object key = new Integer(style);
+		Object key = Integer.valueOf( style );
 		if (timeZone != null) {
 			key = new Pair(key, timeZone);
 		}
@@ -421,7 +421,7 @@ public class FastDateFormat {
 	public static synchronized FastDateFormat getDateTimeInstance(int dateStyle, int timeStyle, TimeZone timeZone,
 			Locale locale) {
 
-		Object key = new Pair(new Integer(dateStyle), new Integer(timeStyle));
+		Object key = new Pair( Integer.valueOf( dateStyle ), Integer.valueOf( timeStyle ) );
 		if (timeZone != null) {
 			key = new Pair(key, timeZone);
 		}

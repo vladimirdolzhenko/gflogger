@@ -42,7 +42,7 @@ public class GFLoggerBenchmark {
 	public static final AtomicInteger ID_GENERATOR = new AtomicInteger( 1 );
 
 	static {
-		System.out.printf( "len=%d, record=%d, payload=%d\n", LENGTH, CELLS_PER_RECORD, PAYLOAD );
+		System.out.printf( "len=%d, record=%d, payload=%d%n", LENGTH, CELLS_PER_RECORD, PAYLOAD );
 	}
 
 

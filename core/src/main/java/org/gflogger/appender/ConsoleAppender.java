@@ -33,7 +33,6 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	private static final String NAME = "console";
 
 	private final OutputStream out;
-	private final Flushable flushable;
 
 	public ConsoleAppender(final LogLevel logLevel,
 	                       final boolean enabled) {
@@ -59,7 +58,6 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	                       final OutputStream out ) {
 		super( NAME, multibyte, logLevel, enabled );
 		this.out = out;
-		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	public ConsoleAppender(final int bufferSize,
@@ -69,7 +67,6 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	                       final OutputStream out) {
 		super( NAME, bufferSize, multibyte, logLevel, enabled );
 		this.out = out;
-		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	@Override
@@ -82,7 +79,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 			try {
 				while (byteBuffer.hasRemaining()) out.write(byteBuffer.get());
 
-				if (flushable != null) flushable.flush();
+				out.flush();
 			} catch (IOException e){
 				LogLog.error("[" + Thread.currentThread().getName() +
 						"] exception at " + getName() + " - " + e.getMessage(), e);
