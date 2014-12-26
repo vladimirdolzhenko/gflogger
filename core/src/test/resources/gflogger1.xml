@@ -30,7 +30,7 @@
 			language="EN"/>
 	</appender>
 
-	<root logLevel="INFO">
+	<root logLevel="INFO" additivity="true">
 		<appender-ref ref="consoleAppender"/>
 	</root>
 

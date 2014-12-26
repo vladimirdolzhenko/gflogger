@@ -220,15 +220,15 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	@Override
 	public final GFLogger[] lookupLoggers(String name) {
-		List<GFLogger> list = new ArrayList<GFLogger>();
+		final List<GFLogger> candidates = new ArrayList<GFLogger>();
 		for(final GFLogger logger : this.loggers){
 			final String category = logger.getCategory();
 			if (category == null || name.startsWith(category)){
-				list.add(logger);
+				candidates.add(logger);
 			}
 		}
 
-		Collections.sort(list, new Comparator<GFLogger>() {
+		Collections.sort(candidates, new Comparator<GFLogger>() {
 			@Override
 			public int compare(GFLogger o1, GFLogger o2) {
 				final String c1 = o1.getCategory();
@@ -239,21 +239,19 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 			}
 		});
 
-		int idx = 0;
-		for(final Iterator<GFLogger> it = list.iterator(); it.hasNext();){
-			final GFLogger gfLogger = it.next();
-			if (!gfLogger.hasAdditivity()) {
+		if (candidates.isEmpty()) return GFLogger.EMPTY;
+
+		int matchedCount = 0;
+		for(final Iterator<GFLogger> it = candidates.iterator(); it.hasNext();){
+			matchedCount++;
+			final GFLogger candidate = it.next();
+			if (!candidate.hasAdditivity()) {
 				break;
 			}
-			idx++;
 		}
 
-		if (list.isEmpty()) return GFLogger.EMPTY;
-
-		final List<GFLogger> subList = list.subList(0, idx + 1);
-		final GFLogger[] array = subList.toArray(new GFLogger[subList.size()]);
-
-		return array;
+		final List<GFLogger> matched = candidates.subList(0, matchedCount);
+		return matched.toArray(new GFLogger[matched.size()]);
 	}
 
 	@Override
