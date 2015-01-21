@@ -16,6 +16,8 @@ package org.gflogger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.gflogger.helpers.LogLog;
@@ -27,89 +29,90 @@ import org.gflogger.helpers.LogLog;
  */
 public final class GFLogFactory {
 
-	private final Object lock = new Object();
+	private static volatile GFLogFactory FACTORY;
 
+	private final Object lock = new Object();
 	private final AtomicReference<LoggerService> loggerService;
-	private final Map<String, GFLogView> namedLogger;
-	private final Map<Class, GFLogView> classedLogger;
+	private final ConcurrentMap<String, GFLogView> loggers;
 
 	private GFLogFactory(){
 		loggerService = new AtomicReference<LoggerService>();
-		namedLogger = new HashMap<String, GFLogView>();
-		classedLogger = new HashMap<Class, GFLogView>();
+		loggers = new ConcurrentHashMap<String, GFLogView>();
 
 		final String ver = GFLogFactory.class.getPackage().getImplementationVersion();
 		LogLog.info(" version " + (ver != null ? ver : "*dev*") );
 	}
 
 	private GFLog get(final String name){
-		return get0(name, name, namedLogger);
+		GFLogView logger = loggers.get(name);
+
+		if (logger != null) return logger;
+
+		logger = new GFLogView(name);
+		final LoggerService service = getService();
+		logger.setLoggerService(service);
+
+		final GFLogView existed = loggers.putIfAbsent( name, logger );
+		if (existed != null){
+			logger = existed;
+		}
+
+		return logger;
 	}
 
 	private GFLog get(final Class clazz){
-		return get0(clazz, clazz.getName(), classedLogger);
-	}
-
-	private <T> GFLog get0(final T key, final String name, final Map<T, GFLogView> map){
-		GFLogView logger = map.get(key);
-		if (logger != null) return logger;
-		synchronized (lock) {
-			logger = map.get(name);
-			if (logger != null) return logger;
-
-			logger = new GFLogView(name);
-			final LoggerService service = getService();
-			logger.setLoggerService(service);
-			map.put(key, logger);
-			return logger;
-		}
+		return get(clazz.getName());
 	}
 
 	public static LoggerService lookupService(final String name) {
-		return Helper.FACTORY.getService();
+		return getFactory().getService();
 	}
 
 	private LoggerService getService(){
-		synchronized (lock) {
-			return loggerService.get();
+		return loggerService.get();
+	}
+
+	private static GFLogFactory getFactory(){
+		if (FACTORY != null) return FACTORY;
+		synchronized ( GFLogFactory.class ){
+			if (FACTORY == null) {
+				FACTORY = new GFLogFactory();
+			}
 		}
+		return FACTORY;
 	}
 
 	public static GFLog getLog(final String name){
-		return Helper.FACTORY.get(name);
+		return getFactory().get( name );
 	}
 
 	public static GFLog getLog(final Class clazz){
-		return Helper.FACTORY.get(clazz);
+		return getFactory().get( clazz );
 	}
 
 	public static void stop(){
-		synchronized (Helper.FACTORY.lock) {
-			final LoggerService service = Helper.FACTORY.loggerService.getAndSet(null);
+		final GFLogFactory factory = getFactory();
+		synchronized ( factory.lock) {
+			final LoggerService service = factory.loggerService.getAndSet(null);
 			if (service == null) return;
 
 			service.stop();
 
-			for(final GFLogView loggerView : Helper.FACTORY.namedLogger.values()){
-				loggerView.invalidate();
-			}
-			for(final GFLogView loggerView : Helper.FACTORY.classedLogger.values()){
+			for(final GFLogView loggerView : factory.loggers.values()){
 				loggerView.invalidate();
 			}
 		}
 	}
 
 	public static GFLogFactory init(LoggerService service){
-		synchronized (Helper.FACTORY.lock) {
+		final GFLogFactory factory = getFactory();
+		synchronized (factory.lock) {
 			stop();
 			if (service == null)
 				throw new IllegalArgumentException("Not a null logger service is expected");
-			Helper.FACTORY.loggerService.set(service);
+			factory.loggerService.set(service);
 		}
-		return Helper.FACTORY;
+		return factory;
 	}
 
-	private final static class Helper {
-		final static GFLogFactory FACTORY = new GFLogFactory();
-	}
 }
