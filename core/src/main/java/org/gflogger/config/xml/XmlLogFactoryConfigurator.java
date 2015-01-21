@@ -23,6 +23,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.gflogger.GFLogFactory;
 
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
+
 /**
  *
  * @author Harald Wendel
@@ -60,7 +62,7 @@ public final class XmlLogFactoryConfigurator {
 	}
 
 	public static void configure() throws Exception {
-		configure(System.getProperty("gflogger.configuration", "gflogger.xml"));
+		configure(getStringProperty("gflogger.configuration", "gflogger.xml"));
 	}
 
 	private XmlLogFactoryConfigurator(final InputStream in) throws Exception {

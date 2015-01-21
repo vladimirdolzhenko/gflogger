@@ -23,7 +23,7 @@ public enum LogLevel {
 
 	TRACE, DEBUG, INFO, WARN, ERROR, FATAL;
 
-	public static LogLevel[] values = values();
+	static final LogLevel[] values = values();
 
 	public boolean lessThan(final LogLevel level){
 		return this.ordinal() < level.ordinal();

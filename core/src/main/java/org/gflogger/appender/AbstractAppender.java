@@ -11,22 +11,33 @@ import org.gflogger.helpers.LogLog;
  */
 public abstract class AbstractAppender implements Appender<LogEntryItemImpl> {
 
+	protected final String name;
+
+	protected final Buffer buffer;
+
 	protected final LogLevel logLevel;
 
 	protected final boolean enabled;
 
-	protected final boolean multibyte;
-
-	protected final String name;
+	protected AbstractAppender(final String name,
+	                           final Buffer buffer,
+	                           final LogLevel logLevel,
+	                           final boolean enabled) {
+		this.name = name;
+		this.buffer = buffer;
+		this.logLevel = logLevel;
+		this.enabled = enabled;
+	}
 
 	protected AbstractAppender(final String name,
+	                           final int bufferSize,
 	                           final boolean multibyte,
 	                           final LogLevel logLevel,
 	                           final boolean enabled) {
 		this.name = name;
-		this.multibyte = multibyte;
 		this.logLevel = logLevel;
 		this.enabled = enabled;
+		this.buffer = multibyte ? new CharBufferImpl(bufferSize, this) : new BufferImpl(bufferSize, this);
 	}
 
 	@Override
@@ -36,7 +47,7 @@ public abstract class AbstractAppender implements Appender<LogEntryItemImpl> {
 
 	@Override
 	public boolean isMultibyte() {
-		return multibyte;
+		return buffer.isMultibyte();
 	}
 
 	@Override

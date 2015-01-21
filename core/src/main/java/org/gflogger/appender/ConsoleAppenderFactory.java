@@ -14,6 +14,9 @@
 
 package org.gflogger.appender;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.gflogger.LoggerService;
 
 
@@ -24,7 +27,7 @@ import org.gflogger.LoggerService;
  */
 public class ConsoleAppenderFactory extends AbstractAppenderFactory<ConsoleAppender> {
 
-	protected Appendable outputStream = System.out;
+	protected OutputStream outputStream = System.out;
 
 	@Override
 	public ConsoleAppender createAppender(Class<? extends LoggerService> loggerServiceClass) {
@@ -50,12 +53,20 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory<ConsoleAppen
 
 	/*===================== Setters'n'Getters =================================*/
 
-	public Appendable getOutputStream() {
+	public OutputStream getOutputStream() {
 		return this.outputStream;
 	}
 
-	public void setOutputStream(Appendable outputStream) {
+	public void setOutputStream(OutputStream outputStream) {
 		this.outputStream = outputStream;
 	}
 
+	public void setAppendable(final Appendable appendable) {
+		this.outputStream = new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				appendable.append((char)b);
+			}
+		};
+	}
 }
