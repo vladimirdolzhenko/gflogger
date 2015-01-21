@@ -17,6 +17,7 @@ package org.gflogger.disruptor;
 import static com.lmax.disruptor.util.Util.getMinimumSequence;
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
+import static org.gflogger.formatter.BufferFormatter.size;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +59,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param count a number of items in the ring
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param objectFormatterFactory
+	 * @param loggerBuilders
 	 * @param appenderFactories
 	 */
 	public LoggerServiceImpl(final int count, final int maxMessageSize,
@@ -74,21 +76,21 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param objectFormatterFactory
 	 * @param appenders
+	 * @param loggers
 	 */
 	private LoggerServiceImpl(final int count, final int maxMessageSize,
 		final ObjectFormatterFactory objectFormatterFactory,
 		final Appender[] appenders,
 		final GFLogger[] loggers) {
 
-		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
+		super( count, maxMessageSize, objectFormatterFactory, loggers, appenders );
 
 		// quick check is count = 2^k ?
 		final int c = (count & (count - 1)) != 0 ?
-			roundUpNextPower2(count) : count;
+			roundUpNextPower2( count ) : count;
 
-		// unicode char has 2 bytes
-		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
-		final ByteBuffer buffer = allocate(c * bufferSize);
+		final int bufferSize = size( maxMessageSize, multibyte );
+		final ByteBuffer buffer = allocate( c * bufferSize );
 
 		strategy = new WaitStrategyImpl();
 
@@ -98,15 +100,15 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			int i = 0;
 			@Override
 			public LogEntryItemImpl newInstance() {
-				buffer.limit((i + 1) * bufferSize);
-				buffer.position(i * bufferSize);
+				buffer.limit( ( i + 1 ) * bufferSize );
+				buffer.position( i * bufferSize );
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
-				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer, multibyte);
+				return new LogEntryItemImpl( objectFormatterFactory, service, subBuffer, multibyte );
 			}
 		},
 		executorService,
-		new MultiThreadedClaimStrategy(c),
+		new MultiThreadedClaimStrategy( c ),
 		//new MultiThreadedLowContentionClaimStrategy(c),
 		strategy);
 
@@ -128,8 +130,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 			}
 		});
 
-		final EntryHandler entryHandler = new EntryHandler(this, appenders);
-		disruptor.handleEventsWith(entryHandler);
+		final EntryHandler entryHandler = new EntryHandler( this, appenders );
+		disruptor.handleEventsWith( entryHandler );
 
 		ringBuffer = disruptor.start();
 		state = State.RUNNING;
