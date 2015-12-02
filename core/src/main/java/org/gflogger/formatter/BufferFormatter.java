@@ -814,7 +814,7 @@ public class BufferFormatter {
 	private static String toString(double v) {
 		// All exceptional cases have been covered
 		// TODO: this leads to garbage
-		final String javaFormatString = new FloatingDecimal(v).toJavaFormatString();
+		final String javaFormatString = FloatingDecimal.toJavaFormatString(v);
 		return javaFormatString;
 	}
 
