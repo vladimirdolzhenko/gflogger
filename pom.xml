@@ -10,8 +10,7 @@
 	<url>https://bitbucket.org/vladimir.dolzhenko/org.gflogger/</url>
 
 	<properties>
-		<disruptor.version>3.2.0</disruptor.version>
-		<disruptor.version>2.10.3</disruptor.version>
+		<disruptor.version>3.3.2</disruptor.version>
 
 		<allocation.version>2.1</allocation.version>
 

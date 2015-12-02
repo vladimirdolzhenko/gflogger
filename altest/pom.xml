@@ -43,19 +43,11 @@
 			<version>${logback.version}</version>
 		</dependency>
 
-		<!-- -->
-		<!--<dependency>-->
-			<!--<groupId>com.lmax</groupId>-->
-			<!--<artifactId>disruptor</artifactId>-->
-			<!--<version>${disruptor.version}</version>-->
-		<!--</dependency>-->
-
 		<dependency>
-			<groupId>com.googlecode.disruptor</groupId>
+			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
 			<version>${disruptor.version}</version>
 		</dependency>
-
 
 		<!-- spring -->
 		<dependency>

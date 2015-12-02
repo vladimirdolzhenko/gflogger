@@ -19,6 +19,7 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import org.gflogger.*;
@@ -27,6 +28,7 @@ import org.gflogger.helpers.LogLog;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
 
 /**
  * garbage-free logger service implementation on the top of LMAX's disruptor.
@@ -39,7 +41,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 	private final RingBuffer<LogEntryItemImpl>	ringBuffer;
 
-	private final WaitStrategyImpl				strategy;
+	private final WaitStrategyImpl	strategy;
 
 	/**
 	 * @param count a number of items in the ring
@@ -94,7 +96,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 		final LoggerServiceImpl service = this;
 
-		disruptor = new Disruptor<LogEntryItemImpl>(new EventFactory<LogEntryItemImpl>() {
+		disruptor = new Disruptor<>(new EventFactory<LogEntryItemImpl>() {
 			int i = 0;
 			@Override
 			public LogEntryItemImpl newInstance() {
@@ -104,10 +106,9 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 				final ByteBuffer subBuffer = buffer.slice();
 				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer, multibyte);
 			}
-		},
+		},c,
 		executorService,
-		new MultiThreadedClaimStrategy(c),
-		//new MultiThreadedLowContentionClaimStrategy(c),
+		ProducerType.MULTI,
 		strategy);
 
 		disruptor.handleExceptionsWith(new ExceptionHandler() {
@@ -198,10 +199,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		private volatile int numWaiters = 0;
 		private boolean signalled;
 		private final Object lock = new Object();
-
-		@Override
-		public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier)
-			throws AlertException, InterruptedException {
+		public long waitFor(long sequence, Sequence cursor, Sequence dependentSequence, SequenceBarrier barrier) throws AlertException, InterruptedException, TimeoutException {
 			long availableSequence;
 			if ((availableSequence = cursor.get()) < sequence) {
 				flush();
@@ -222,49 +220,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 					--numWaiters;
 				}
 			}
-
-			if (0 != dependents.length) {
-				while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-					barrier.checkAlert();
-				}
-			}
-
-			return availableSequence;
-		}
-
-		@Override
-		public long waitFor(final long sequence, final Sequence cursor, final Sequence[] dependents, final SequenceBarrier barrier,
-							final long timeout, final TimeUnit sourceUnit)
-			throws AlertException, InterruptedException {
-			long availableSequence;
-			if ((availableSequence = cursor.get()) < sequence) {
-				final long timeoutMs = sourceUnit.toMillis(timeout);
-				final long startTime = System.currentTimeMillis() ;
-				flush();
-				synchronized (lock) {
-					++numWaiters;
-					while ((availableSequence = cursor.get()) < sequence) {
-						barrier.checkAlert();
-						if (state == State.STOPPED){
-							disruptor.halt();
-							throw AlertException.INSTANCE;
-						}
-						//*/
-						lock.wait(timeoutMs);
-
-						if (!signalled || (System.currentTimeMillis() - startTime) > timeoutMs) break;
-						/*/
-						Thread.sleep(timeoutMs);
-						//*/
-					}
-					--numWaiters;
-				}
-			}
-
-			if (0 != dependents.length) {
-				while ((availableSequence = getMinimumSequence(dependents)) < sequence) {
-					barrier.checkAlert();
-				}
+			while ((availableSequence = dependentSequence.get()) < sequence) {
+				barrier.checkAlert();
 			}
 
 			return availableSequence;
