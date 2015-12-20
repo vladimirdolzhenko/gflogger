@@ -14,11 +14,11 @@
 
 package org.gflogger;
 
-import static org.gflogger.formatter.BufferFormatter.allocate;
+import org.gflogger.formatter.BufferFormatter;
 
 import java.nio.ByteBuffer;
 
-import org.gflogger.formatter.BufferFormatter;
+import static org.gflogger.formatter.BufferFormatter.allocate;
 
 /**
  * ByteBufferLocalLogEntry
@@ -29,26 +29,31 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	public ByteBufferLocalLogEntry(final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService) {
-		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService);
+		final LoggerService loggerService,
+		final FormattingStrategy strategy) {
+		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService, strategy);
 	}
 
 	public ByteBufferLocalLogEntry(final Thread owner, final int maxMessageSize,
 			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService) {
-		this(owner, allocate(maxMessageSize), formatterFactory, loggerService);
+			final LoggerService loggerService,
+			final FormattingStrategy strategy) {
+		this(owner, allocate(maxMessageSize), formatterFactory, loggerService, strategy);
 	}
 
 	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService) {
-		super(owner, formatterFactory, loggerService, byteBuffer);
+		final LoggerService loggerService,
+		final FormattingStrategy strategy) {
+		super(owner, formatterFactory, loggerService, byteBuffer,strategy);
 	}
 
 	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService, String logErrorsMsg) {
-		super(owner, formatterFactory, loggerService, logErrorsMsg, byteBuffer);
+		final LoggerService loggerService,
+		String logErrorsMsg,
+		final FormattingStrategy strategy) {
+		super(owner, formatterFactory, loggerService, logErrorsMsg, byteBuffer, strategy);
 	}
 
 	@Override

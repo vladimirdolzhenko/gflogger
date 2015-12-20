@@ -1,9 +1,6 @@
 package org.gflogger.base;
 
-import org.gflogger.AbstractTestLoggerService;
-import org.gflogger.GFLoggerBuilder;
-import org.gflogger.LoggerService;
-import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.*;
 import org.gflogger.appender.AppenderFactory;
 
 
@@ -12,7 +9,7 @@ import org.gflogger.appender.AppenderFactory;
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class TestDefaultLoggerServiceImpl extends AbstractTestLoggerService {
+public class TestDefaultStingFormatLoggerServiceImpl extends TestStringFormatLoggerServiceImpl {
 
 	@Override
 	protected LoggerService createLoggerService(int maxMessageSize,

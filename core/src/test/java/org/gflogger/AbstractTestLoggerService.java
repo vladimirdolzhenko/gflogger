@@ -1,15 +1,24 @@
 package org.gflogger;
 
+import org.gflogger.appender.AbstractAppenderFactory;
+import org.gflogger.appender.AbstractAsyncAppender;
+import org.gflogger.appender.AppenderFactory;
+import org.gflogger.appender.ConsoleAppender;
+import org.gflogger.appender.ConsoleAppenderFactory;
+import org.gflogger.formatter.BytesOverflow;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.gflogger.appender.*;
-import org.gflogger.formatter.BytesOverflow;
-import org.junit.*;
 
 import static org.junit.Assert.*;
 
@@ -18,6 +27,10 @@ import static org.junit.Assert.*;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public abstract class AbstractTestLoggerService {
+
+	protected abstract Map<String,String> getMessagePatterns();
+
+	protected abstract Map<String,String> getExpectedOutput();
 
 	@AfterClass
 	public static void shutdown(){
@@ -281,7 +294,7 @@ public abstract class AbstractTestLoggerService {
 		log.info().append("commited").commit();
 		log.info().append("commited").commit();
 
-		latch.await();
+		latch.await(100000, TimeUnit.MILLISECONDS);
 
 		Thread.sleep(100);
 
@@ -628,7 +641,7 @@ public abstract class AbstractTestLoggerService {
 		final String placeholder = ">";
 		System.setProperty("gflogger.errorMessage", placeholder);
 
-		final String tooLongMessage = "value is %s%s";
+		final String tooLongMessage = getMessagePatterns().get("testAppendTruncatedMessageWithDigits");
 		final int maxMessageSize = "value is  ".length();
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
@@ -665,7 +678,7 @@ public abstract class AbstractTestLoggerService {
 		final String string = buffer.toString();
 		assertEquals(string, maxMessageSize, string.length());
 
-		final String expected = "value is >";
+		final String expected = getExpectedOutput().get("testAppendTruncatedMessageWithDigits");
 		assertEquals(expected, string);
 	}
 
@@ -799,19 +812,19 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.init( loggerService );
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
-		log.info("say hello %% %s %").withLast("world");
+		log.info(getMessagePatterns().get("testAppendFormattedWithWithLastMessage")).withLast("world");
 
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("say hello % world %", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithWithLastMessage"), string);
 	}
 
 	@Test
 	public void testAppendFormattedWithLimitedAppenderBufferSize() throws Exception {
 		final int maxMessageSize = 64;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
-		final String targetMsg = "say hello % world %";
+		final String targetMsg = getExpectedOutput().get("testAppendFormattedWithLimitedAppenderBufferSize");
 		factory.setBufferSize(targetMsg.length() + 2);
 		factory.setLayoutPattern( "%m" );
 		final StringBuffer buffer = new StringBuffer();
@@ -825,7 +838,7 @@ public abstract class AbstractTestLoggerService {
 
 		final StringBuilder expected = new StringBuilder();
 		for(int i = 0; i < 10; i++){
-			log.info("say hello %% %s %").withLast("world");
+			log.info(getMessagePatterns().get("testAppendFormattedWithLimitedAppenderBufferSize")).withLast("world");
 			expected.append(targetMsg);
 		}
 
@@ -848,12 +861,12 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.init( loggerService );
 
 		final GFLog log = GFLogFactory.getLog( "com.db.fxpricing.Logger" );
-		log.info("say %s hello %% %s %").with("a").withLast( "world" );
+		log.info(getMessagePatterns().get("testAppendFormattedWithLastMessage")).with("a").withLast( "world" );
 
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("say a hello % world %", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithLastMessage"), string);
 	}
 
 	@Test
@@ -870,9 +883,9 @@ public abstract class AbstractTestLoggerService {
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 		try {
-			log.info("say hello %d !").withLast("world");
+			log.info(getMessagePatterns().get("testAppendFormattedWithWrongPlaceholder")).withLast("world");
 			fail();
-		} catch(IllegalArgumentException e){
+		} catch(IllegalStateException e){
 			// ok
 		}
 	}
@@ -891,7 +904,7 @@ public abstract class AbstractTestLoggerService {
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 		try {
-			log.info("say hello %s").with( "world" ).with( "world" );
+			log.info(getMessagePatterns().get("testAppendFormattedWithNoMorePlaceholder")).with( "world" ).with( "world" );
 			fail();
 		} catch(IllegalStateException e){
 			// ok
@@ -899,7 +912,7 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("say hello world", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithNoMorePlaceholder"), string);
 	}
 
 	@Test
@@ -916,7 +929,7 @@ public abstract class AbstractTestLoggerService {
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 		try {
-			log.info("say hello %s %s").withLast("world");
+			log.info(getMessagePatterns().get("testAppendFormattedWithLessPlaceholdersThanRequired")).withLast("world");
 
 			GFLogFactory.stop();
 			fail(buffer.toString());
@@ -926,7 +939,7 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithLessPlaceholdersThanRequired"), string);
 	}
 
 	@Test
@@ -963,15 +976,15 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.init(loggerService);
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
-		log.info("value: %s;").withLast(new String[0], ", ");
-		log.info("value: %s;").withLast(new String[]{"a"}, ", ");
-		log.info("value: %s;").withLast(new String[]{"b", "a"}, ", ");
-		log.info("value: %s;").withLast( new String[] { null, "q", null }, ", " );
+		log.info(getMessagePatterns().get("testAppendFormattedWithArrayPlaceholder")).withLast(new String[0], ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithArrayPlaceholder")).withLast(new String[]{"a"}, ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithArrayPlaceholder")).withLast(new String[]{"b", "a"}, ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithArrayPlaceholder")).withLast( new String[] { null, "q", null }, ", " );
 
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("value: [];value: [a];value: [b, a];value: [null, q, null];", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithArrayPlaceholder"), string);
 	}
 
 	@Test
@@ -988,15 +1001,15 @@ public abstract class AbstractTestLoggerService {
 
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
-		log.info("value: %s;").withLast(Arrays.asList(), ", ");
-		log.info("value: %s;").withLast(Arrays.asList("a"), ", ");
-		log.info("value: %s;").withLast(Arrays.asList("b", "a"), ", ");
-		log.info("value: %s;").withLast(Arrays.asList(null, "q", null), ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithIterablePlaceholder")).withLast(Arrays.asList(), ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithIterablePlaceholder")).withLast(Arrays.asList("a"), ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithIterablePlaceholder")).withLast(Arrays.asList("b", "a"), ", ");
+		log.info(getMessagePatterns().get("testAppendFormattedWithIterablePlaceholder")).withLast(Arrays.asList(null, "q", null), ", ");
 
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("value: [];value: [a];value: [b, a];value: [null, q, null];", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithIterablePlaceholder"), string);
 	}
 
 	@Test
@@ -1018,12 +1031,12 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.init( loggerService );
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
-		log.info("say hello %s world").withLast(new Foo(5));
+		log.info(getMessagePatterns().get("testAppendObjectFormatter")).withLast(new Foo(5));
 
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("say hello v:5 world", string);
+		assertEquals(getExpectedOutput().get("testAppendObjectFormatter"), string);
 	}
 
 	@Test

@@ -13,14 +13,12 @@
  */
 package org.gflogger;
 
-import static org.gflogger.helpers.OptionConverter.getStringProperty;
-import static org.gflogger.util.StackTraceUtils.getCodeLocation;
-import static org.gflogger.util.StackTraceUtils.getImplementationVersion;
-import static org.gflogger.util.StackTraceUtils.loadClass;
+import org.gflogger.helpers.LogLog;
 
 import java.util.Iterator;
 
-import org.gflogger.helpers.LogLog;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
+import static org.gflogger.util.StackTraceUtils.*;
 
 /**
  * AbstractLocalLogEntry
@@ -33,6 +31,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected final LoggerService loggerService;
 	protected final ObjectFormatterFactory	formatterFactory;
 	protected final String logErrorsMessage;
+	protected final FormattingStrategy strategy;
 
 	protected String categoryName;
 	protected LogLevel logLevel;
@@ -45,28 +44,33 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected int pPos;
 
 	AbstractLocalLogEntry(final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService,
-			final String logErrorsMessage){
+						  final LoggerService loggerService,
+						  final String logErrorsMessage,
+						  final FormattingStrategy strategy){
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
 		this.logErrorsMessage = logErrorsMessage;
+		this.strategy = strategy;
 	}
 
 	public AbstractLocalLogEntry(final Thread owner,
-			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService) {
+								 final ObjectFormatterFactory formatterFactory,
+								 final LoggerService loggerService,
+								 final FormattingStrategy strategy) {
 		this(owner, formatterFactory,
-			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"));
+			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), strategy);
 	}
 
 	public AbstractLocalLogEntry(final Thread owner,
-			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService,
-			final String logErrorsMessage) {
+								 final ObjectFormatterFactory formatterFactory,
+								 final LoggerService loggerService,
+								 final String logErrorsMessage,
+								 final FormattingStrategy strategy) {
 		/*
 		 * It have to be cached thread name at thread local variable cause
 		 * thread.getName() generates new String(char[])
 		 */
+		this.strategy = strategy;
 		this.threadName = owner.getName();
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
@@ -137,11 +141,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		final int len = pattern.length();
 		for(; pPos < len; pPos++){
 			final char ch = pattern.charAt(pPos);
-			if (ch == '%' && (pPos + 1) < len){
-				if (pattern.charAt(pPos + 1) != '%') break;
+			if(strategy.isEscape(pattern,pPos)){
+				append(pattern.charAt(pPos+1));
 				pPos++;
+			} else if(strategy.isPlaceholder(pattern,pPos)){
+				break;
+			} else {
+				append(ch);
 			}
-			append(ch);
 		}
 		if (this.pPos == len){
 			commit();
@@ -164,8 +171,8 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		}
 		final char ch1 = pattern.charAt(pPos);
 		final char ch2 = pattern.charAt(pPos + 1);
-		if (ch1 != '%' || ch2 != 's'){
-			throw new IllegalArgumentException("Illegal pattern placeholder '" + ch1 + "" + ch2 + " at " + pPos);
+        if (!strategy.isPlaceholder(pattern, pPos)) {
+            throw new IllegalArgumentException("Illegal pattern placeholder '" + ch1 + "" + ch2 + " at " + pPos);
 		}
 		pPos += 2;
 	}

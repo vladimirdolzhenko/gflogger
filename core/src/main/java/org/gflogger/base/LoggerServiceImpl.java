@@ -14,12 +14,9 @@
 
 package org.gflogger.base;
 
-import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
-
-import java.util.concurrent.TimeUnit;
-
 import org.gflogger.AbstractLoggerServiceImpl;
 import org.gflogger.Appender;
+import org.gflogger.FormattingStrategy;
 import org.gflogger.GFLogger;
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LocalLogEntry;
@@ -28,7 +25,12 @@ import org.gflogger.LogLevel;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.State;
 import org.gflogger.appender.AppenderFactory;
+import org.gflogger.formatting.StringFormattingStrategy;
 import org.gflogger.ring.RingBuffer;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
 /**
  * garbage-free logger service implementation on the top of
@@ -44,7 +46,6 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	/**
 	 * @param count a number of items in the ring, could be rounded up to the next power of 2
 	 * @param maxMessageSize max message size in the ring (in chars)
-	 * @param objectFormatterFactory
 	 * @param appenderFactories
 	 */
 	public LoggerServiceImpl(final int count,
@@ -134,6 +135,11 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	@Override
 	protected String name() {
 		return "gflogger";
+	}
+
+	@Override
+	protected FormattingStrategy getFormattingStrategy() {
+		return new StringFormattingStrategy();
 	}
 
 	@Override

@@ -15,7 +15,9 @@
 		<allocation.version>2.1</allocation.version>
 
 		<log4j.version>1.2.17</log4j.version>
+		<slf4j.version>1.7.13</slf4j.version>
 		<logback.version>1.0.13</logback.version>
+		<commons-logging.version>1.1.3</commons-logging.version>
 
 		<spring.version>3.2.4.RELEASE</spring.version>
 
@@ -28,6 +30,9 @@
 		<module>core</module>
 		<module>altest</module>
 		<module>perftest</module>
+		<module>log4j-adapter</module>
+		<module>jcl-adapter</module>
+		<module>slf4j-adapter</module>
 	</modules>
 
 	<build>

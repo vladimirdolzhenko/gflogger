@@ -14,13 +14,13 @@
 
 package org.gflogger;
 
-import static org.gflogger.formatter.BufferFormatter.allocate;
+import org.gflogger.formatter.BufferFormatter;
+import org.gflogger.ring.Publishable;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-import org.gflogger.formatter.BufferFormatter;
-import org.gflogger.ring.Publishable;
+import static org.gflogger.formatter.BufferFormatter.allocate;
 
 /**
  * LogEntryItemImpl
@@ -41,22 +41,22 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	private long appenderMask;
 	private long	sequence;
 
-	public LogEntryItemImpl(final int size) {
-		this(size, false);
+	public LogEntryItemImpl(final int size, final FormattingStrategy strategy) {
+		this(size, false, strategy);
 	}
 
-	public LogEntryItemImpl(final int size, final boolean multibyte) {
-		this(allocate(size), multibyte);
+	public LogEntryItemImpl(final int size, final boolean multibyte,final FormattingStrategy strategy) {
+		this(allocate(size), multibyte,strategy);
 	}
 
-	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte) {
-		this(null, null, buffer, multibyte);
+	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte,final FormattingStrategy strategy) {
+		this(null, null, buffer, multibyte,strategy);
 	}
 
 	public LogEntryItemImpl(final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
-			final ByteBuffer buffer, final boolean multibyte) {
-		super(formatterFactory, loggerService, null);
+			final ByteBuffer buffer, final boolean multibyte,final FormattingStrategy strategy) {
+		super(formatterFactory, loggerService, null, strategy);
 		this.buffer = buffer;
 		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;
 	}
