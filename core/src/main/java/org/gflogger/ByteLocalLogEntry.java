@@ -13,10 +13,10 @@
  */
 package org.gflogger;
 
+import org.gflogger.formatter.Bytes;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-
-import org.gflogger.formatter.Bytes;
 
 /**
  * ByteLocalLogEntry
@@ -29,20 +29,23 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	public ByteLocalLogEntry(final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService) {
-		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService);
+		final LoggerService loggerService,
+		final FormattingStrategy strategy) {
+		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService,strategy);
 	}
 
 	public ByteLocalLogEntry(final Thread owner, final int maxMessageSize,
 			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService) {
-		this(owner,maxMessageSize, formatterFactory, loggerService, null);
+			final LoggerService loggerService,
+			final FormattingStrategy strategy) {
+		this(owner,maxMessageSize, formatterFactory, loggerService, null,strategy);
 	}
 
 	public ByteLocalLogEntry(final Thread owner, final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService, String logErrorsMsg) {
-		super(owner, formatterFactory, loggerService, logErrorsMsg);
+		final LoggerService loggerService, String logErrorsMsg,
+		final FormattingStrategy strategy) {
+		super(owner, formatterFactory, loggerService, logErrorsMsg, strategy);
 		this.bytes = new Bytes(maxMessageSize);
 	}
 

@@ -14,21 +14,35 @@
 
 package org.gflogger.disruptor;
 
-import static com.lmax.disruptor.util.Util.getMinimumSequence;
-import static org.gflogger.formatter.BufferFormatter.allocate;
-import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
-
-import java.nio.ByteBuffer;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-
-import org.gflogger.*;
-import org.gflogger.appender.AppenderFactory;
-import org.gflogger.helpers.LogLog;
-
-import com.lmax.disruptor.*;
+import com.lmax.disruptor.AlertException;
+import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.ExceptionHandler;
+import com.lmax.disruptor.RingBuffer;
+import com.lmax.disruptor.Sequence;
+import com.lmax.disruptor.SequenceBarrier;
+import com.lmax.disruptor.TimeoutException;
+import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.gflogger.AbstractLoggerServiceImpl;
+import org.gflogger.Appender;
+import org.gflogger.FormattingStrategy;
+import org.gflogger.GFLogger;
+import org.gflogger.GFLoggerBuilder;
+import org.gflogger.LocalLogEntry;
+import org.gflogger.LogEntryItemImpl;
+import org.gflogger.LogLevel;
+import org.gflogger.ObjectFormatterFactory;
+import org.gflogger.State;
+import org.gflogger.appender.AppenderFactory;
+import org.gflogger.formatting.StringFormattingStrategy;
+import org.gflogger.helpers.LogLog;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+
+import static org.gflogger.formatter.BufferFormatter.allocate;
+import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
 /**
  * garbage-free logger service implementation on the top of LMAX's disruptor.
@@ -104,7 +118,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 				buffer.position(i * bufferSize);
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
-				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer, multibyte);
+				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer, multibyte, getFormattingStrategy());
 			}
 		},c,
 		executorService,
@@ -186,6 +200,11 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	@Override
 	protected String name() {
 		return "dgflogger";
+	}
+
+	@Override
+	protected FormattingStrategy getFormattingStrategy() {
+		return new StringFormattingStrategy();
 	}
 
 	void flush() {

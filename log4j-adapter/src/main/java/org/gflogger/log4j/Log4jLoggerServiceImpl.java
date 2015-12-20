@@ -14,18 +14,18 @@
 
 package org.gflogger.log4j;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.gflogger.FormattedGFLogEntry;
+import org.gflogger.GFLogEntry;
 import org.gflogger.GFLogger;
 import org.gflogger.LocalLogEntry;
-import org.gflogger.GFLogEntry;
 import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -47,7 +47,7 @@ public class Log4jLoggerServiceImpl implements LoggerService {
 		this.entries = new ThreadLocal<Map<String, Log4jEntry>>(){
 			@Override
 			protected Map<String, Log4jEntry> initialValue() {
-				return new HashMap<String, Log4jEntry>();
+				return new HashMap<>();
 			}
 		};
 		BasicConfigurator.configure();

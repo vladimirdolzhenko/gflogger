@@ -14,6 +14,11 @@
 package org.gflogger;
 
 
+import org.gflogger.appender.AppenderFactory;
+import org.gflogger.disruptor.LoggerServiceImpl;
+import org.gflogger.helpers.LogLog;
+import org.gflogger.util.NamedThreadFactory;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,11 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.gflogger.appender.AppenderFactory;
-import org.gflogger.disruptor.LoggerServiceImpl;
-import org.gflogger.helpers.LogLog;
-import org.gflogger.util.NamedThreadFactory;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
@@ -90,16 +90,19 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 					new CharBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
 						formatterFactory,
-						service) :
+						service,
+						getFormattingStrategy()) :
 					typeOfByteBuffer ?
 						new ByteBufferLocalLogEntry(Thread.currentThread(),
 							maxMessageSize0,
 							formatterFactory,
-							service):
+							service,
+							getFormattingStrategy()):
 						new ByteLocalLogEntry(Thread.currentThread(),
 							maxMessageSize0,
 							formatterFactory,
-							service);
+							service,
+							getFormattingStrategy());
 				return logEntry;
 			}
 		};
@@ -147,6 +150,8 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected abstract String name();
 
+	protected abstract FormattingStrategy getFormattingStrategy();
+
 	protected ExecutorService initExecutorService(){
 		return Executors.newFixedThreadPool(1, new NamedThreadFactory(name()));
 	}
@@ -161,7 +166,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 			buffer.limit((i + 1) * bufferSize);
 			buffer.position(i * bufferSize);
 			final ByteBuffer subBuffer = buffer.slice();
-			entries[i] = new LogEntryItemImpl(subBuffer, multibyte);
+			entries[i] = new LogEntryItemImpl(subBuffer, multibyte, getFormattingStrategy());
 		}
 		return entries;
 	}

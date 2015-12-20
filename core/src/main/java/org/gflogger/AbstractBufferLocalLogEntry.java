@@ -13,11 +13,11 @@
  */
 package org.gflogger;
 
-import static org.gflogger.helpers.OptionConverter.getStringProperty;
+import org.gflogger.formatter.BufferFormatter;
 
 import java.nio.ByteBuffer;
 
-import org.gflogger.formatter.BufferFormatter;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 
 /**
@@ -32,17 +32,19 @@ abstract class AbstractBufferLocalLogEntry extends AbstractLocalLogEntry {
 	public AbstractBufferLocalLogEntry(final Thread owner,
 			final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
-			final ByteBuffer byteBuffer) {
+			final ByteBuffer byteBuffer,
+			final FormattingStrategy strategy) {
 		this(owner, formatterFactory,
-			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), byteBuffer);
+			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), byteBuffer,strategy);
 	}
 
 	public AbstractBufferLocalLogEntry(final Thread owner,
 			final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
 			final String logErrorsMessage,
-			final ByteBuffer byteBuffer) {
-		super(owner, formatterFactory, loggerService, logErrorsMessage);
+			final ByteBuffer byteBuffer,
+			final FormattingStrategy strategy) {
+		super(owner, formatterFactory, loggerService, logErrorsMessage, strategy);
 		this.byteBuffer = byteBuffer;
 
 		// there is no reason to register in Cleaner as direct byte buffer registers in it by its own

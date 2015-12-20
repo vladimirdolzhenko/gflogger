@@ -10,7 +10,6 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>org.gflogger</groupId>
 	<artifactId>perftest</artifactId>
 	<packaging>jar</packaging>
 	<version>0.1.0-SNAPSHOT</version>
@@ -25,6 +24,21 @@
 		<dependency>
 			<groupId>org.gflogger</groupId>
 			<artifactId>core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gflogger</groupId>
+			<artifactId>log4j-adapter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gflogger</groupId>
+			<artifactId>slf4j-adapter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gflogger</groupId>
+			<artifactId>jcl-adapter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
