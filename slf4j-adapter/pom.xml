@@ -8,6 +8,7 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <name>Slf4j To Garbage Free Logger Bridge</name>
 
     <artifactId>slf4j-adapter</artifactId>
 
