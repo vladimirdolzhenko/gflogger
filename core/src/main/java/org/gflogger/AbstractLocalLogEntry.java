@@ -43,29 +43,35 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected String pattern;
 	protected int pPos;
 
-	AbstractLocalLogEntry(final ObjectFormatterFactory formatterFactory,
-						  final LoggerService loggerService,
-						  final String logErrorsMessage,
-						  final FormattingStrategy strategy){
+	AbstractLocalLogEntry(
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService,
+		final String logErrorsMessage,
+		final FormattingStrategy strategy
+	){
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
 		this.logErrorsMessage = logErrorsMessage;
 		this.strategy = strategy;
 	}
 
-	public AbstractLocalLogEntry(final Thread owner,
-								 final ObjectFormatterFactory formatterFactory,
-								 final LoggerService loggerService,
-								 final FormattingStrategy strategy) {
+	public AbstractLocalLogEntry(
+		final Thread owner,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService,
+		final FormattingStrategy strategy
+	) {
 		this(owner, formatterFactory,
 			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), strategy);
 	}
 
-	public AbstractLocalLogEntry(final Thread owner,
-								 final ObjectFormatterFactory formatterFactory,
-								 final LoggerService loggerService,
-								 final String logErrorsMessage,
-								 final FormattingStrategy strategy) {
+	public AbstractLocalLogEntry(
+		final Thread owner,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService,
+		final String logErrorsMessage,
+		final FormattingStrategy strategy
+	) {
 		/*
 		 * It have to be cached thread name at thread local variable cause
 		 * thread.getName() generates new String(char[])
@@ -74,7 +80,8 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		this.threadName = owner.getName();
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
-		this.logErrorsMessage = logErrorsMessage != null && logErrorsMessage.length() > 0 ? logErrorsMessage : null;
+		this.logErrorsMessage = logErrorsMessage != null
+				&& logErrorsMessage.length() > 0 ? logErrorsMessage : null;
 	}
 
 	@Override

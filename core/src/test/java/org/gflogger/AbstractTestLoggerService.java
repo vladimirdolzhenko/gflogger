@@ -38,7 +38,7 @@ public abstract class AbstractTestLoggerService {
 	}
 
 	@Before
-	public void setUp(){
+	public void setUp() throws Exception {
 		System.setProperty("gflogger.errorMessage", "");
 	}
 

@@ -3,8 +3,11 @@ package org.gflogger.slf4j;
 import org.gflogger.GFLog;
 import org.slf4j.helpers.MarkerIgnoringBase;
 
+/**
+ * @author Denis Gburg
+ */
 public class Slf4jLoggerImpl extends MarkerIgnoringBase{
-    GFLog log;
+    private final GFLog log;
 
     public Slf4jLoggerImpl(GFLog log) {
         this.log = log;

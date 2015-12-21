@@ -6,9 +6,6 @@ import org.gflogger.GFLog;
 import org.gflogger.GFLogFactory;
 
 /**
- * 
- * 
- * 
  * LogImpl is java commons logging impl on the top of gflogger
  * 
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com

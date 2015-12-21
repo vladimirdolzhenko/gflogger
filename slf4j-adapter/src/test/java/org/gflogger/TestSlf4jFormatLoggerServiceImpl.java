@@ -1,13 +1,22 @@
 package org.gflogger;
 
+import org.junit.Before;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Denis Gburg
+ */
 public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLoggerService {
-    Map<String,String> messagePatterns;
-    Map<String,String> expectedOutput;
+    private Map<String,String> messagePatterns;
+    private Map<String,String> expectedOutput;
 
-    {
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
         messagePatterns = new HashMap<>();
         expectedOutput = new HashMap<>();
 
