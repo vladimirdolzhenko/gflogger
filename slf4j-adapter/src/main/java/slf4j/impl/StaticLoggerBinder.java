@@ -5,8 +5,11 @@ import org.gflogger.helpers.LogLog;
 import org.gflogger.slf4j.Slf4jLoggerFactory;
 import org.slf4j.ILoggerFactory;
 
+/**
+ * @author Denis Gburg
+ */
 public class StaticLoggerBinder {
-    private static StaticLoggerBinder SINGLETON = new StaticLoggerBinder();
+    private static final StaticLoggerBinder SINGLETON = new StaticLoggerBinder();
 
     static {
         SINGLETON.init();

@@ -10,7 +10,7 @@ import org.gflogger.helpers.LogLog;
  * https://code.google.com/p/jmonkeyengine/source/browse/trunk/engine/src/core/com/jme3/util/BufferUtils.java
  * Great thanks to them!
  *
- * @author ruslan
+ * @author Ruslan Cheremin
  *         created 03/11/14 at 15:12
  */
 public class DirectBufferUtils {
