@@ -48,10 +48,12 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param maxMessageSize max message size in the ring (in chars)
 	 * @param appenderFactories
 	 */
-	public LoggerServiceImpl(final int count,
-			final int maxMessageSize,
-			final GFLoggerBuilder[] loggerBuilders,
-			final AppenderFactory ... appenderFactories) {
+	public LoggerServiceImpl(
+		final int count,
+		final int maxMessageSize,
+		final GFLoggerBuilder[] loggerBuilders,
+		final AppenderFactory ... appenderFactories
+	) {
 		this(count, maxMessageSize, null,
 			createAppenders(appenderFactories),
 			createLoggers(appenderFactories, loggerBuilders));
@@ -63,14 +65,20 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param objectFormatterFactory
 	 * @param appenderFactories
 	 */
-	public LoggerServiceImpl(final int count,
-			final int maxMessageSize,
-			final ObjectFormatterFactory objectFormatterFactory,
-			final GFLoggerBuilder[] loggersBuilders,
-			final AppenderFactory ... appenderFactories) {
-		this(count, maxMessageSize, objectFormatterFactory,
+	public LoggerServiceImpl(
+		final int count,
+		final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final GFLoggerBuilder[] loggersBuilders,
+		final AppenderFactory ... appenderFactories
+	) {
+		this(
+			count,
+			maxMessageSize,
+			objectFormatterFactory,
 			createAppenders(appenderFactories),
-			createLoggers(appenderFactories, loggersBuilders));
+			createLoggers(appenderFactories, loggersBuilders)
+		);
 	}
 
 	/**
@@ -79,11 +87,13 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	private LoggerServiceImpl(final int count,
-			final int maxMessageSize,
-			final ObjectFormatterFactory objectFormatterFactory,
-			final Appender[] appenders,
-			final GFLogger[] loggers) {
+	private LoggerServiceImpl(
+		final int count,
+		final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final Appender[] appenders,
+		final GFLogger[] loggers
+	) {
 
 		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
 
@@ -95,7 +105,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 		entryHandler = new EntryHandler(this, appenders);
 		this.ringBuffer =
-				new RingBuffer<LogEntryItemImpl>(initEnties(c, maxMessageSize0), entryHandler);
+				new RingBuffer<>(initEnties(c, maxMessageSize0), entryHandler);
 		entryHandler.start();
 		executorService.execute(entryHandler);
 

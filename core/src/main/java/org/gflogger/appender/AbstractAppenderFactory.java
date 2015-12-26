@@ -33,22 +33,34 @@ import org.gflogger.PatternLayout;
  */
 public abstract class AbstractAppenderFactory<A extends Appender> implements AppenderFactory<A> {
 
-	// 1M
-	protected int bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
-	protected boolean multibyte = getBooleanProperty("gflogger.multibyte", false);
-
-	protected LogLevel logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "TRACE"));
-	protected TimeZone timeZone = getStringProperty("gflogger.timeZoneId", null) != null ?
-			TimeZone.getTimeZone(getStringProperty("gflogger.timeZoneId", null)) : null;
-	protected Locale locale = getStringProperty("gflogger.language", null) != null ?
-			new Locale(getStringProperty("gflogger.language", null)) : null;
-	protected String layoutPattern = getStringProperty("gflogger.pattern", "%m%n");
+	protected int bufferSize;
+	protected boolean multibyte;
+	protected LogLevel logLevel;
+	protected TimeZone timeZone;
+	protected Locale locale;
+	protected String layoutPattern;
 	protected Layout layout;
-	protected boolean immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
-	protected int bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
-	protected long awaitTimeout = getIntProperty("gflogger.awaitTimeout", 10);
-	protected boolean enabled = true;
+	protected boolean immediateFlush;
+	protected int bufferedIOThreshold;
+	protected long awaitTimeout;
+	protected boolean enabled;
 	protected int index;
+
+	public AbstractAppenderFactory() {
+		// 1M
+		bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
+		multibyte = getBooleanProperty("gflogger.multibyte", false);
+		logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "TRACE"));
+		timeZone = getStringProperty("gflogger.timeZoneId", null) != null ?
+				TimeZone.getTimeZone(getStringProperty("gflogger.timeZoneId", null)) : null;
+		locale = getStringProperty("gflogger.language", null) != null ?
+				new Locale(getStringProperty("gflogger.language", null)) : null;
+		layoutPattern = getStringProperty("gflogger.pattern", "%m%n");
+		immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
+		bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
+		awaitTimeout = getIntProperty("gflogger.awaitTimeout", 10);
+		enabled = true;
+	}
 
 	protected void preinit(Class<? extends LoggerService> loggerServiceClass) {
 		if (layout == null){

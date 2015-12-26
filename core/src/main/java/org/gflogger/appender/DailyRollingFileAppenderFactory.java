@@ -53,9 +53,10 @@ public class DailyRollingFileAppenderFactory extends FileAppenderFactory<DailyRo
 
 	protected DailyRollingFileAppender createAppender() {
 		return new DailyRollingFileAppender(
-				bufferSize,
-				multibyte,
-				logLevel, enabled
+			bufferSize,
+			multibyte,
+			logLevel,
+			enabled
 		);
 	}
 

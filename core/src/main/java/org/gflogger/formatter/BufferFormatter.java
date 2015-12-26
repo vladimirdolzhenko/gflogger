@@ -26,7 +26,8 @@ import sun.misc.FloatingDecimal;
  */
 public class BufferFormatter {
 
-	private static final boolean USE_DIRECT_BUFFER = Boolean.parseBoolean( System.getProperty( "gflogger.direct", "true" ) );
+	private static final boolean USE_DIRECT_BUFFER =
+			Boolean.parseBoolean( System.getProperty( "gflogger.direct", "true" ) );
 
 	public static ByteBuffer allocate(final int capacity){
 		return USE_DIRECT_BUFFER ?

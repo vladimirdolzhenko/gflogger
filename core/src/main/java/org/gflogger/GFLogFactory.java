@@ -14,8 +14,6 @@
 
 package org.gflogger;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,8 +34,8 @@ public final class GFLogFactory {
 	private final ConcurrentMap<String, GFLogView> loggers;
 
 	private GFLogFactory(){
-		loggerService = new AtomicReference<LoggerService>();
-		loggers = new ConcurrentHashMap<String, GFLogView>();
+		loggerService = new AtomicReference<>();
+		loggers = new ConcurrentHashMap<>();
 
 		final String ver = GFLogFactory.class.getPackage().getImplementationVersion();
 		LogLog.info(" version " + (ver != null ? ver : "*dev*") );

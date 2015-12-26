@@ -30,11 +30,12 @@ public class DefaultLoggerServiceFactory extends AbstractLoggerServiceFactory {
 	@Override
 	public LoggerService createService() {
 		return new LoggerServiceImpl(
-				count,
-				maxMessageSize,
-				objectFormatterFactory,
-				loggersBuilders.toArray(new GFLoggerBuilder[loggersBuilders.size()]),
-				appenderFactories.toArray(new AppenderFactory[appenderFactories.size()]));
+			count,
+			maxMessageSize,
+			objectFormatterFactory,
+			loggersBuilders.toArray(new GFLoggerBuilder[loggersBuilders.size()]),
+			appenderFactories.toArray(new AppenderFactory[appenderFactories.size()])
+		);
 	}
 
 }
