@@ -27,32 +27,43 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
  */
 public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
-	public ByteBufferLocalLogEntry(final int maxMessageSize,
+	public ByteBufferLocalLogEntry(
+		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy) {
+		final FormattingStrategy strategy
+	) {
 		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService, strategy);
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final int maxMessageSize,
-			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService,
-			final FormattingStrategy strategy) {
+	public ByteBufferLocalLogEntry(
+		final Thread owner,
+		final int maxMessageSize,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService,
+		final FormattingStrategy strategy
+	) {
 		this(owner, allocate(maxMessageSize), formatterFactory, loggerService, strategy);
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
+	public ByteBufferLocalLogEntry(
+		final Thread owner,
+		final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy) {
+		final FormattingStrategy strategy
+	) {
 		super(owner, formatterFactory, loggerService, byteBuffer,strategy);
 	}
 
-	public ByteBufferLocalLogEntry(final Thread owner, final ByteBuffer byteBuffer,
+	public ByteBufferLocalLogEntry(
+		final Thread owner,
+		final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
 		String logErrorsMsg,
-		final FormattingStrategy strategy) {
+		final FormattingStrategy strategy
+	) {
 		super(owner, formatterFactory, loggerService, logErrorsMsg, byteBuffer, strategy);
 	}
 

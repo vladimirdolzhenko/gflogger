@@ -51,11 +51,11 @@ public class LogLog {
 	/**
 	 * In quietMode not even errors generate any output.
 	 */
-	private static boolean	  quietMode		= getBooleanProperty("gflogger.internalQuietMode", false);
+	private static boolean	  quietMode			= getBooleanProperty("gflogger.internalQuietMode", false);
 
-	private static final String PREFIX		   = "gflogger: ";
-	private static final String ERR_PREFIX	   = "gflogger:ERROR ";
-	private static final String WARN_PREFIX	   = "gflogger:WARN ";
+	private static final String PREFIX			= "gflogger: ";
+	private static final String ERR_PREFIX		= "gflogger:ERROR ";
+	private static final String WARN_PREFIX		= "gflogger:WARN ";
 
 	private static boolean isLoggable(final LogLevel level){
 		return !quietMode && isLoggable0(level);

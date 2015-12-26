@@ -56,11 +56,13 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	 * @param objectFormatterFactory
 	 * @param appenders
 	 */
-	public AbstractLoggerServiceImpl(final int count,
-			final int maxMessageSize,
-			final ObjectFormatterFactory objectFormatterFactory,
-			final GFLogger[] loggers,
-			final Appender ... appenders) {
+	public AbstractLoggerServiceImpl(
+		final int count,
+		final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final GFLogger[] loggers,
+		final Appender ... appenders
+	) {
 		if (appenders.length <= 0){
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
@@ -119,7 +121,10 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		return appenders;
 	}
 
-	protected static GFLogger[] createLoggers(AppenderFactory[] appenderFactories, GFLoggerBuilder[] loggerBuilders) {
+	protected static GFLogger[] createLoggers(
+		AppenderFactory[] appenderFactories,
+		GFLoggerBuilder[] loggerBuilders
+	) {
 		final GFLogger[] loggers = new GFLogger[loggerBuilders.length];
 		for (int i = 0; i < loggerBuilders.length; i++) {
 			loggers[i] = loggerBuilders[i].build();

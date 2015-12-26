@@ -47,61 +47,77 @@ public final class GFLoggerBuilder {
 		this(factory.getLogLevel(), category, false, factory);
 	}
 
-	public GFLoggerBuilder(LogLevel logLevel, String category, AppenderFactory ... appenderFactories) {
+	public GFLoggerBuilder(
+		LogLevel logLevel,
+		String category,
+		AppenderFactory ... appenderFactories
+	) {
 		this(logLevel, category, false, appenderFactories);
 	}
 
-	public GFLoggerBuilder(LogLevel logLevel, String category, boolean additivity, AppenderFactory ... appenderFactories) {
+	public GFLoggerBuilder(
+		LogLevel logLevel,
+		String category,
+		boolean additivity,
+		AppenderFactory ... appenderFactories
+	) {
 		this.logLevel = logLevel;
 		this.name = category;
 		this.additivity = additivity;
-		this.factories = new ArrayList<AppenderFactory>(Arrays.asList(appenderFactories));
+		this.factories = new ArrayList<>(Arrays.asList(appenderFactories));
 	}
 
 	public LogLevel getLogLevel() {
 		return this.logLevel;
 	}
 
-	public void setLogLevel(LogLevel logLevel) {
+	public GFLoggerBuilder setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
+		return this;
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public void setName(String category) {
+	public GFLoggerBuilder setName(String category) {
 		this.name = category;
+		return this;
 	}
 
 	public boolean isAdditivity() {
 		return this.additivity;
 	}
 
-	public void setAdditivity(boolean additivity) {
+	public GFLoggerBuilder setAdditivity(boolean additivity) {
 		this.additivity = additivity;
+		return this;
 	}
 
-	public void setAppenderFactory(final AppenderFactory appender){
+	public GFLoggerBuilder setAppenderFactory(final AppenderFactory appender){
 		this.factories.clear();
 		if (appender != null) {
 			this.factories.add(appender);
 		}
+		return this;
 	}
 
-	public void setAppenderFactories(final Collection<AppenderFactory> appenders){
+	public GFLoggerBuilder setAppenderFactories(final Collection<AppenderFactory> appenders){
 		this.factories.clear();
 		if (appenders != null) {
 			this.factories.addAll(appenders);
 		}
+		return this;
 	}
 
-	public void addAppenderFactory(final AppenderFactory appender){
+	public GFLoggerBuilder addAppenderFactory(final AppenderFactory appender){
 		this.factories.add(appender);
+		return this;
 	}
 
-	public void removeAppenderFactory(final AppenderFactory appender){
+	public GFLoggerBuilder removeAppenderFactory(final AppenderFactory appender){
 		this.factories.remove(appender);
+		return this;
 	}
 
 	public GFLogger build(){
@@ -121,11 +137,21 @@ public final class GFLoggerBuilder {
 		private final long		mask;
 		private final boolean	additivity;
 
-		public GFLoggerFinal(LogLevel logLevel, String category, boolean additivity, AppenderFactory ... appenderFactories) {
+		public GFLoggerFinal(
+			LogLevel logLevel,
+			String category,
+			boolean additivity,
+			AppenderFactory ... appenderFactories
+		) {
 			this(logLevel, category, additivity, mask(appenderFactories));
 		}
 
-		private GFLoggerFinal(LogLevel logLevel, String category, boolean additivity, long mask){
+		private GFLoggerFinal(
+			LogLevel logLevel,
+			String category,
+			boolean additivity,
+			long mask
+		){
 			this.logLevel = logLevel;
 			this.category = category;
 			this.additivity = additivity;

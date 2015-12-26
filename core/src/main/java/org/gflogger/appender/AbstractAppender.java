@@ -19,10 +19,12 @@ public abstract class AbstractAppender implements Appender<LogEntryItemImpl> {
 
 	protected final String name;
 
-	protected AbstractAppender(final String name,
-	                           final boolean multibyte,
-	                           final LogLevel logLevel,
-	                           final boolean enabled) {
+	protected AbstractAppender(
+		final String name,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		this.name = name;
 		this.multibyte = multibyte;
 		this.logLevel = logLevel;

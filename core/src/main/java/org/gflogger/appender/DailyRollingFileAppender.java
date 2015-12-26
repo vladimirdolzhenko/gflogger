@@ -185,22 +185,26 @@ public class DailyRollingFileAppender extends FileAppender {
 
 	Troubles checkPeriod = Troubles.TOP_OF_TROUBLE;
 
-	// The gmtTimeZone is used only in computeCheckPeriod() method.
-	static final TimeZone gmtTimeZone = TimeZone.getTimeZone("GMT");
+	// The utcTimeZone is used only in computeCheckPeriod() method.
+	static final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
 
 	/**
 	 * The default constructor does nothing.
 	 */
-	public DailyRollingFileAppender( final boolean multibyte,
-	                                 final LogLevel logLevel,
-	                                 final boolean enabled ) {
+	public DailyRollingFileAppender(
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		super(multibyte, logLevel, enabled );
 	}
 
-	public DailyRollingFileAppender( final int bufferSize,
-	                                 final boolean multibyte,
-	                                 final LogLevel logLevel,
-	                                 final boolean enabled ) {
+	public DailyRollingFileAppender(
+		final int bufferSize,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		super(bufferSize, multibyte, logLevel, enabled );
 	}
 
@@ -209,23 +213,27 @@ public class DailyRollingFileAppender extends FileAppender {
 	 * designated by <code>filename</code>. The opened filename will become the
 	 * ouput destination for this appender.
 	 */
-	public DailyRollingFileAppender( final Layout layout,
-	                                 final String filename,
-	                                 final String datePattern,
-	                                 final boolean multibyte,
-	                                 final LogLevel logLevel,
-	                                 final boolean enabled ) {
+	public DailyRollingFileAppender(
+		final Layout layout,
+		final String filename,
+		final String datePattern,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		super(layout, filename, multibyte, logLevel, enabled );
 		this.datePattern = datePattern;
 	}
 
-	public DailyRollingFileAppender( final int bufferSize,
-	                                 final Layout layout,
-	                                 final String filename,
-	                                 final String datePattern,
-	                                 final boolean multibyte,
-	                                 final LogLevel logLevel,
-	                                 final boolean enabled ) {
+	public DailyRollingFileAppender(
+		final int bufferSize,
+		final Layout layout,
+		final String filename,
+		final String datePattern,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		super(bufferSize, layout, filename, multibyte, logLevel, enabled );
 		this.datePattern = datePattern;
 	}
@@ -284,7 +292,7 @@ public class DailyRollingFileAppender extends FileAppender {
 	// GMT (the epoch).
 
 	Troubles computeCheckPeriod() {
-		RollingCalendar rollingCalendar = new RollingCalendar(gmtTimeZone,
+		RollingCalendar rollingCalendar = new RollingCalendar(utcTimeZone,
 				Locale.getDefault());
 		// set sate to 1970-01-01 00:00:00 GMT
 		Date epoch = new Date(0);
@@ -293,7 +301,7 @@ public class DailyRollingFileAppender extends FileAppender {
 				Troubles troubles = Troubles.values[i];
 				if (troubles.getCode() < 0) continue;
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
-				simpleDateFormat.setTimeZone(gmtTimeZone); // do all date
+				simpleDateFormat.setTimeZone(utcTimeZone); // do all date
 														   // formatting in GMT
 				String r0 = simpleDateFormat.format(epoch);
 				rollingCalendar.setType(troubles);

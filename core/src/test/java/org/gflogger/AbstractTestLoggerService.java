@@ -42,28 +42,38 @@ public abstract class AbstractTestLoggerService {
 		System.setProperty("gflogger.errorMessage", "");
 	}
 
-	protected abstract LoggerService createLoggerService(final int maxMessageSize,
-	                                                     final ObjectFormatterFactory objectFormatterFactory,
-	                                                     final GFLoggerBuilder[] loggers,
-	                                                     final AppenderFactory ... factories);
+	protected abstract LoggerService createLoggerService(
+		final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final GFLoggerBuilder[] loggers,
+		final AppenderFactory ... factories
+	);
 
-	protected LoggerService createLoggerService(final int maxMessageSize,
-	                                            final ObjectFormatterFactory objectFormatterFactory,
-	                                            final GFLoggerBuilder logger,
-	                                            final AppenderFactory ... factories){
-		return createLoggerService(maxMessageSize, objectFormatterFactory, new GFLoggerBuilder[]{logger}, factories);
+	protected LoggerService createLoggerService(
+		final int maxMessageSize,
+		final ObjectFormatterFactory objectFormatterFactory,
+		final GFLoggerBuilder logger,
+		final AppenderFactory ... factories
+	){
+		return createLoggerService(maxMessageSize, objectFormatterFactory,
+				new GFLoggerBuilder[]{logger}, factories);
 	}
 
-	protected LoggerService createLoggerService(final int maxMessageSize,
-	                                            final GFLoggerBuilder[] loggers,
-	                                            final AppenderFactory ... factories){
+	protected LoggerService createLoggerService(
+		final int maxMessageSize,
+		final GFLoggerBuilder[] loggers,
+		final AppenderFactory ... factories
+	){
 		return createLoggerService(maxMessageSize, null, loggers, factories);
 	}
 
-	protected LoggerService createLoggerService(final int maxMessageSize,
-	                                            final GFLoggerBuilder logger,
-	                                            final AppenderFactory ... factories){
-		return createLoggerService(maxMessageSize, null, new GFLoggerBuilder[]{logger}, factories);
+	protected LoggerService createLoggerService(
+		final int maxMessageSize,
+		final GFLoggerBuilder logger,
+		final AppenderFactory ... factories
+	){
+		return createLoggerService(maxMessageSize, null,
+				new GFLoggerBuilder[]{logger}, factories);
 	}
 
 	@Test
@@ -143,9 +153,9 @@ public abstract class AbstractTestLoggerService {
 		};
 
 		final LoggerService loggerService = createLoggerService(
-				1,
-				new GFLoggerBuilder("com.db", factory),
-				factory
+			1,
+			new GFLoggerBuilder("com.db", factory),
+			factory
 		);
 
 		GFLogFactory.init( loggerService );
@@ -153,15 +163,15 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.stop();
 
 		assertEquals(
-				".start() called once",
-				1,
-				startCalled.get()
+			".start() called once",
+			1,
+			startCalled.get()
 		);
 
 		assertEquals(
-				".stop() called once",
-				1,
-				stopCalled.get()
+			".stop() called once",
+			1,
+			stopCalled.get()
 		);
 	}
 

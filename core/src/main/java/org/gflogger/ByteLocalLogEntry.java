@@ -27,24 +27,32 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	private final Bytes	bytes;
 
-	public ByteLocalLogEntry(final int maxMessageSize,
+	public ByteLocalLogEntry(
+		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy) {
+		final FormattingStrategy strategy
+	) {
 		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService,strategy);
 	}
 
-	public ByteLocalLogEntry(final Thread owner, final int maxMessageSize,
-			final ObjectFormatterFactory formatterFactory,
-			final LoggerService loggerService,
-			final FormattingStrategy strategy) {
+	public ByteLocalLogEntry(
+		final Thread owner,
+		final int maxMessageSize,
+		final ObjectFormatterFactory formatterFactory,
+		final LoggerService loggerService,
+		final FormattingStrategy strategy
+	) {
 		this(owner,maxMessageSize, formatterFactory, loggerService, null,strategy);
 	}
 
-	public ByteLocalLogEntry(final Thread owner, final int maxMessageSize,
+	public ByteLocalLogEntry(
+		final Thread owner,
+		 final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService, String logErrorsMsg,
-		final FormattingStrategy strategy) {
+		final FormattingStrategy strategy
+	) {
 		super(owner, formatterFactory, loggerService, logErrorsMsg, strategy);
 		this.bytes = new Bytes(maxMessageSize);
 	}

@@ -32,6 +32,7 @@ import static org.gflogger.formatter.BufferFormatter.allocate;
 */
 public abstract class AbstractAsyncAppender extends AbstractAppender {
 
+	// 4M
 	private static final int DEFAULT_BUFFER_SIZE = 1 << 22;
 
 	// inner thread buffer
@@ -47,27 +48,33 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 
 	protected volatile boolean	running				= false;
 
-	protected AbstractAsyncAppender(final String name,
-	                                final boolean multibyte,
-	                                final LogLevel logLevel,
-	                                final boolean enabled) {
+	protected AbstractAsyncAppender(
+		final String name,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		this(name,
-		     DEFAULT_BUFFER_SIZE/*4Mb*/,
+		     DEFAULT_BUFFER_SIZE,
 		     multibyte,
 		     logLevel, enabled
 		);
 	}
 
-	protected AbstractAsyncAppender(final String name,
-	                                final int bufferSize,
-	                                final boolean multibyte,
-	                                final LogLevel logLevel,
-	                                final boolean enabled) {
+	protected AbstractAsyncAppender(
+		final String name,
+		final int bufferSize,
+		final boolean multibyte,
+		final LogLevel logLevel,
+		final boolean enabled
+	) {
 		super(name, multibyte, logLevel, enabled);
 		// unicode char has 2 bytes
 		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
 		byteBuffer.clear();
-		charBuffer = multibyte ? allocate(multibyte ? bufferSize << 1 : bufferSize).asCharBuffer() : null;
+		charBuffer = multibyte ?
+			allocate(bufferSize << 1).asCharBuffer()
+			: null;
 	}
 
 	public void setLayout(final Layout layout) {

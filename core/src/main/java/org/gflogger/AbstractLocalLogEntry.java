@@ -72,11 +72,11 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		final String logErrorsMessage,
 		final FormattingStrategy strategy
 	) {
+		this.strategy = strategy;
 		/*
 		 * It have to be cached thread name at thread local variable cause
 		 * thread.getName() generates new String(char[])
 		 */
-		this.strategy = strategy;
 		this.threadName = owner.getName();
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
@@ -141,17 +141,17 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 		}
 		this.pattern = pattern;
 		this.pPos = 0;
-		appendNextPatternChank();
+		appendNextPatternChunk();
 	}
 
-	protected void appendNextPatternChank(){
+	protected void appendNextPatternChunk(){
 		final int len = pattern.length();
 		for(; pPos < len; pPos++){
 			final char ch = pattern.charAt(pPos);
-			if(strategy.isEscape(pattern,pPos)){
-				append(pattern.charAt(pPos+1));
+			if(strategy.isEscape(pattern, pPos)){
+				append(pattern.charAt(pPos + 1));
 				pPos++;
-			} else if(strategy.isPlaceholder(pattern,pPos)){
+			} else if(strategy.isPlaceholder(pattern, pPos)){
 				break;
 			} else {
 				append(ch);
@@ -164,14 +164,14 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	protected void checkIfCommitted(){
 		if (commited){
-			throw new IllegalStateException("Entry has been commited.");
+			throw new IllegalStateException("Entry has been committed.");
 		}
 	}
 
 	protected void checkPlaceholder(){
 		checkIfCommitted();
 		if (pattern == null){
-			throw new IllegalStateException("Entry has been commited.");
+			throw new IllegalStateException("Entry has been committed.");
 		}
 		if (pPos + 1 >= pattern.length()){
 			throw new IllegalStateException("Illegal pattern '" + pattern + "' or position " + pPos);
@@ -611,7 +611,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(char c){
 		checkPlaceholder();
 		append(c);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -619,7 +619,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(CharSequence csq){
 		checkPlaceholder();
 		append(csq);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -627,7 +627,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(CharSequence csq, int start, int end){
 		checkPlaceholder();
 		append(csq, start, end);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -635,7 +635,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(boolean b){
 		checkPlaceholder();
 		append(b);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -643,7 +643,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(int i){
 		checkPlaceholder();
 		append(i);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -651,7 +651,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(long i){
 		checkPlaceholder();
 		append(i);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -659,7 +659,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(double i){
 		checkPlaceholder();
 		append(i);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -667,7 +667,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(double i, int precision){
 		checkPlaceholder();
 		append(i, precision);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -675,7 +675,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public <T> FormattedGFLogEntry with(T[] array, String separator) {
 		checkPlaceholder();
 		append(array, separator);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -683,7 +683,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public <T> FormattedGFLogEntry with(Iterable<T> iterable, String separator) {
 		checkPlaceholder();
 		append(iterable, separator);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -691,7 +691,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(Throwable e){
 		checkPlaceholder();
 		append(e);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -699,7 +699,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(Loggable loggable){
 		checkPlaceholder();
 		append(loggable);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
@@ -707,7 +707,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	public FormattedGFLogEntry with(Object o){
 		checkPlaceholder();
 		append(o);
-		appendNextPatternChank();
+		appendNextPatternChunk();
 		return this;
 	}
 
