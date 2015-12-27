@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 /**
  * @author Denis Gburg
  */
-public class Slf4jLoggerFactory implements ILoggerFactory{
+public final class Slf4jLoggerFactory implements ILoggerFactory {
 
     @Override
     public Logger getLogger(String name) {

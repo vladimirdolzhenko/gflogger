@@ -1,9 +1,15 @@
 package org.gflogger;
 
+import org.gflogger.appender.ConsoleAppenderFactory;
+import org.gflogger.slf4j.Slf4jLoggerImpl;
 import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Denis Gburg
@@ -59,4 +65,31 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
     protected Map<String, String> getMessagePatterns() {
         return messagePatterns;
     }
+
+    @Test
+    public void testSlf4jLogger() throws Exception {
+
+		final int maxMessageSize = 32;
+		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+		factory.setLayoutPattern("%m");
+		factory.setMultibyte(false);
+		final StringBuffer buffer = new StringBuffer();
+		factory.setOutputStream(buffer);
+		factory.setLogLevel(LogLevel.INFO);
+		final LoggerService loggerService =
+			createLoggerService(maxMessageSize,
+				new GFLoggerBuilder("com.db", factory), factory);
+
+		GFLogFactory.init(loggerService);
+
+		final Logger slf4jLogger = new Slf4jLoggerImpl(GFLogFactory.getLog("com.db.fxpricing.Logger"));
+		slf4jLogger.info("msg0 {}", "a");
+		slf4jLogger.info("msg1 {} {}", "a", "c");
+		slf4jLogger.info("msg2 {} {} {}", "a", 10, "c");
+		slf4jLogger.info("msg3 {} {} {} {}", "a", 11, "b", "d");
+
+		GFLogFactory.stop();
+
+		assertEquals("msg0 amsg1 a cmsg2 a 10 cmsg3 a 11 b d", buffer.toString());
+	}
 }

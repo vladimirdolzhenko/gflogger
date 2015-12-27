@@ -7,7 +7,7 @@ import org.gflogger.formatting.Slf4jFormattingStrategy;
 /**
  * @author Denis Gburg
  */
-public class Slf4JDLoggerServiceImpl extends LoggerServiceImpl {
+public final class Slf4JDLoggerServiceImpl extends LoggerServiceImpl {
 
     public Slf4JDLoggerServiceImpl(
         int count,
@@ -38,8 +38,4 @@ public class Slf4JDLoggerServiceImpl extends LoggerServiceImpl {
         return new Slf4jFormattingStrategy();
     }
 
-    @Override
-    public void entryFlushed(LocalLogEntry localEntry) {
-        super.entryFlushed(localEntry);
-    }
 }
