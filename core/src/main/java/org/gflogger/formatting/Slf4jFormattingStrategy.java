@@ -5,7 +5,7 @@ import org.gflogger.FormattingStrategy;
 /**
  * @author Denis Gburg
  */
-public class Slf4jFormattingStrategy implements FormattingStrategy {
+public final class Slf4jFormattingStrategy implements FormattingStrategy {
     @Override
     public boolean isPlaceholder(String pattern, int position) {
         return pattern.length() > position + 1

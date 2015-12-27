@@ -10,19 +10,19 @@ import org.gflogger.formatting.Slf4jFormattingStrategy;
 public class Slf4JLoggerServiceImpl extends LoggerServiceImpl {
 
     public Slf4JLoggerServiceImpl(
-        int count,
-        int maxMessageSize,
-        GFLoggerBuilder[] loggerBuilders,
-        AppenderFactory... appenderFactories
+        final int count,
+        final int maxMessageSize,
+        final GFLoggerBuilder[] loggerBuilders,
+        final AppenderFactory... appenderFactories
     ) {
         super(count, maxMessageSize, loggerBuilders, appenderFactories);
     }
 
     public Slf4JLoggerServiceImpl(
-        int count,
-        int maxMessageSize,
-        ObjectFormatterFactory objectFormatterFactory,
-        GFLoggerBuilder[] loggersBuilders,
+        final int count,
+        final int maxMessageSize,
+        final ObjectFormatterFactory objectFormatterFactory,
+        final GFLoggerBuilder[] loggersBuilders,
         AppenderFactory... appenderFactories
     ) {
         super(count, maxMessageSize, objectFormatterFactory, loggersBuilders, appenderFactories);
