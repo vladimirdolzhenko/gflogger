@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Denis Gburg
@@ -68,7 +70,6 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
 
     @Test
     public void testSlf4jLogger() throws Exception {
-
 		final int maxMessageSize = 32;
 		final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
 		factory.setLayoutPattern("%m");
@@ -92,4 +93,32 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
 
 		assertEquals("msg0 amsg1 a cmsg2 a 10 cmsg3 a 11 b d", buffer.toString());
 	}
+
+    @Test
+    public void testExceptionArgument() throws Exception {
+        final int maxMessageSize = 10 << 10;
+        final ConsoleAppenderFactory factory = new ConsoleAppenderFactory();
+        factory.setLayoutPattern("%m");
+        factory.setMultibyte(false);
+        final StringBuffer buffer = new StringBuffer();
+        factory.setOutputStream(buffer);
+        factory.setLogLevel(LogLevel.INFO);
+        final LoggerService loggerService =
+                createLoggerService(maxMessageSize,
+                        new GFLoggerBuilder("com.db", factory), factory);
+
+        GFLogFactory.init(loggerService);
+
+        final Logger slf4jLogger = new Slf4jLoggerImpl(GFLogFactory.getLog("com.db.fxpricing.Logger"));
+        slf4jLogger.info("msg0 {}", "a", new RuntimeException());
+        slf4jLogger.info("another", new IllegalArgumentException());
+
+        GFLogFactory.stop();
+
+        String str = buffer.toString();
+        assertThat(str, containsString("msg0 a java.lang.RuntimeException\n"
+            + "\tat org.gflogger.TestSlf4jFormatLoggerServiceImpl.testExceptionArgument(TestSlf4jFormatLoggerServiceImpl.java:"));
+        assertThat(str, containsString("another java.lang.IllegalArgumentException\n"
+            + "\tat org.gflogger.TestSlf4jFormatLoggerServiceImpl.testExceptionArgument(TestSlf4jFormatLoggerServiceImpl.java:"));
+    }
 }
