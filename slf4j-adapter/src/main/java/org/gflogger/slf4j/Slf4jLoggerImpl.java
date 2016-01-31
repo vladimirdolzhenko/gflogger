@@ -27,28 +27,27 @@ public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
 
 	@Override
 	public void trace(String pattern, Object obj) {
-		log.debug(pattern).with(obj);
+		log.debug(adjustPattern(pattern, obj)).withLast(obj);
 	}
 
 	@Override
 	public void trace(String pattern, Object obj1, Object obj2) {
-		log.debug(pattern).with(obj1).with(obj2);
-	}
-
-	private void logArray(FormattedGFLogEntry entry, Object[] objects) {
-		for (int i = 0; i < objects.length; i++) {
-			entry = entry.with(objects[i]);
+		FormattedGFLogEntry entry = log.debug(adjustPattern(pattern, obj2)).with(obj1);
+		if (obj2 instanceof Throwable) {
+			entry.withLast((Throwable)obj2);
+		} else {
+			entry.withLast(obj2);
 		}
 	}
 
 	@Override
 	public void trace(String pattern, Object... objects) {
-		logArray(log.debug(pattern), objects);
+		logArray(log.debug(adjustPattern(pattern, objects)), objects);
 	}
 
 	@Override
 	public void trace(String pattern, Throwable throwable) {
-		log.debug(pattern).with(throwable);
+		log.debug(adjustPattern(pattern, throwable)).withLast(throwable);
 	}
 
 	@Override
@@ -63,22 +62,27 @@ public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
 
 	@Override
 	public void debug(String pattern, Object obj) {
-		log.debug(pattern).with(obj);
+		log.debug(adjustPattern(pattern, obj)).withLast(obj);
 	}
 
 	@Override
 	public void debug(String pattern, Object obj1, Object obj2) {
-		log.debug(pattern).with(obj1).with(obj2);
+		FormattedGFLogEntry entry = log.debug(adjustPattern(pattern, obj2)).with(obj1);
+		if (obj2 instanceof Throwable) {
+			entry.withLast((Throwable)obj2);
+		} else {
+			entry.withLast(obj2);
+		}
 	}
 
 	@Override
 	public void debug(String pattern, Object... objects) {
-		logArray(log.debug(pattern), objects);
+		logArray(log.debug(adjustPattern(pattern, objects)), objects);
 	}
 
 	@Override
 	public void debug(String pattern, Throwable throwable) {
-		log.debug(pattern).with(throwable);
+		log.debug(adjustPattern(pattern, throwable)).withLast(throwable);
 	}
 
 	@Override
@@ -93,22 +97,27 @@ public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
 
 	@Override
 	public void info(String pattern, Object obj) {
-		log.info(pattern).with(obj);
+		log.info(adjustPattern(pattern, obj)).with(obj);
 	}
 
 	@Override
 	public void info(String pattern, Object obj1, Object obj2) {
-		log.info(pattern).with(obj1).with(obj2);
+		FormattedGFLogEntry entry = log.info(adjustPattern(pattern, obj2)).with(obj1);
+		if (obj2 instanceof Throwable) {
+			entry.withLast((Throwable)obj2);
+		} else {
+			entry.withLast(obj2);
+		}
 	}
 
 	@Override
 	public void info(String pattern, Object... objects) {
-		logArray(log.info(pattern), objects);
+		logArray(log.info(adjustPattern(pattern, objects)), objects);
 	}
 
 	@Override
 	public void info(String pattern, Throwable throwable) {
-		log.info(pattern).with(throwable);
+		log.info(adjustPattern(pattern, throwable)).withLast(throwable);
 	}
 
 	@Override
@@ -123,22 +132,27 @@ public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
 
 	@Override
 	public void warn(String pattern, Object obj) {
-		log.warn(pattern).with(obj);
+		log.warn(adjustPattern(pattern, obj)).withLast(obj);
 	}
 
 	@Override
 	public void warn(String pattern, Object... objects) {
-		logArray(log.warn(pattern), objects);
+		logArray(log.warn(adjustPattern(pattern, objects)), objects);
 	}
 
 	@Override
 	public void warn(String pattern, Object obj1, Object obj2) {
-		log.warn(pattern).with(obj1).with(obj2);
+		FormattedGFLogEntry entry = log.warn(adjustPattern(pattern, obj2)).with(obj1);
+		if (obj2 instanceof Throwable) {
+			entry.withLast((Throwable)obj2);
+		} else {
+			entry.withLast(obj2);
+		}
 	}
 
 	@Override
 	public void warn(String pattern, Throwable throwable) {
-		log.warn(pattern).with(throwable);
+		log.warn(adjustPattern(pattern, throwable)).withLast(throwable);
 	}
 
 	@Override
@@ -153,21 +167,51 @@ public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
 
 	@Override
 	public void error(String pattern, Object obj) {
-		log.error(pattern).with(obj);
+		log.error(adjustPattern(pattern, obj)).withLast(obj);
 	}
 
 	@Override
 	public void error(String pattern, Object obj1, Object obj2) {
-		log.error(pattern).with(obj1).with(obj2);
+		FormattedGFLogEntry entry = log.error(adjustPattern(pattern, obj2)).with(obj1);
+		if (obj2 instanceof Throwable) {
+			entry.withLast((Throwable)obj2);
+		} else {
+			entry.withLast(obj2);
+		}
 	}
 
 	@Override
 	public void error(String pattern, Object... objects) {
-		logArray(log.error(pattern), objects);
+		logArray(log.error(adjustPattern(pattern, objects)), objects);
 	}
 
 	@Override
 	public void error(String pattern, Throwable throwable) {
-		log.error(pattern).with(throwable);
+		log.error(adjustPattern(pattern, throwable)).withLast(throwable);
+	}
+
+	private void logArray(FormattedGFLogEntry entry, Object[] objects) {
+		int length = objects.length;
+		for (int i = 0; i < length - 1; i++) {
+			entry = entry.with(objects[i]);
+		}
+		if (length > 1){
+			if (objects[length - 1] instanceof Throwable){
+				entry.withLast((Throwable)objects[length - 1]);
+			} else {
+				entry.withLast(objects[length - 1]);
+			}
+		}
+	}
+
+	private String adjustPattern(String pattern, Object[] args) {
+		return args.length > 1 ? adjustPattern(pattern, args[args.length - 1]) : pattern;
+	}
+
+	private String adjustPattern(String pattern, Object lastArg) {
+		if (lastArg instanceof Throwable){
+			pattern = pattern + " {}";
+		}
+		return pattern;
 	}
 }
