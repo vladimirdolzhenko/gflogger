@@ -6,38 +6,7 @@
 XmlLogFactoryConfigurator.configure();
 ```
 
-### system properties
-
-* **gflogger.configuration** - gflogger xml configuration file
-    * default value: **/gflogger.xml**
-* **gflogger.buffer.size** - buffer size (in bytes) commonly used in appenders
-    * default value: **1M**
-* **gflogger.multibyte** - use multibyte code pages
-    * default value: **false**
-* **gflogger.loglevel**
-    * default value: **ERROR**
-* **gflogger.pattern**
-    * default value: **%m%n**
-* **gflogger.immediateFlush**
-    * default value: **false**
-* **gflogger.bufferedIOThreshold**
-* **gflogger.awaitTimeout**
-* **gflogger.codepage**
-    * default value: **UTF-8**
-* **gflogger.append**
-    * default value: **true**
-* **gflogger.rolling.pattern** rolling pattern, see _DailyRollingFileAppenderFactory_
-    *  default value: **'.'yyyy-MM-dd**
-* **gflogger.timeZoneId** timezone to use for datetime formatters 
-    * default value: _none_
-* **gflogger.language** language/locale to use for datetime formatters 
-    * default value: _none_
-* **gflogger.internalQuietMode** turn internal logging (prints to stdout/stderr) in quiet mode
-    * default value: _false_
-* **gflogger.internalLogLevel** internal log level
-    * default value: _INFO_
-
-# gflogger.xml 
+### gflogger.xml 
 ```xml
 
 <configuration 
@@ -72,8 +41,34 @@ XmlLogFactoryConfigurator.configure();
 </configuration>
 ```
 
-```java
-// uses system property **gflogger.configuration** 
-// or default gflogger.xml file
-XmlLogFactoryConfigurator.configure();
-```
+### system properties
+
+* **gflogger.configuration** - gflogger xml configuration file
+    * default value: **/gflogger.xml**
+* **gflogger.buffer.size** - buffer size (in bytes) commonly used in appenders
+    * default value: **1M**
+* **gflogger.multibyte** - use multibyte code pages
+    * default value: **false**
+* **gflogger.loglevel**
+    * default value: **ERROR**
+* **gflogger.pattern**
+    * default value: **%m%n**
+* **gflogger.immediateFlush**
+    * default value: **false**
+* **gflogger.bufferedIOThreshold**
+* **gflogger.awaitTimeout**
+* **gflogger.codepage**
+    * default value: **UTF-8**
+* **gflogger.append**
+    * default value: **true**
+* **gflogger.rolling.pattern** rolling pattern, see _DailyRollingFileAppenderFactory_
+    *  default value: **'.'yyyy-MM-dd**
+* **gflogger.timeZoneId** timezone to use for datetime formatters 
+    * default value: _none_
+* **gflogger.language** language/locale to use for datetime formatters 
+    * default value: _none_
+* **gflogger.internalQuietMode** turn internal logging (prints to stdout/stderr) in quiet mode
+    * default value: _false_
+* **gflogger.internalLogLevel** internal log level
+    * default value: _INFO_
+
