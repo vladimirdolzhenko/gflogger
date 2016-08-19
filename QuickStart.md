@@ -1,4 +1,41 @@
-How to  [configure](Configuration.md) _gflogger_
+# Configuration
+
+```java
+// uses system property **gflogger.configuration** 
+// or default gflogger.xml file
+XmlLogFactoryConfigurator.configure();
+```
+
+### system properties
+
+* **gflogger.configuration** - gflogger xml configuration file
+    * default value: **/gflogger.xml**
+* **gflogger.buffer.size** - buffer size (in bytes) commonly used in appenders
+    * default value: **1M**
+* **gflogger.multibyte** - use multibyte code pages
+    * default value: **false**
+* **gflogger.loglevel**
+    * default value: **ERROR**
+* **gflogger.pattern**
+    * default value: **%m%n**
+* **gflogger.immediateFlush**
+    * default value: **false**
+* **gflogger.bufferedIOThreshold**
+* **gflogger.awaitTimeout**
+* **gflogger.codepage**
+    * default value: **UTF-8**
+* **gflogger.append**
+    * default value: **true**
+* **gflogger.rolling.pattern** rolling pattern, see _DailyRollingFileAppenderFactory_
+    *  default value: **'.'yyyy-MM-dd**
+* **gflogger.timeZoneId** timezone to use for datetime formatters 
+    * default value: _none_
+* **gflogger.language** language/locale to use for datetime formatters 
+    * default value: _none_
+* **gflogger.internalQuietMode** turn internal logging (prints to stdout/stderr) in quiet mode
+    * default value: _false_
+* **gflogger.internalLogLevel** internal log level
+    * default value: _INFO_
 
 # gflogger.xml 
 ```xml
@@ -39,24 +76,4 @@ How to  [configure](Configuration.md) _gflogger_
 // uses system property **gflogger.configuration** 
 // or default gflogger.xml file
 XmlLogFactoryConfigurator.configure();
-```
-
-# Usage
-```java
-
-private static final GFLogger log = 
-    GFLogFactory.getLog(MyClass.class);
-
-// in method
-log.info("value of %s is %s").with(name).withLast(value);
-```
-
-## classic 
-```java
-
-private static final GFLog log = 
-    GFLogFactory.getLog(MyClass.class);
-
-// in method
-log.info().append("value:").append(value).commit();
 ```
