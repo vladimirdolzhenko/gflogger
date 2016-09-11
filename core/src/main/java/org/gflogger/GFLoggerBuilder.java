@@ -71,53 +71,46 @@ public final class GFLoggerBuilder {
 		return this.logLevel;
 	}
 
-	public GFLoggerBuilder setLogLevel(LogLevel logLevel) {
+	public void setLogLevel(LogLevel logLevel) {
 		this.logLevel = logLevel;
-		return this;
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public GFLoggerBuilder setName(String category) {
+	public void setName(String category) {
 		this.name = category;
-		return this;
 	}
 
 	public boolean isAdditivity() {
 		return this.additivity;
 	}
 
-	public GFLoggerBuilder setAdditivity(boolean additivity) {
+	public void setAdditivity(boolean additivity) {
 		this.additivity = additivity;
-		return this;
 	}
 
-	public GFLoggerBuilder setAppenderFactory(final AppenderFactory appender){
+	public void setAppenderFactory(final AppenderFactory appender){
 		this.factories.clear();
 		if (appender != null) {
 			this.factories.add(appender);
 		}
-		return this;
 	}
 
-	public GFLoggerBuilder setAppenderFactories(final Collection<AppenderFactory> appenders){
+	public void setAppenderFactories(final Collection<AppenderFactory> appenders){
 		this.factories.clear();
 		if (appenders != null) {
 			this.factories.addAll(appenders);
 		}
-		return this;
 	}
 
-	public GFLoggerBuilder addAppenderFactory(final AppenderFactory appender){
+	public void addAppenderFactory(final AppenderFactory appender){
 		this.factories.add(appender);
-		return this;
 	}
 
-	public GFLoggerBuilder removeAppenderFactory(final AppenderFactory appender){
+	public void removeAppenderFactory(final AppenderFactory appender){
 		this.factories.remove(appender);
-		return this;
 	}
 
 	public GFLogger build(){

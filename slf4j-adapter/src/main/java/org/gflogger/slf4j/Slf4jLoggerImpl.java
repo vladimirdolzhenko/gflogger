@@ -2,216 +2,338 @@ package org.gflogger.slf4j;
 
 import org.gflogger.FormattedGFLogEntry;
 import org.gflogger.GFLog;
+import org.gflogger.GFLogEntry;
+import org.gflogger.LocalLogEntry;
+import org.gflogger.helpers.LogLog;
 import org.slf4j.helpers.MarkerIgnoringBase;
 
 /**
  * @author Denis Gburg
  */
 public final class Slf4jLoggerImpl extends MarkerIgnoringBase {
+    private final GFLog log;
 
-	private final GFLog log;
+    public Slf4jLoggerImpl(final GFLog log) {
+        this.log = log;
+    }
 
-	public Slf4jLoggerImpl(final GFLog log) {
-		this.log = log;
-	}
+    @Override
+    public boolean isTraceEnabled() {
+        try {
+            return log.isTraceEnabled();
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+            return false;
+        }
+    }
 
-	@Override
-	public boolean isTraceEnabled() {
-		return log.isTraceEnabled();
-	}
+    @Override
+    public void trace(String pattern) {
+        try {
+            logUnsafe(log.trace(), pattern);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void trace(String pattern) {
-		log.debug(pattern);
-	}
+    @Override
+    public void trace(String pattern, Object obj) {
+        try {
+            logUnsafe(log.trace(pattern), obj);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void trace(String pattern, Object obj) {
-		log.debug(adjustPattern(pattern, obj)).withLast(obj);
-	}
+    @Override
+    public void trace(String pattern, Object obj1, Object obj2) {
+        try {
+            logUnsafe(log.trace(pattern), obj1, obj2);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void trace(String pattern, Object obj1, Object obj2) {
-		FormattedGFLogEntry entry = log.debug(adjustPattern(pattern, obj2)).with(obj1);
-		if (obj2 instanceof Throwable) {
-			entry.withLast((Throwable)obj2);
-		} else {
-			entry.withLast(obj2);
-		}
-	}
+    @Override
+    public void trace(String pattern, Object... objects) {
+        try {
+            logArray(log.trace(pattern), objects);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void trace(String pattern, Object... objects) {
-		logArray(log.debug(adjustPattern(pattern, objects)), objects);
-	}
+    @Override
+    public void trace(String pattern, Throwable throwable) {
+        try {
+            logUnsafe(log.trace(), pattern, throwable);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void trace(String pattern, Throwable throwable) {
-		log.debug(adjustPattern(pattern, throwable)).withLast(throwable);
-	}
+    @Override
+    public boolean isDebugEnabled() {
+        try {
+            return log.isDebugEnabled();
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+            return false;
+        }
+    }
 
-	@Override
-	public boolean isDebugEnabled() {
-		return log.isDebugEnabled();
-	}
+    @Override
+    public void debug(String pattern) {
+        try {
+            logUnsafe(log.debug(), pattern);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void debug(String pattern) {
-		log.debug(pattern);
-	}
+    @Override
+    public void debug(String pattern, Object obj) {
+        try {
+            logUnsafe(log.debug(pattern), obj);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void debug(String pattern, Object obj) {
-		log.debug(adjustPattern(pattern, obj)).withLast(obj);
-	}
+    @Override
+    public void debug(String pattern, Object obj1, Object obj2) {
+        try {
+            logUnsafe(log.debug(pattern), obj1, obj2);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void debug(String pattern, Object obj1, Object obj2) {
-		FormattedGFLogEntry entry = log.debug(adjustPattern(pattern, obj2)).with(obj1);
-		if (obj2 instanceof Throwable) {
-			entry.withLast((Throwable)obj2);
-		} else {
-			entry.withLast(obj2);
-		}
-	}
+    @Override
+    public void debug(String pattern, Object... objects) {
+        try {
+            logArray(log.debug(pattern), objects);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void debug(String pattern, Object... objects) {
-		logArray(log.debug(adjustPattern(pattern, objects)), objects);
-	}
+    @Override
+    public void debug(String pattern, Throwable throwable) {
+        try {
+            logUnsafe(log.debug(), pattern, throwable);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void debug(String pattern, Throwable throwable) {
-		log.debug(adjustPattern(pattern, throwable)).withLast(throwable);
-	}
+    @Override
+    public boolean isInfoEnabled() {
+        try {
+            return log.isInfoEnabled();
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+            return false;
+        }
+    }
 
-	@Override
-	public boolean isInfoEnabled() {
-		return log.isInfoEnabled();
-	}
+    @Override
+    public void info(String pattern) {
+        try {
+            logUnsafe(log.info(), pattern);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void info(String pattern) {
-		log.info(pattern);
-	}
+    @Override
+    public void info(String pattern, Object obj) {
+        try {
+            logUnsafe(log.info(pattern), obj);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void info(String pattern, Object obj) {
-		log.info(adjustPattern(pattern, obj)).with(obj);
-	}
+    @Override
+    public void info(String pattern, Object obj1, Object obj2) {
+        try {
+            logUnsafe(log.info(pattern), obj1, obj2);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void info(String pattern, Object obj1, Object obj2) {
-		FormattedGFLogEntry entry = log.info(adjustPattern(pattern, obj2)).with(obj1);
-		if (obj2 instanceof Throwable) {
-			entry.withLast((Throwable)obj2);
-		} else {
-			entry.withLast(obj2);
-		}
-	}
+    @Override
+    public void info(String pattern, Object... objects) {
+        try {
+            logArray(log.info(pattern), objects);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void info(String pattern, Object... objects) {
-		logArray(log.info(adjustPattern(pattern, objects)), objects);
-	}
+    @Override
+    public void info(String pattern, Throwable throwable) {
+        try {
+            logUnsafe(log.info(), pattern, throwable);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void info(String pattern, Throwable throwable) {
-		log.info(adjustPattern(pattern, throwable)).withLast(throwable);
-	}
+    @Override
+    public boolean isWarnEnabled() {
+        try {
+            return log.isWarnEnabled();
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+            return false;
+        }
+    }
 
-	@Override
-	public boolean isWarnEnabled() {
-		return log.isWarnEnabled();
-	}
+    @Override
+    public void warn(String pattern) {
+        try {
+            logUnsafe(log.warn(), pattern);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void warn(String pattern) {
-		log.warn(pattern);
-	}
+    @Override
+    public void warn(String pattern, Object obj) {
+        try {
+            logUnsafe(log.warn(pattern), obj);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void warn(String pattern, Object obj) {
-		log.warn(adjustPattern(pattern, obj)).withLast(obj);
-	}
+    @Override
+    public void warn(String pattern, Object... objects) {
+        try {
+            logArray(log.warn(pattern), objects);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void warn(String pattern, Object... objects) {
-		logArray(log.warn(adjustPattern(pattern, objects)), objects);
-	}
+    @Override
+    public void warn(String pattern, Object obj1, Object obj2) {
+        try {
+            logUnsafe(log.warn(pattern), obj1, obj2);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void warn(String pattern, Object obj1, Object obj2) {
-		FormattedGFLogEntry entry = log.warn(adjustPattern(pattern, obj2)).with(obj1);
-		if (obj2 instanceof Throwable) {
-			entry.withLast((Throwable)obj2);
-		} else {
-			entry.withLast(obj2);
-		}
-	}
+    @Override
+    public void warn(String pattern, Throwable throwable) {
+        try {
+            logUnsafe(log.warn(), pattern, throwable);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void warn(String pattern, Throwable throwable) {
-		log.warn(adjustPattern(pattern, throwable)).withLast(throwable);
-	}
+    @Override
+    public boolean isErrorEnabled() {
+        try {
+            return log.isErrorEnabled();
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+            return false;
+        }
+    }
 
-	@Override
-	public boolean isErrorEnabled() {
-		return log.isErrorEnabled();
-	}
+    @Override
+    public void error(String pattern) {
+        try {
+            logUnsafe(log.error(), pattern);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void error(String pattern) {
-		log.error(pattern);
-	}
+    @Override
+    public void error(String pattern, Object obj) {
+        try {
+            logUnsafe(log.error(pattern), obj);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void error(String pattern, Object obj) {
-		log.error(adjustPattern(pattern, obj)).withLast(obj);
-	}
+    @Override
+    public void error(String pattern, Object obj1, Object obj2) {
+        try {
+            logUnsafe(log.error(pattern), obj1, obj2);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void error(String pattern, Object obj1, Object obj2) {
-		FormattedGFLogEntry entry = log.error(adjustPattern(pattern, obj2)).with(obj1);
-		if (obj2 instanceof Throwable) {
-			entry.withLast((Throwable)obj2);
-		} else {
-			entry.withLast(obj2);
-		}
-	}
+    @Override
+    public void error(String pattern, Object... objects) {
+        try {
+            logArray(log.error(pattern), objects);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void error(String pattern, Object... objects) {
-		logArray(log.error(adjustPattern(pattern, objects)), objects);
-	}
+    @Override
+    public void error(String pattern, Throwable throwable) {
+        try {
+            logUnsafe(log.error(), pattern, throwable);
+        } catch (Throwable e) {
+            LogLog.error("Unhandled error: ", e);
+        }
+    }
 
-	@Override
-	public void error(String pattern, Throwable throwable) {
-		log.error(adjustPattern(pattern, throwable)).withLast(throwable);
-	}
+    private void logUnsafe(GFLogEntry entry, String pattern) {
+        entry.append(pattern).commit();
+    }
 
-	private void logArray(FormattedGFLogEntry entry, Object[] objects) {
-		int length = objects.length;
-		for (int i = 0; i < length - 1; i++) {
-			entry = entry.with(objects[i]);
-		}
-		if (length > 1){
-			if (objects[length - 1] instanceof Throwable){
-				entry.withLast((Throwable)objects[length - 1]);
-			} else {
-				entry.withLast(objects[length - 1]);
-			}
-		}
-	}
+    private void logUnsafe(GFLogEntry entry, String pattern, Throwable t) {
+        entry.append(pattern).append(t).commit();
+    }
 
-	private String adjustPattern(String pattern, Object[] args) {
-		return args.length > 1 ? adjustPattern(pattern, args[args.length - 1]) : pattern;
-	}
+    private void logUnsafe(FormattedGFLogEntry entry, Object obj) {
+        entry.withLast(obj);
+    }
 
-	private String adjustPattern(String pattern, Object lastArg) {
-		if (lastArg instanceof Throwable){
-			pattern = pattern + " {}";
-		}
-		return pattern;
-	}
+    private void logUnsafe(FormattedGFLogEntry entry, Object obj1, Object obj2) {
+        entry.with(obj1);
+        processLast(entry, obj2);
+    }
+
+    private void logArray(FormattedGFLogEntry entry, Object[] objects) {
+        if (objects == null) {
+            logUnsafe(entry, null);
+            return;
+        }
+        if (objects.length == 0) {
+            logUnsafe(entry, "[]");
+            return;
+        }
+        for (int i = 0; i < objects.length - 1; i++) {
+            entry = entry.with(objects[i]);
+        }
+        Object last = objects[objects.length - 1];
+        processLast(entry, last);
+    }
+
+    private void processLast(FormattedGFLogEntry entry, Object last) {
+        if (entry.isPatternEnd() && last instanceof Throwable) {
+            if (entry instanceof LocalLogEntry) {
+                ((LocalLogEntry) entry).append((Throwable) last).commit();
+            } else {
+                LogLog.error("LocalLogEntry expected in slf4j adapter");
+            }
+        } else {
+            entry.withLast(last);
+        }
+    }
 }

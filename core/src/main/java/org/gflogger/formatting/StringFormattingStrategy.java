@@ -19,4 +19,9 @@ public final class StringFormattingStrategy implements FormattingStrategy {
             && pattern.charAt(position) == '%'
             && pattern.charAt(position + 1) == '%';
     }
+
+    @Override
+    public boolean autocommitEnabled() {
+        return true;
+    }
 }

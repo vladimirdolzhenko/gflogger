@@ -9,4 +9,5 @@ public interface FormattingStrategy {
 
 	boolean isEscape(String pattern, int position);
 
+    boolean autocommitEnabled();
 }

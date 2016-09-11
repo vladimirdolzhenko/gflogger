@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class TestSlf4jFormattingStrategy {
-	private final FormattingStrategy strategy = new Slf4jFormattingStrategy();
+	private final FormattingStrategy strategy = new Slf4JFormattingStrategy();
 
 	@Test
 	public void testIsPlaceholder() throws Exception {

@@ -379,6 +379,11 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public boolean isPatternEnd() {
+		return pPos == pattern.length();
+	}
+
+	@Override
 	public FormattedGFLogEntry with(char c){
 		checkPlaceholder();
 		append(c);

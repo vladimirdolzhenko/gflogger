@@ -39,6 +39,8 @@ public abstract class TestStringFormatLoggerServiceImpl extends AbstractTestLogg
 
         messagePatterns.put("testAppendObjectFormatter","say hello %s world");
         expectedOutput.put("testAppendObjectFormatter","say hello v:5 world");
+
+        expectedOutput.put("testAppendFormattedWithAutoCommit", "say hello world");
     }
 
     @Override
