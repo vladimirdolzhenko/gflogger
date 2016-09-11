@@ -2,7 +2,7 @@ package org.gflogger.appender;
 
 import org.gflogger.LogEntryItemImpl;
 import org.gflogger.LogLevel;
-import org.gflogger.formatting.StringFormattingStrategy;
+import org.gflogger.formatting.StringLoggingStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public abstract class AbstractFlushingAppenderHelper<A extends AbstractAsyncAppe
 	}
 
 	private static LogEntryItemImpl createEntry(final String message) throws Exception {
-		LogEntryItemImpl entry = new LogEntryItemImpl(message.length(), new StringFormattingStrategy());
+		LogEntryItemImpl entry = new LogEntryItemImpl(message.length(), new StringLoggingStrategy());
 		entry.setLogLevel( LogLevel.INFO);
 		entry.getBuffer().put(message.getBytes("ascii"));
 		return entry;

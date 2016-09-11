@@ -31,18 +31,14 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy
-	) {
+		final LoggingStrategy strategy) {
 		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService, strategy);
 	}
 
-	public ByteBufferLocalLogEntry(
-		final Thread owner,
-		final int maxMessageSize,
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final FormattingStrategy strategy
-	) {
+	public ByteBufferLocalLogEntry(final Thread owner, final int maxMessageSize,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService,
+			final LoggingStrategy strategy) {
 		this(owner, allocate(maxMessageSize), formatterFactory, loggerService, strategy);
 	}
 
@@ -51,8 +47,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy
-	) {
+		final LoggingStrategy strategy) {
 		super(owner, formatterFactory, loggerService, byteBuffer,strategy);
 	}
 
@@ -62,8 +57,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
 		String logErrorsMsg,
-		final FormattingStrategy strategy
-	) {
+		final LoggingStrategy strategy) {
 		super(owner, formatterFactory, loggerService, logErrorsMsg, byteBuffer, strategy);
 	}
 

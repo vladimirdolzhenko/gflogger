@@ -34,7 +34,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy
+		final LoggingStrategy strategy
 	) {
 		this(Thread.currentThread(), maxMessageSize, formatterFactory, loggerService, strategy);
 	}
@@ -44,7 +44,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy
+		final LoggingStrategy strategy
 	) {
 		this(owner, allocate(maxMessageSize), formatterFactory, loggerService, strategy);
 	}
@@ -54,7 +54,7 @@ public final class CharBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		final ByteBuffer byteBuffer,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService,
-		final FormattingStrategy strategy
+		final LoggingStrategy strategy
 	) {
 		super(owner, formatterFactory, loggerService, byteBuffer, strategy);
 		this.buffer = byteBuffer.asCharBuffer();

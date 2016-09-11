@@ -29,25 +29,21 @@ abstract class AbstractBufferLocalLogEntry extends AbstractLocalLogEntry {
 
 	protected final ByteBuffer byteBuffer;
 
-	public AbstractBufferLocalLogEntry(
-		final Thread owner,
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final ByteBuffer byteBuffer,
-		final FormattingStrategy strategy
-	) {
+	public AbstractBufferLocalLogEntry(final Thread owner,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService,
+			final ByteBuffer byteBuffer,
+			final LoggingStrategy strategy) {
 		this(owner, formatterFactory,
 			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), byteBuffer,strategy);
 	}
 
-	public AbstractBufferLocalLogEntry(
-		final Thread owner,
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final String logErrorsMessage,
-		final ByteBuffer byteBuffer,
-		final FormattingStrategy strategy
-	) {
+	public AbstractBufferLocalLogEntry(final Thread owner,
+			final ObjectFormatterFactory formatterFactory,
+			final LoggerService loggerService,
+			final String logErrorsMessage,
+			final ByteBuffer byteBuffer,
+			final LoggingStrategy strategy) {
 		super(owner, formatterFactory, loggerService, logErrorsMessage, strategy);
 		this.byteBuffer = byteBuffer;
 

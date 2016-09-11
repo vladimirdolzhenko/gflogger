@@ -16,7 +16,7 @@ package org.gflogger.base;
 
 import org.gflogger.AbstractLoggerServiceImpl;
 import org.gflogger.Appender;
-import org.gflogger.FormattingStrategy;
+import org.gflogger.LoggingStrategy;
 import org.gflogger.GFLogger;
 import org.gflogger.GFLoggerBuilder;
 import org.gflogger.LocalLogEntry;
@@ -25,7 +25,7 @@ import org.gflogger.LogLevel;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.State;
 import org.gflogger.appender.AppenderFactory;
-import org.gflogger.formatting.StringFormattingStrategy;
+import org.gflogger.formatting.StringLoggingStrategy;
 import org.gflogger.ring.RingBuffer;
 
 import java.util.concurrent.TimeUnit;
@@ -148,8 +148,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	}
 
 	@Override
-	protected FormattingStrategy getFormattingStrategy() {
-		return new StringFormattingStrategy();
+	protected LoggingStrategy getFormattingStrategy() {
+		return new StringLoggingStrategy();
 	}
 
 	@Override

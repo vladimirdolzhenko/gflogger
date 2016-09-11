@@ -2,7 +2,7 @@ package org.gflogger.helpers;
 
 import org.gflogger.LogEntryItem;
 import org.gflogger.LogEntryItemImpl;
-import org.gflogger.formatting.StringFormattingStrategy;
+import org.gflogger.formatting.StringLoggingStrategy;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -20,7 +20,7 @@ public class TestPatternParser {
 		PatternParser parser = new PatternParser("%m", Locale.getDefault(), TimeZone.getDefault());
 
 		final PatternConverter converter = parser.parse();
-		final LogEntryItem item = new LogEntryItemImpl(1 << 10 , new StringFormattingStrategy());
+		final LogEntryItem item = new LogEntryItemImpl(1 << 10 , new StringLoggingStrategy());
 		assertEquals(0, converter.size(item));
 		item.getBuffer().put("Hello world!".getBytes());
 		assertEquals(12, converter.size(item));

@@ -970,7 +970,7 @@ public abstract class AbstractTestLoggerService {
 		GFLogFactory.stop();
 
 		final String string = buffer.toString();
-		assertEquals("say hello world", string);
+		assertEquals(getExpectedOutput().get("testAppendFormattedWithAutoCommit"), string);
 	}
 
 	@Test

@@ -155,7 +155,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected abstract String name();
 
-	protected abstract FormattingStrategy getFormattingStrategy();
+	protected abstract LoggingStrategy getFormattingStrategy();
 
 	protected ExecutorService initExecutorService(){
 		return Executors.newFixedThreadPool(1, new NamedThreadFactory(name()));

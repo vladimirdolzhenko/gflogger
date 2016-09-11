@@ -31,7 +31,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected final LoggerService loggerService;
 	protected final ObjectFormatterFactory	formatterFactory;
 	protected final String logErrorsMessage;
-	protected final FormattingStrategy strategy;
+	protected final LoggingStrategy strategy;
 
 	protected String categoryName;
 	protected LogLevel logLevel;
@@ -43,40 +43,34 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	protected String pattern;
 	protected int pPos;
 
-	AbstractLocalLogEntry(
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final String logErrorsMessage,
-		final FormattingStrategy strategy
-	){
+	AbstractLocalLogEntry(final ObjectFormatterFactory formatterFactory,
+						  final LoggerService loggerService,
+						  final String logErrorsMessage,
+						  final LoggingStrategy strategy){
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
 		this.logErrorsMessage = logErrorsMessage;
 		this.strategy = strategy;
 	}
 
-	public AbstractLocalLogEntry(
-		final Thread owner,
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final FormattingStrategy strategy
-	) {
+	public AbstractLocalLogEntry(final Thread owner,
+								 final ObjectFormatterFactory formatterFactory,
+								 final LoggerService loggerService,
+								 final LoggingStrategy strategy) {
 		this(owner, formatterFactory,
 			loggerService, getStringProperty("gflogger.errorMessage", ">>TRNCTD>>"), strategy);
 	}
 
-	public AbstractLocalLogEntry(
-		final Thread owner,
-		final ObjectFormatterFactory formatterFactory,
-		final LoggerService loggerService,
-		final String logErrorsMessage,
-		final FormattingStrategy strategy
-	) {
-		this.strategy = strategy;
+	public AbstractLocalLogEntry(final Thread owner,
+								 final ObjectFormatterFactory formatterFactory,
+								 final LoggerService loggerService,
+								 final String logErrorsMessage,
+								 final LoggingStrategy strategy) {
 		/*
 		 * It have to be cached thread name at thread local variable cause
 		 * thread.getName() generates new String(char[])
 		 */
+		this.strategy = strategy;
 		this.threadName = owner.getName();
 		this.formatterFactory = formatterFactory;
 		this.loggerService = loggerService;
@@ -112,6 +106,11 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	@Override
 	public boolean isCommited() {
 		return this.commited;
+	}
+
+	@Override
+	public boolean isPatternEnd() {
+		return pPos == pattern.length();
 	}
 
 	@Override
@@ -157,7 +156,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 				append(ch);
 			}
 		}
-		if (this.pPos == len){
+		if (this.pPos == len && strategy.autocommitEnabled()){
 			commit();
 		}
 	}
@@ -186,7 +185,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	protected void checkAndCommit(){
 		if (commited) return;
-		if (pPos + 1 != pattern.length()){
+		if (pPos + 1 < pattern.length()){
 			throw new IllegalStateException("The pattern has not been finished. More parameters are required.");
 		}
 		commit();

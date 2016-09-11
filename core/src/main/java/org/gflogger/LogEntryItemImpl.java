@@ -41,21 +41,21 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	private long appenderMask;
 	private long	sequence;
 
-	public LogEntryItemImpl(final int size, final FormattingStrategy strategy) {
+	public LogEntryItemImpl(final int size, final LoggingStrategy strategy) {
 		this(size, false, strategy);
 	}
 
-	public LogEntryItemImpl(final int size, final boolean multibyte,final FormattingStrategy strategy) {
+	public LogEntryItemImpl(final int size, final boolean multibyte,final LoggingStrategy strategy) {
 		this(allocate(size), multibyte,strategy);
 	}
 
-	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte,final FormattingStrategy strategy) {
+	public LogEntryItemImpl(final ByteBuffer buffer, final boolean multibyte,final LoggingStrategy strategy) {
 		this(null, null, buffer, multibyte,strategy);
 	}
 
 	public LogEntryItemImpl(final ObjectFormatterFactory formatterFactory,
 			final LoggerService loggerService,
-			final ByteBuffer buffer, final boolean multibyte,final FormattingStrategy strategy) {
+			final ByteBuffer buffer, final boolean multibyte,final LoggingStrategy strategy) {
 		super(formatterFactory, loggerService, null, strategy);
 		this.buffer = buffer;
 		this.charBuffer = multibyte ? buffer.asCharBuffer() : null;

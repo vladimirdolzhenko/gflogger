@@ -2,7 +2,7 @@ package org.gflogger;
 
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.disruptor.LoggerServiceImpl;
-import org.gflogger.formatting.Slf4jFormattingStrategy;
+import org.gflogger.formatting.Slf4JLoggingStrategy;
 
 /**
  * @author Denis Gburg
@@ -34,8 +34,8 @@ public final class Slf4JDLoggerServiceImpl extends LoggerServiceImpl {
     }
 
     @Override
-    protected FormattingStrategy getFormattingStrategy() {
-        return new Slf4jFormattingStrategy();
+    protected LoggingStrategy getFormattingStrategy() {
+        return new Slf4JLoggingStrategy();
     }
 
 }

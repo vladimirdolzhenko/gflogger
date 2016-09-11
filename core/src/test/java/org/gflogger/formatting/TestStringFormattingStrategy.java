@@ -1,6 +1,6 @@
 package org.gflogger.formatting;
 
-import org.gflogger.FormattingStrategy;
+import org.gflogger.LoggingStrategy;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
 public class TestStringFormattingStrategy {
-	private final FormattingStrategy strategy = new StringFormattingStrategy();
+	private final LoggingStrategy strategy = new StringLoggingStrategy();
 
 	@Test
 	public void testIsPlaceholder() throws Exception {
