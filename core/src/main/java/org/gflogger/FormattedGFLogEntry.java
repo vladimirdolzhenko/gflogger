@@ -20,6 +20,8 @@ package org.gflogger;
  */
 public interface FormattedGFLogEntry {
 
+	boolean isPatternEnd();
+
 	/**
 	 * appends pattern parameter with a single char parameter
 	 *

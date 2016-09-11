@@ -115,6 +115,11 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 	}
 
 	@Override
+	public boolean isPatternEnd() {
+		return pPos == pattern.length();
+	}
+
+	@Override
 	public void setCommited(boolean commited) {
 		this.commited = commited;
 	}
@@ -157,7 +162,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 				append(ch);
 			}
 		}
-		if (this.pPos == len){
+		if (this.pPos == len && strategy.autocommitEnabled()){
 			commit();
 		}
 	}
@@ -186,7 +191,7 @@ abstract class AbstractLocalLogEntry implements LocalLogEntry {
 
 	protected void checkAndCommit(){
 		if (commited) return;
-		if (pPos + 1 != pattern.length()){
+		if (pPos + 1 < pattern.length()){
 			throw new IllegalStateException("The pattern has not been finished. More parameters are required.");
 		}
 		commit();
