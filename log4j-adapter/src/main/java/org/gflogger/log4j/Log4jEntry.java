@@ -14,12 +14,6 @@
 
 package org.gflogger.log4j;
 
-import static org.gflogger.util.StackTraceUtils.getCodeLocation;
-import static org.gflogger.util.StackTraceUtils.getImplementationVersion;
-import static org.gflogger.util.StackTraceUtils.loadClass;
-
-import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.gflogger.DefaultObjectFormatterFactory;
 import org.gflogger.FormattedGFLogEntry;
@@ -29,6 +23,10 @@ import org.gflogger.Loggable;
 import org.gflogger.ObjectFormatter;
 import org.gflogger.ObjectFormatterFactory;
 import org.gflogger.formatter.BufferFormatter;
+
+import java.util.Iterator;
+
+import static org.gflogger.util.StackTraceUtils.*;
 
 
 /**
@@ -376,6 +374,11 @@ public class Log4jEntry implements GFLogEntry, FormattedGFLogEntry {
 	public void appendLast(Object o) {
 		append(o);
 		commit();
+	}
+
+	@Override
+	public boolean isPatternEnd() {
+		return pPos == pattern.length();
 	}
 
 	@Override

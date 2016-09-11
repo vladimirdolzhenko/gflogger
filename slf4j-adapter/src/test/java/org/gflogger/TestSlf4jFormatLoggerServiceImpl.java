@@ -43,7 +43,7 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
         messagePatterns.put("testAppendFormattedWithWrongPlaceholder","say hello {0} !");
 
         messagePatterns.put("testAppendFormattedWithNoMorePlaceholder","say hello {}");
-        expectedOutput.put("testAppendFormattedWithNoMorePlaceholder","say hello world");
+        expectedOutput.put("testAppendFormattedWithNoMorePlaceholder","");
 
         messagePatterns.put("testAppendFormattedWithLessPlaceholdersThanRequired","say hello {} {}");
         expectedOutput.put("testAppendFormattedWithLessPlaceholdersThanRequired","");
@@ -56,6 +56,8 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
 
         messagePatterns.put("testAppendObjectFormatter","say hello {} world");
         expectedOutput.put("testAppendObjectFormatter","say hello v:5 world");
+
+        expectedOutput.put("testAppendFormattedWithAutoCommit", "");
     }
 
     @Override
@@ -116,9 +118,9 @@ public abstract class TestSlf4jFormatLoggerServiceImpl extends AbstractTestLogge
         GFLogFactory.stop();
 
         String str = buffer.toString();
-        assertThat(str, containsString("msg0 a java.lang.RuntimeException\n"
+        assertThat(str, containsString("msg0 ajava.lang.RuntimeException\n"
             + "\tat org.gflogger.TestSlf4jFormatLoggerServiceImpl.testExceptionArgument(TestSlf4jFormatLoggerServiceImpl.java:"));
-        assertThat(str, containsString("another java.lang.IllegalArgumentException\n"
+        assertThat(str, containsString("anotherjava.lang.IllegalArgumentException\n"
             + "\tat org.gflogger.TestSlf4jFormatLoggerServiceImpl.testExceptionArgument(TestSlf4jFormatLoggerServiceImpl.java:"));
     }
 }

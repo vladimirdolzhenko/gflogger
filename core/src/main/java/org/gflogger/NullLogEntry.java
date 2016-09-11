@@ -162,6 +162,11 @@ public class NullLogEntry implements GFLogEntry, FormattedGFLogEntry {
 	}
 
 	@Override
+	public boolean isPatternEnd() {
+		return false;
+	}
+
+	@Override
 	public FormattedGFLogEntry with(char c) {
 		return this;
 	}

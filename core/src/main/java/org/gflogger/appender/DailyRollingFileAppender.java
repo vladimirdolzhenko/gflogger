@@ -21,12 +21,18 @@ import org.gflogger.LogLevel;
 import org.gflogger.PatternLayout;
 import org.gflogger.helpers.LogLog;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * DailyRollingFileAppender extends {@link FileAppender} so that the underlying
@@ -338,18 +344,11 @@ public class DailyRollingFileAppender extends FileAppender {
 		// close current file, and rename it to datedFilename
 		closeFile();
 
-		File target = new File(scheduledFilename);
-		if (target.exists()) {
-			target.delete();
-		}
-
-		File file = new File(fileName);
-		boolean result = file.renameTo(target);
-		if (result) {
-			LogLog.debug(fileName + " -> " + scheduledFilename);
-		} else {
-			LogLog.error("Failed to rename [" + fileName + "] to ["
-					+ scheduledFilename + "].");
+		try{
+			Files.move(Paths.get(fileName), Paths.get(scheduledFilename), StandardCopyOption.REPLACE_EXISTING);
+			LogLog.info("Renamed [" + fileName + "] to [" + scheduledFilename + "]");
+		} catch (Exception e){
+			LogLog.error("Failed to rename [" + fileName + "] to [" + scheduledFilename + "]: ", e);
 		}
 
 		try {
