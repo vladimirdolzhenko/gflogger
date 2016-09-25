@@ -14,6 +14,9 @@
 
 package org.gflogger.disruptor;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+
 import com.lmax.disruptor.AlertException;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.ExceptionHandler;
@@ -37,9 +40,6 @@ import org.gflogger.State;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.formatting.StringFormattingStrategy;
 import org.gflogger.helpers.LogLog;
-
-import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
@@ -99,8 +99,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		super(count, maxMessageSize, objectFormatterFactory, loggers, appenders);
 
 		// quick check is count = 2^k ?
-		final int c = (count & (count - 1)) != 0 ?
-			roundUpNextPower2(count) : count;
+		final int c = (count & (count - 1)) != 0
+			? roundUpNextPower2(count) : count;
 
 		// unicode char has 2 bytes
 		final int bufferSize = multibyte ? maxMessageSize << 1 : maxMessageSize;
@@ -118,7 +118,8 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 				buffer.position(i * bufferSize);
 				i++;
 				final ByteBuffer subBuffer = buffer.slice();
-				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer, multibyte, getFormattingStrategy());
+				return new LogEntryItemImpl(objectFormatterFactory, service, subBuffer,
+					multibyte, getFormattingStrategy());
 			}
 		},c,
 		executorService,
@@ -129,17 +130,20 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 			@Override
 			public void handleOnStartException(Throwable ex) {
-				LogLog.error("Unhandled onStartException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
+				LogLog.error("Unhandled onStartException in "
+					+ Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 
 			@Override
 			public void handleOnShutdownException(Throwable ex) {
-				LogLog.error("Unhandled onShutdownException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
+				LogLog.error("Unhandled onShutdownException in "
+					+ Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 
 			@Override
 			public void handleEventException(Throwable ex, long sequence, Object event) {
-				LogLog.error("Unhandled onEventException in " + Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
+				LogLog.error("Unhandled onEventException in "
+					+ Thread.currentThread().getName() + ": " + ex.getMessage(), ex);
 			}
 		});
 
@@ -179,11 +183,11 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	}
 
 	@Override
-	public void stop(){
+	public void stop() {
 		if (state == State.STOPPED) return;
 		state = State.STOPPED;
 		strategy.signalAllWhenBlocking();
-//		for(int i = 0; i < appenders.length; i++){
+//		for (int i = 0; i < appenders.length; i++) {
 //			appenders[i].stop();
 //		}
 		executorService.shutdown();
@@ -208,7 +212,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	}
 
 	void flush() {
-		for(int i = 0; i < appenders.length; i++){
+		for (int i = 0; i < appenders.length; i++) {
 			appenders[i].flush();
 		}
 	}
@@ -218,14 +222,20 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		private volatile int numWaiters = 0;
 		private boolean signalled;
 		private final Object lock = new Object();
-		public long waitFor(long sequence, Sequence cursor, Sequence dependentSequence, SequenceBarrier barrier) throws AlertException, InterruptedException, TimeoutException {
+
+		public long waitFor(
+			long sequence,
+			Sequence cursor,
+			Sequence dependentSequence,
+			SequenceBarrier barrier
+		) throws AlertException, InterruptedException, TimeoutException {
 			long availableSequence;
 			if ((availableSequence = cursor.get()) < sequence) {
 				flush();
 				synchronized (lock) {
 					++numWaiters;
 					while ((availableSequence = cursor.get()) < sequence) {
-						if (state == State.STOPPED){
+						if (state == State.STOPPED) {
 							disruptor.halt();
 							throw AlertException.INSTANCE;
 						}

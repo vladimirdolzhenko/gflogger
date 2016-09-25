@@ -14,8 +14,6 @@
 
 package org.gflogger.appender;
 
-import static org.gflogger.helpers.OptionConverter.*;
-
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -25,6 +23,9 @@ import org.gflogger.LogLevel;
 import org.gflogger.LoggerService;
 import org.gflogger.PatternLayout;
 
+import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
+import static org.gflogger.helpers.OptionConverter.getIntProperty;
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 /**
  * AbstractAppenderFactory
@@ -51,10 +52,10 @@ public abstract class AbstractAppenderFactory<A extends Appender> implements App
 		bufferSize = getIntProperty("gflogger.buffer.size", 1 << 20);
 		multibyte = getBooleanProperty("gflogger.multibyte", false);
 		logLevel = LogLevel.valueOf(getStringProperty("gflogger.loglevel", "TRACE"));
-		timeZone = getStringProperty("gflogger.timeZoneId", null) != null ?
-				TimeZone.getTimeZone(getStringProperty("gflogger.timeZoneId", null)) : null;
-		locale = getStringProperty("gflogger.language", null) != null ?
-				new Locale(getStringProperty("gflogger.language", null)) : null;
+		timeZone = getStringProperty("gflogger.timeZoneId", null) != null
+			? TimeZone.getTimeZone(getStringProperty("gflogger.timeZoneId", null)) : null;
+		locale = getStringProperty("gflogger.language", null) != null
+			? new Locale(getStringProperty("gflogger.language", null)) : null;
 		layoutPattern = getStringProperty("gflogger.pattern", "%m%n");
 		immediateFlush = getBooleanProperty("gflogger.immediateFlush", false);
 		bufferedIOThreshold = getIntProperty("gflogger.bufferedIOThreshold", 100);
@@ -63,7 +64,7 @@ public abstract class AbstractAppenderFactory<A extends Appender> implements App
 	}
 
 	protected void preinit(Class<? extends LoggerService> loggerServiceClass) {
-		if (layout == null){
+		if (layout == null) {
 			layout = new PatternLayout(layoutPattern, timeZone, locale);
 		}
 	}
@@ -128,11 +129,11 @@ public abstract class AbstractAppenderFactory<A extends Appender> implements App
 		this.timeZone = timeZoneId != null ? TimeZone.getTimeZone(timeZoneId) : null;
 	}
 
-	public String getLayoutPattern(){
+	public String getLayoutPattern() {
 		return this.layoutPattern;
 	}
 
-	public void setLayoutPattern(String layoutPattern){
+	public void setLayoutPattern(String layoutPattern) {
 		this.layoutPattern = layoutPattern;
 	}
 

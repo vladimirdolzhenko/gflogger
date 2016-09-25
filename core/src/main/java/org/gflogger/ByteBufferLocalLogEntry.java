@@ -14,9 +14,9 @@
 
 package org.gflogger;
 
-import org.gflogger.formatter.BufferFormatter;
-
 import java.nio.ByteBuffer;
+
+import org.gflogger.formatter.BufferFormatter;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 
@@ -82,12 +82,12 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	protected void moveAndAppendSilent(String message) {
 		final int length = message.length();
 		final int remaining = byteBuffer.remaining();
-		if (remaining < length){
+		if (remaining < length) {
 			byteBuffer.position(byteBuffer.position() - (length - remaining));
 		}
 		try {
 			BufferFormatter.append(byteBuffer, message);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 		}
 	}
 
@@ -96,7 +96,7 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 		checkIfCommitted();
 		try {
 			BufferFormatter.append(byteBuffer, c);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(char c)", e);
 		}
 		return this;
@@ -105,9 +105,9 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, csq);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq)", e);
 		}
 		return this;
@@ -116,9 +116,9 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public ByteBufferLocalLogEntry append(final CharSequence csq, final int start, final int end) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, csq, start, end);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq, int start, int end)", e);
 		}
 		return this;
@@ -127,20 +127,20 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public GFLogEntry append(final boolean b) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, b);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(boolean b)", e);
 		}
 		return this;
 	}
 
 	@Override
-	public ByteBufferLocalLogEntry append(final int i){
+	public ByteBufferLocalLogEntry append(final int i) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(int i)", e);
 		}
 		return this;
@@ -149,9 +149,9 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public GFLogEntry append(final long i) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(long i)", e);
 		}
 		return this;
@@ -160,9 +160,9 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 	@Override
 	public GFLogEntry append(final double i, final int precision) {
 		checkIfCommitted();
-		try{
+		try {
 			BufferFormatter.append(byteBuffer, i, precision);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(double i, int precision)", e);
 		}
 		return this;
@@ -187,12 +187,12 @@ public final class ByteBufferLocalLogEntry extends AbstractBufferLocalLogEntry {
 
 	@Override
 	public String toString() {
-		return "[local of " + threadName +
-			" " + logLevel +
-			" pos:" + byteBuffer.position() +
-			" limit:" + byteBuffer.limit() +
-			" capacity:" + byteBuffer.capacity() +
-			"]";
+		return "[local of " + threadName
+			+ " " + logLevel
+			+ " pos:" + byteBuffer.position()
+			+ " limit:" + byteBuffer.limit()
+			+ " capacity:" + byteBuffer.capacity()
+			+ "]";
 	}
 
 }

@@ -1,0 +1,1 @@
+include 'core', 'log4j-adapter', 'jcl-adapter', 'slf4j-adapter', 'altest', 'perftest'

@@ -28,8 +28,8 @@ public abstract class Layout {
 
 	// Note that the line.separator property can be looked up even by
 	// applets.
-	public final static String LINE_SEP	 = System.getProperty("line.separator");
-	public final static int	LINE_SEP_LEN = LINE_SEP.length();
+	public static final String LINE_SEP	 = System.getProperty("line.separator");
+	public static final int	LINE_SEP_LEN = LINE_SEP.length();
 
 	/**
 	 * Implement this method to create your own layout format.
@@ -77,6 +77,6 @@ public abstract class Layout {
 	 * 
 	 * @since 0.8.4
 	 */
-	abstract public boolean ignoresThrowable();
+	public abstract boolean ignoresThrowable();
 
 }

@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger.base;
 
 import java.util.concurrent.TimeUnit;
@@ -21,14 +22,19 @@ import org.gflogger.LogEntryItemImpl;
 import org.gflogger.State;
 import org.gflogger.appender.AbstractAsyncAppender;
 import org.gflogger.helpers.LogLog;
-import org.gflogger.ring.*;
+import org.gflogger.ring.AlertException;
+import org.gflogger.ring.EntryProcessor;
+import org.gflogger.ring.PaddedAtomicLong;
+import org.gflogger.ring.RingBuffer;
+import org.gflogger.ring.RingBufferAware;
 
 /**
  * EntryHandler
  *
  * @author Vladimir Dolzhenko, vladimir.dolzhenko@gmail.com
  */
-public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implements EntryProcessor, RingBufferAware<LogEntryItemImpl> {
+public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implements
+		EntryProcessor, RingBufferAware<LogEntryItemImpl> {
 
 	protected RingBuffer<LogEntryItemImpl> ringBuffer;
 
@@ -60,11 +66,11 @@ public class EntryHandler extends AbstractEntryHandler<LoggerServiceImpl> implem
 
 		long idx = RingBuffer.INITIAL_CURSOR_VALUE;
 		long loopCounter = 0;
-		while(true) {
+		while (true) {
 			try {
 				long maxIndex =
 					/*/
-					ringBuffer.waitFor(idx + 1);
+					ringBuffer.waitfor (idx + 1);
 					/*/
 						ringBuffer.waitFor(idx + 1, awaitTimeout, TimeUnit.MILLISECONDS);
 				//*/

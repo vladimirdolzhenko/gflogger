@@ -61,7 +61,11 @@ public class TestZODDefaultLoggerServiceImpl {
 
 			@Override
 			public void sampleAllocation(int count, String desc, Object newObj, long size) {
-			  if (!objectCounting.get()) return;
+			  if (!objectCounting.get()
+					  ||
+					  // bypass for gradle workers thread
+					  threadName.get().contains("0.0.0.0:")
+				  ) return;
 
 			  objectCount.incrementAndGet();
 			  objectSize.addAndGet(size);
@@ -84,7 +88,7 @@ public class TestZODDefaultLoggerServiceImpl {
 			  builder.append('[').append(threadName.get()).append(']');
 
 			  if (!detailedAllocation.get()) return;
-			  System.out.println(builder);
+			  System.err.println(builder);
 			  /*/
 			  //*/
 			}
@@ -93,6 +97,7 @@ public class TestZODDefaultLoggerServiceImpl {
 
 	@AfterClass
 	public static void shutdown(){
+		resetObjectCounting();
 	}
 
 	@Before
@@ -102,7 +107,6 @@ public class TestZODDefaultLoggerServiceImpl {
 
 	@Test
 	public void testGFLoggerAppendLong() throws Exception {
-
 		resetObjectCounting();
 		objectCounting.set(true);
 
@@ -120,17 +124,16 @@ public class TestZODDefaultLoggerServiceImpl {
 
 		final GFLog log = GFLogFactory.getLog("com.db.fxpricing.Logger");
 
+		detailedAllocation.set(false);
 		for(long i = 0; i < WARMUP_COUNT; i++)
 			log.info().append("warmup:").append(i).commit();
 		Thread.sleep(1000L);
 
 		Assume.assumeTrue( "have to run with jvm option -javaagent:libs/allocation.jar",
 		                   objectCount.get() > 0 );
-		System.out.println(objectCount.get());
-
 		resetObjectCounting();
 		objectCounting.set(true);
-		//detailedAllocation.set(true);
+//		detailedAllocation.set(true);
 
 		for(long v = 0; v < TEST_COUNT; v++)
 			log.info().append("value:").append(v).commit();

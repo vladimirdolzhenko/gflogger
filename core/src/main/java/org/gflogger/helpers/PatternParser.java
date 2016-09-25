@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gflogger.helpers;
 
+package org.gflogger.helpers;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.gflogger.Layout;
 import org.gflogger.LogEntryItem;
 import org.gflogger.formatter.BufferFormatter;
 import org.gflogger.formatter.FastDateFormat;
-
 
 // Contributors:   Nelson Minar <(nelson@monkey.org>
 //				 Igor E. Poteryaev <jah@mail.ru>
@@ -154,7 +154,7 @@ public class PatternParser {
 					default:
 						if (currentLiteral.length() != 0) {
 							addToList(new LiteralPatternConverter(currentLiteral.toString()));
-							LogLog.debug("Parsed LITERAL converter: \"" +currentLiteral+"\".");
+							LogLog.debug("Parsed LITERAL converter: \"" + currentLiteral + "\".");
 						}
 						currentLiteral.setLength(0);
 						currentLiteral.append(c); // append %
@@ -178,17 +178,18 @@ public class PatternParser {
 					if (c >= '0' && c <= '9') {
 						formattingInfo.min = c - '0';
 						state = MIN_STATE;
-					} else
+					} else {
 						finalizeConverter(c);
+					}
 				} // switch
 				break;
 			case MIN_STATE:
 				currentLiteral.append(c);
-				if (c >= '0' && c <= '9')
+				if (c >= '0' && c <= '9') {
 					formattingInfo.min = formattingInfo.min * 10 + (c - '0');
-				else if (c == '.')
+				} else if (c == '.') {
 					state = DOT_STATE;
-				else {
+				} else {
 					finalizeConverter(c);
 				}
 				break;
@@ -198,25 +199,27 @@ public class PatternParser {
 					formattingInfo.max = c - '0';
 					state = MAX_STATE;
 				} else {
-				   LogLog.error("Error occured in position " + i
-					   + ".\n Was expecting digit, instead got char \"" + c + "\".");
+					LogLog.error("Error occured in position " + i
+						+ ".\n Was expecting digit, instead got char \"" + c + "\".");
 					state = LITERAL_STATE;
 				}
 				break;
 			case MAX_STATE:
 				currentLiteral.append(c);
-				if (c >= '0' && c <= '9')
+				if (c >= '0' && c <= '9') {
 					formattingInfo.max = formattingInfo.max * 10 + (c - '0');
-				else {
+				} else {
 					finalizeConverter(c);
 					state = LITERAL_STATE;
 				}
+				break;
+			default:
 				break;
 			} // switch
 		} // while
 		if (currentLiteral.length() != 0) {
 			addToList(new LiteralPatternConverter(currentLiteral.toString()));
-			LogLog.debug("Parsed LITERAL converter: \""+currentLiteral+"\".");
+			LogLog.debug("Parsed LITERAL converter: \"" + currentLiteral + "\".");
 		}
 		return head;
 	}
@@ -234,8 +237,7 @@ public class PatternParser {
 			String dateFormatStr = "ISO8601";
 			FastDateFormat df = null;
 			String dOpt = extractOption();
-			if (dOpt != null)
-				dateFormatStr = dOpt;
+			if (dOpt != null) dateFormatStr = dOpt;
 
 //			if (dateFormatStr.equalsIgnoreCase(AbsoluteTimeDateFormat.ISO8601_DATE_FORMAT))
 //				df = new ISO8601DateFormat();
@@ -253,7 +255,7 @@ public class PatternParser {
 				}
 //			}
 			pc = new DatePatternConverter(formattingInfo, df);
-			LogLog.debug("DATE converter {"+dateFormatStr+"}.");
+			LogLog.debug("DATE converter {" + dateFormatStr + "}.");
 			formattingInfo.dump();
 			currentLiteral.setLength(0);
 			break;
@@ -367,12 +369,12 @@ public class PatternParser {
 				BufferFormatter.append(buffer, item.getTimestamp() - LogEntryItem.startTime);
 				break;
 			case THREAD_CONVERTER:
-//				if (item.isByteBufferBased()){
+//				if (item.isByteBufferBased()) {
 //					buffer.put(item.getThreadNameBuffer());
 //				} else {
 					BufferFormatter.append(buffer, item.getThreadName());
 //				}
-				 return;
+				return;
 			case LEVEL_CONVERTER:
 				BufferFormatter.append(buffer, item.getLogLevel().name());
 				return;
@@ -478,7 +480,9 @@ public class PatternParser {
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder().append(literal);
-			if (next != null) builder.append(" ").append(next);
+			if (next != null) {
+				builder.append(" ").append(next);
+			}
 			return builder.toString();
 		}
 	}
@@ -509,7 +513,9 @@ public class PatternParser {
 		@Override
 		public String toString() {
 			final StringBuilder builder = new StringBuilder().append("%date");
-			if (next != null) builder.append(" ").append(next);
+			if (next != null) {
+				builder.append(" ").append(next);
+			}
 			return builder.toString();
 		}
 	}
@@ -539,7 +545,7 @@ public class PatternParser {
 //		}
 //	}
 
-	private static abstract class NamedPatternConverter extends PatternConverter {
+	private abstract static class NamedPatternConverter extends PatternConverter {
 		int precision;
 
 		NamedPatternConverter(FormattingInfo formattingInfo, int precision) {
@@ -571,7 +577,7 @@ public class PatternParser {
 
 		@Override
 		public void format(ByteBuffer buffer, LogEntryItem item) {
-//			if (!item.isByteBufferBased()){
+//			if (!item.isByteBufferBased()) {
 				String n = getFullyQualifiedName(item);
 				if (precision <= 0) {
 					BufferFormatter.append(buffer, n);

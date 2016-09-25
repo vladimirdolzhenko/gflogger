@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger.formatter;
 
 import java.nio.ByteBuffer;
@@ -19,7 +20,11 @@ import com.lmax.disruptor.util.Util;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
-import static org.gflogger.formatter.BufferFormatter.*;
+import static org.gflogger.formatter.BufferFormatter.BDIGITS;
+import static org.gflogger.formatter.BufferFormatter.BDIGIT_ONES;
+import static org.gflogger.formatter.BufferFormatter.BDIGIT_TENS;
+import static org.gflogger.formatter.BufferFormatter.LONG_SIZE_TABLE;
+import static org.gflogger.formatter.BufferFormatter.numberOfDigits;
 import static org.gflogger.formatter.BytesOverflow.BYTES_OVERFLOW;
 
 /**
@@ -36,32 +41,33 @@ public final class Bytes {
 		bs = new byte[size];
 	}
 
-	public int size(){
+	public int size() {
 		return bs.length;
 	}
 
-	public int remaining(){
+	public int remaining() {
 		return bs.length - pos;
 	}
 
-	public int position(){
+	public int position() {
 		return pos;
 	}
 
-	public void position(int pos){
-		if (pos < 0 || pos > bs.length)
+	public void position(int pos) {
+		if (pos < 0 || pos > bs.length) {
 			throw new IllegalArgumentException("position " + pos
-				+ " is out of range [0 .. " + bs.length + "]");
+					+ " is out of range [0 .. " + bs.length + "]");
+		}
 		this.pos = pos;
 	}
 
-	public void clear(){
+	public void clear() {
 		pos = 0;
 	}
 
-	public void put(boolean b){
+	public void put(boolean b) {
 		final int remaining = remaining();
-		if (b){
+		if (b) {
 			if (remaining < 4) throw BYTES_OVERFLOW;
 			bs[pos + 0] = 't';
 			bs[pos + 1] = 'r';
@@ -91,37 +97,37 @@ public final class Bytes {
 		bs[pos + 1] = 'u';
 		bs[pos + 2] = 'l';
 		bs[pos + 3] = 'l';
-		pos+=4;
+		pos += 4;
 	}
 
-	public void put(CharSequence s){
+	public void put(CharSequence s) {
 		final int remaining = remaining();
-		if (s == null){
+		if (s == null) {
 			putNull(remaining);
 			return;
 		}
 		final int len = s.length();
 		if (remaining < len) throw BYTES_OVERFLOW;
-		for(int i = 0; i < len; i++){
+		for (int i = 0; i < len; i++) {
 			bs[pos++] = (byte) s.charAt(i);
 		}
 	}
 
-	public void put(CharSequence s, int start, int end){
+	public void put(CharSequence s, int start, int end) {
 		final int remaining = remaining();
-		if (s == null){
+		if (s == null) {
 			putNull(remaining);
 			return;
 		}
 		if (remaining < (end - start)) throw BYTES_OVERFLOW;
-		for(int i = start; i < end; i++){
+		for (int i = start; i < end; i++) {
 			bs[pos++] = (byte) s.charAt(i);
 		}
 	}
 
 	public void put(int i) {
 		if (i == Integer.MIN_VALUE) {
-		 // uses java.lang.Integer string constant of MIN_VALUE
+			// uses java.lang.Integer string constant of MIN_VALUE
 			put(Integer.toString(i));
 			return;
 		}
@@ -136,7 +142,8 @@ public final class Bytes {
 			i = -i;
 		}
 
-		int q, r;
+		int q;
+		int r;
 		int charPos = size;
 
 		int oldPos = pos;
@@ -154,13 +161,7 @@ public final class Bytes {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
-			/*/
-			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
-			/*/
-			q = (i * 52429) >>> (16+3);
-			//*/
+			q = (i * 52429) >>> (16 + 3);
 			r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
 			bs[oldPos + (--charPos)] = BDIGITS[r];
 			i = q;
@@ -171,7 +172,7 @@ public final class Bytes {
 	}
 
 	public void put(long i) {
-		if (i == Long.MIN_VALUE){
+		if (i == Long.MIN_VALUE) {
 			// uses java.lang.Long string constant of MIN_VALUE
 			put(Long.toString(i));
 			return;
@@ -216,12 +217,7 @@ public final class Bytes {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			/*/
-			q2 = ((i2 << 15) + (i2 << 14) + (i2 << 11) + (i2 << 10) + (i2 << 7) + (i2 << 6) + (i2 << 3) + (i2 << 2) + i2) >> (16 + 3);
-			/*/
-			q2 = (i2 * 52429) >>> (16+3);
-			//*/
+			q2 = (i2 * 52429) >>> (16 + 3);
 			r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
 			bs[oldPos + (--charPos)] = BDIGITS[r];
 			i2 = q2;
@@ -234,7 +230,7 @@ public final class Bytes {
 		long x = (long)i;
 		put(x);
 		bs[pos++] = '.';
-		x = (long)((i -x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
+		x = (long)((i - x) * (precision > 0 ? LONG_SIZE_TABLE[precision - 1] : 1));
 		put(x < 0 ? -x : x);
 	}
 
@@ -291,8 +287,13 @@ public final class Bytes {
 	 * @param   length
 	 *		  number of bytes to copy
 	 */
-	private static void copyFromArray(Object src, long srcBaseOffset, long srcPos,
-							  long dstAddr, long length) {
+	private static void copyFromArray(
+		Object src,
+		long srcBaseOffset,
+		long srcPos,
+		long dstAddr,
+		long length
+	) {
 		long offset = srcBaseOffset + srcPos;
 		while (length > 0) {
 			long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;

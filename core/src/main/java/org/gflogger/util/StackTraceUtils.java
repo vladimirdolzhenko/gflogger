@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger.util;
 
 import java.net.URL;
@@ -56,12 +57,16 @@ public class StackTraceUtils {
 	
 	
 	public static String getImplementationVersion(Class clazz) {
-		if (clazz == null) return null;
+		if (clazz == null) {
+			return null;
+		}
 		
 		final Package pkg = clazz.getPackage();
 		if (pkg != null) {
 			String v = pkg.getImplementationVersion();
-			if (v != null) return v;
+			if (v != null) {
+				return v;
+			}
 		}
 		return null;
 	}

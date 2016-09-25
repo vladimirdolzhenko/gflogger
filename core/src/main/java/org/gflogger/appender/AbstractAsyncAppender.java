@@ -55,9 +55,9 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 		final boolean enabled
 	) {
 		this(name,
-		     DEFAULT_BUFFER_SIZE,
-		     multibyte,
-		     logLevel, enabled
+			DEFAULT_BUFFER_SIZE,
+			multibyte,
+			logLevel, enabled
 		);
 	}
 
@@ -72,8 +72,8 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 		// unicode char has 2 bytes
 		byteBuffer = allocate(multibyte ? bufferSize << 1 : bufferSize);
 		byteBuffer.clear();
-		charBuffer = multibyte ?
-			allocate(bufferSize << 1).asCharBuffer()
+		charBuffer = multibyte
+			? allocate(bufferSize << 1).asCharBuffer()
 			: null;
 	}
 
@@ -99,7 +99,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 
 	@Override
 	public void process(LogEntryItemImpl entry) {
-		if(!enabled || logLevel.greaterThan(entry.getLogLevel())) return;
+		if (!enabled || logLevel.greaterThan(entry.getLogLevel())) return;
 
 		if (multibyte) {
 			final CharBuffer buffer = entry.getCharBuffer();
@@ -109,7 +109,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 			final int position = charBuffer.position();
 			final int limit = charBuffer.limit();
 			final int size = layout.size(entry);
-			if (position + size >= limit){
+			if (position + size >= limit) {
 				flush();
 				charBuffer.clear();
 			}
@@ -130,7 +130,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 			final int position = byteBuffer.position();
 			final int limit = byteBuffer.limit();
 			final int size = layout.size(entry);
-			if (position + size >= limit){
+			if (position + size >= limit) {
 				flush();
 				byteBuffer.clear();
 			}
@@ -143,12 +143,12 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 		}
 	}
 
-	protected void processCharBuffer(){
+	protected void processCharBuffer() {
 		// empty
 	}
 
 	@Override
-	public void flush(){
+	public void flush() {
 		flush(true);
 	}
 
@@ -158,7 +158,7 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 
 		LogLog.debug(getName() + " is starting ");
 
-		if (layout == null){
+		if (layout == null) {
 			layout = new PatternLayout();
 		}
 		running = true;
@@ -169,14 +169,14 @@ public abstract class AbstractAsyncAppender extends AbstractAppender {
 	 *             instead
 	 */
 	@Deprecated
-	protected void workerIsAboutToFinish(){
+	protected void workerIsAboutToFinish() {
 		flush();
 		BufferFormatter.purge(byteBuffer);
 		BufferFormatter.purge(charBuffer);
 	}
 
 	@Override
-	public void stop(){
+	public void stop() {
 		if (!running) return;
 		LogLog.debug(getName() + " is stopping ");
 		workerIsAboutToFinish();

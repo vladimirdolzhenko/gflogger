@@ -14,11 +14,6 @@
 
 package org.gflogger.appender;
 
-
-import org.gflogger.Layout;
-import org.gflogger.LogLevel;
-import org.gflogger.helpers.LogLog;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,6 +21,10 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+
+import org.gflogger.Layout;
+import org.gflogger.LogLevel;
+import org.gflogger.helpers.LogLog;
 
 /**
  * FileAppender
@@ -106,7 +105,7 @@ public class FileAppender extends AbstractAsyncAppender {
 		final int sizeOfBuffer = maxBytesPerChar * charBuffer.position();
 
 		// store buffer if there it could be no enough space for message
-		if (remaining < sizeOfBuffer){
+		if (remaining < sizeOfBuffer) {
 			store("remaining < sizeOfBuffer");
 		}
 
@@ -145,8 +144,8 @@ public class FileAppender extends AbstractAsyncAppender {
 	protected void createFileChannel() throws FileNotFoundException {
 		final File file = new File(fileName);
 		final File folder = file.getParentFile();
-		if(!folder.exists()){
-			if(!folder.mkdirs()){
+		if (!folder.exists()) {
+			if (!folder.mkdirs()) {
 				throw new FileNotFoundException("Can't create folder " + folder.getAbsolutePath());
 			}
 		}
@@ -159,8 +158,8 @@ public class FileAppender extends AbstractAsyncAppender {
 			channel.force(true);
 			channel.close();
 		} catch (IOException e) {
-			LogLog.error("[" + Thread.currentThread().getName() +
-				"] exception at " + getName() + " - " + e.getMessage(), e);
+			LogLog.error("[" + Thread.currentThread().getName()
+				+ "] exception at " + getName() + " - " + e.getMessage(), e);
 		}
 	}
 
@@ -182,8 +181,8 @@ public class FileAppender extends AbstractAsyncAppender {
 			channel.write(byteBuffer);
 			//*/
 		} catch (final IOException e) {
-			LogLog.error("[" + Thread.currentThread().getName() +
-				"] exception at " + getName() + " - " + e.getMessage(), e);
+			LogLog.error("[" + Thread.currentThread().getName()
+				+ "] exception at " + getName() + " - " + e.getMessage(), e);
 		} finally {
 			byteBuffer.clear();
 		}

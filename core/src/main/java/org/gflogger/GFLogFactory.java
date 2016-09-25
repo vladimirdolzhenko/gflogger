@@ -33,7 +33,7 @@ public final class GFLogFactory {
 	private final AtomicReference<LoggerService> loggerService;
 	private final ConcurrentMap<String, GFLogView> loggers;
 
-	private GFLogFactory(){
+	private GFLogFactory() {
 		loggerService = new AtomicReference<>();
 		loggers = new ConcurrentHashMap<>();
 
@@ -41,7 +41,7 @@ public final class GFLogFactory {
 		LogLog.info(" version " + (ver != null ? ver : "*dev*") );
 	}
 
-	private GFLog get(final String name){
+	private GFLog get(final String name) {
 		GFLogView logger = loggers.get(name);
 
 		if (logger != null) return logger;
@@ -51,14 +51,14 @@ public final class GFLogFactory {
 		logger.setLoggerService(service);
 
 		final GFLogView existed = loggers.putIfAbsent( name, logger );
-		if (existed != null){
+		if (existed != null) {
 			logger = existed;
 		}
 
 		return logger;
 	}
 
-	private GFLog get(final Class clazz){
+	private GFLog get(final Class clazz) {
 		return get(clazz.getName());
 	}
 
@@ -66,13 +66,13 @@ public final class GFLogFactory {
 		return getFactory().getService();
 	}
 
-	private LoggerService getService(){
+	private LoggerService getService() {
 		return loggerService.get();
 	}
 
-	private static GFLogFactory getFactory(){
+	private static GFLogFactory getFactory() {
 		if (FACTORY != null) return FACTORY;
-		synchronized ( GFLogFactory.class ){
+		synchronized ( GFLogFactory.class ) {
 			if (FACTORY == null) {
 				FACTORY = new GFLogFactory();
 			}
@@ -80,15 +80,15 @@ public final class GFLogFactory {
 		return FACTORY;
 	}
 
-	public static GFLog getLog(final String name){
+	public static GFLog getLog(final String name) {
 		return getFactory().get( name );
 	}
 
-	public static GFLog getLog(final Class clazz){
+	public static GFLog getLog(final Class clazz) {
 		return getFactory().get( clazz );
 	}
 
-	public static void stop(){
+	public static void stop() {
 		final GFLogFactory factory = getFactory();
 		synchronized ( factory.lock) {
 			final LoggerService service = factory.loggerService.getAndSet(null);
@@ -96,18 +96,17 @@ public final class GFLogFactory {
 
 			service.stop();
 
-			for(final GFLogView loggerView : factory.loggers.values()){
+			for (final GFLogView loggerView : factory.loggers.values()) {
 				loggerView.invalidate();
 			}
 		}
 	}
 
-	public static GFLogFactory init(LoggerService service){
+	public static GFLogFactory init(LoggerService service) {
 		final GFLogFactory factory = getFactory();
 		synchronized (factory.lock) {
 			stop();
-			if (service == null)
-				throw new IllegalArgumentException("Not a null logger service is expected");
+			if (service == null) throw new IllegalArgumentException("Not a null logger service is expected");
 			factory.loggerService.set(service);
 		}
 		return factory;

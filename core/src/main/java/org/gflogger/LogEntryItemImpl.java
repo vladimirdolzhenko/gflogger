@@ -14,11 +14,11 @@
 
 package org.gflogger;
 
-import org.gflogger.formatter.BufferFormatter;
-import org.gflogger.ring.Publishable;
-
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+
+import org.gflogger.formatter.BufferFormatter;
+import org.gflogger.ring.Publishable;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 
@@ -144,12 +144,12 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	protected void moveAndAppendSilent(String message) {
 		final int length = message.length();
 		final int remaining = buffer.remaining();
-		if (remaining < length){
+		if (remaining < length) {
 			buffer.position(buffer.position() - (length - remaining));
 		}
 		try {
 			BufferFormatter.append(buffer, message);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 		}
 	}
 
@@ -157,7 +157,7 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 	public LogEntryItemImpl append(final char c) {
 		try {
 			BufferFormatter.append(buffer, c);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(char c)", e);
 		}
 		return this;
@@ -165,9 +165,9 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 
 	@Override
 	public LogEntryItemImpl append(final CharSequence csq) {
-		try{
+		try {
 			BufferFormatter.append(buffer, csq);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq)", e);
 		}
 		return this;
@@ -175,9 +175,9 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 
 	@Override
 	public LogEntryItemImpl append(final CharSequence csq, final int start, final int end) {
-		try{
+		try {
 			BufferFormatter.append(buffer, csq, start, end);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq, int start, int end)", e);
 		}
 		return this;
@@ -185,19 +185,19 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 
 	@Override
 	public LogEntryItemImpl append(final boolean b) {
-		try{
+		try {
 			BufferFormatter.append(buffer, b);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(boolean b)", e);
 		}
 		return this;
 	}
 
 	@Override
-	public LogEntryItemImpl append(final int i){
-		try{
+	public LogEntryItemImpl append(final int i) {
+		try {
 			BufferFormatter.append(buffer, i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(int i)", e);
 		}
 		return this;
@@ -205,9 +205,9 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 
 	@Override
 	public LogEntryItemImpl append(final long i) {
-		try{
+		try {
 			BufferFormatter.append(buffer, i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(long i)", e);
 		}
 		return this;
@@ -215,9 +215,9 @@ public final class LogEntryItemImpl extends AbstractLocalLogEntry implements Log
 
 	@Override
 	public LogEntryItemImpl append(final double i, final int precision) {
-		try{
+		try {
 			BufferFormatter.append(buffer, i, precision);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(double i, int precision)", e);
 		}
 		return this;

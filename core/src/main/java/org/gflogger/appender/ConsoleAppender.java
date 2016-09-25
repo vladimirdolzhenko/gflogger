@@ -77,7 +77,7 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	) {
 		super(NAME,bufferSize,multibyte,logLevel, enabled);
 		this.out = out;
-		this.flushable =  (out instanceof Flushable) ? (Flushable) out : null;
+		this.flushable = (out instanceof Flushable) ? (Flushable) out : null;
 	}
 
 	@Override
@@ -89,29 +89,31 @@ public class ConsoleAppender extends AbstractAsyncAppender {
 	public void flush(boolean force) {
 		if (!(force || immediateFlush)) return;
 		if (multibyte) {
-			if (charBuffer.position() > 0){
+			if (charBuffer.position() > 0) {
 				charBuffer.flip();
 				try {
-					while(charBuffer.hasRemaining()) out.append(charBuffer.get());
+					while (charBuffer.hasRemaining()) {
+						out.append(charBuffer.get());
+					}
 
 					if (flushable != null) flushable.flush();
-				} catch (IOException e){
-					LogLog.error("[" + Thread.currentThread().getName() +
-						"] exception at " + getName() + " - " + e.getMessage(), e);
+				} catch (IOException e) {
+					LogLog.error("[" + Thread.currentThread().getName()
+						+ "] exception at " + getName() + " - " + e.getMessage(), e);
 				} finally {
 					charBuffer.clear();
 				}
 			}
 		} else {
-			if (byteBuffer.position() > 0){
+			if (byteBuffer.position() > 0) {
 				byteBuffer.flip();
 				try {
-					while(byteBuffer.hasRemaining()){
+					while (byteBuffer.hasRemaining()) {
 						out.append((char) byteBuffer.get());
 					}
 
 					if (flushable != null) flushable.flush();
-				} catch (IOException e){
+				} catch (IOException e) {
 					LogLog.error("[" + Thread.currentThread().getName()
 						+ "] exception at " + getName() + " - " + e.getMessage(), e);
 				} finally {

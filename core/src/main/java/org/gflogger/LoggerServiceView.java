@@ -22,7 +22,12 @@ public class LoggerServiceView implements LoggerService {
 	}
 
 	@Override
-	public FormattedGFLogEntry formattedLog(LogLevel level, String categoryName, String pattern, final long appenderMask) {
+	public FormattedGFLogEntry formattedLog(
+		final LogLevel level,
+		final String categoryName,
+		final String pattern,
+		final long appenderMask
+	) {
 		return service.formattedLog(level, categoryName, pattern, appenderMask);
 	}
 

@@ -25,7 +25,7 @@ public class DirectBufferUtils {
 		cleanerMethod = loadMethod( "sun.nio.ch.DirectBuffer", "cleaner" );
 		cleanMethod = loadMethod( "sun.misc.Cleaner", "clean" );
 		Method vbMethod = loadMethod( "sun.nio.ch.DirectBuffer", "viewedBuffer" );
-		if( vbMethod == null ) {
+		if ( vbMethod == null ) {
 			// They changed the name in Java 7 (???)
 			vbMethod = loadMethod( "sun.nio.ch.DirectBuffer", "attachment" );
 		}
@@ -38,18 +38,20 @@ public class DirectBufferUtils {
 		//finalizeMethod = loadMethod("java.nio.DirectByteBufferImpl", "finalize");
 	}
 
-	private static Method loadMethod( final String className,
-	                                  final String methodName ) {
+	private static Method loadMethod(
+		final String className,
+		final String methodName
+	) {
 		try {
 			final Class<?> clazz = Class.forName( className );
 			final Method method = clazz.getMethod( methodName );
 			method.setAccessible( true );
 			return method;
-		} catch( NoSuchMethodException ex ) {
+		} catch ( NoSuchMethodException ex ) {
 			return null; // the method was not found
-		} catch( SecurityException ex ) {
+		} catch ( SecurityException ex ) {
 			return null; // setAccessible not allowed by security policy
-		} catch( ClassNotFoundException ex ) {
+		} catch ( ClassNotFoundException ex ) {
 			return null; // the direct buffer implementation was not found
 		}
 	}
@@ -58,29 +60,29 @@ public class DirectBufferUtils {
 	 * @param toBeReleased The direct buffer that will be "cleaned". Utilizes reflection.
 	 */
 	public static void releaseBuffer( final Buffer toBeReleased ) {
-		if( toBeReleased==null
+		if ( toBeReleased == null
 				|| !toBeReleased.isDirect() ) {
 			return;
 		}
 
 		try {
-			if( freeMethod != null ) {
+			if ( freeMethod != null ) {
 				freeMethod.invoke( toBeReleased );
 			} else {
 				final Object cleaner = cleanerMethod.invoke( toBeReleased );
-				if( cleaner != null ) {
+				if ( cleaner != null ) {
 					cleanMethod.invoke( cleaner );
 				} else {
 					// Try the alternate approach of getting the viewed buffer first
 					final Object viewedBuffer = viewedBufferMethod.invoke( toBeReleased );
-					if( viewedBuffer != null ) {
+					if ( viewedBuffer != null ) {
 						releaseBuffer( ( Buffer ) viewedBuffer );
 					} else {
 						LogLog.warn( "Can't release direct buffer:" + toBeReleased );
 					}
 				}
 			}
-		} catch( Exception ex ) {
+		} catch ( Exception ex ) {
 			LogLog.warn( "Can't release direct buffer: " + toBeReleased, ex );
 		}
 	}

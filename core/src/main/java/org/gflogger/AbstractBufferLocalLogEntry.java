@@ -11,14 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gflogger;
 
-import org.gflogger.formatter.BufferFormatter;
+package org.gflogger;
 
 import java.nio.ByteBuffer;
 
-import static org.gflogger.helpers.OptionConverter.getStringProperty;
+import org.gflogger.formatter.BufferFormatter;
 
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 /**
  * AbstractBufferLocalLogEntry

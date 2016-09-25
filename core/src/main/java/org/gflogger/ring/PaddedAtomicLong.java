@@ -22,7 +22,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * Version of AtomicLong with cache line padding to prevent false sharing.
  */
 public class PaddedAtomicLong extends AtomicLong {
-	public volatile long p1, p2, p3, p4, p5, p6 = 7L;
+	public volatile long p1 = 7L;
+	public volatile long p2 = 7L;
+	public volatile long p3 = 7L;
+	public volatile long p4 = 7L;
+	public volatile long p5 = 7L;
+	public volatile long p6 = 7L;
 
 	/**
 	 * Default constructor

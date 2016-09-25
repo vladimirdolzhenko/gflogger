@@ -58,22 +58,23 @@ public class OptionConverter {
 			c = s.charAt(i++);
 			if (c == '\\') {
 				c = s.charAt(i++);
-				if (c == 'n')
+				if (c == 'n') {
 					c = '\n';
-				else if (c == 'r')
+				} else if (c == 'r') {
 					c = '\r';
-				else if (c == 't')
+				} else if (c == 't') {
 					c = '\t';
-				else if (c == 'f')
+				} else if (c == 'f') {
 					c = '\f';
-				else if (c == '\b')
+				} else if (c == '\b') {
 					c = '\b';
-				else if (c == '\"')
+				} else if (c == '\"') {
 					c = '\"';
-				else if (c == '\'')
+				} else if (c == '\'') {
 					c = '\'';
-				else if (c == '\\')
+				} else if (c == '\\') {
 					c = '\\';
+				}
 			}
 			sbuf.append(c);
 		}
@@ -102,29 +103,29 @@ public class OptionConverter {
 		}
 	}
 
-	public static String getStringProperty(final String name, final String defaultValue){
+	public static String getStringProperty(final String name, final String defaultValue) {
 		final String propValue = System.getProperty(name);
 		return propValue != null ? propValue : defaultValue;
 	}
 
-	public static boolean getBooleanProperty(final String name, final boolean defaultValue){
+	public static boolean getBooleanProperty(final String name, final boolean defaultValue) {
 		final String propValue = System.getProperty(name);
 		if (propValue != null) {
 			try {
 				return Boolean.parseBoolean(propValue);
-			} catch (Throwable e){
+			} catch (Throwable e) {
 				// nothing
 			}
 		}
 		return defaultValue;
 	}
 
-	public static int getIntProperty(final String name, final int defaultValue){
+	public static int getIntProperty(final String name, final int defaultValue) {
 		final String propValue = System.getProperty(name);
 		if (propValue != null) {
 			try {
 				return Integer.parseInt(propValue);
-			} catch (Throwable e){
+			} catch (Throwable e) {
 				// nothing
 			}
 		}
@@ -140,13 +141,16 @@ public class OptionConverter {
 	 * Case of value is unimportant.
 	 */
 	public static boolean toBoolean(String value, boolean dEfault) {
-		if (value == null)
+		if (value == null) {
 			return dEfault;
+		}
 		String trimmedVal = value.trim();
-		if ("true".equalsIgnoreCase(trimmedVal))
+		if ("true".equalsIgnoreCase(trimmedVal)) {
 			return true;
-		if ("false".equalsIgnoreCase(trimmedVal))
+		}
+		if ("false".equalsIgnoreCase(trimmedVal)) {
 			return false;
+		}
 		return dEfault;
 	}
 
@@ -164,8 +168,9 @@ public class OptionConverter {
 	}
 
 	public static long toFileSize(String value, long dEfault) {
-		if (value == null)
+		if (value == null) {
 			return dEfault;
+		}
 
 		String s = value.trim().toUpperCase();
 		long multiplier = 1;
@@ -239,11 +244,14 @@ public class OptionConverter {
 	 *			 if <code>val</code> is malformed.
 	 */
 	public static String substVars(String val, Properties props) throws IllegalArgumentException {
-		if (val == null) return val;
+		if (val == null) {
+			return val;
+		}
 		StringBuilder sbuf = new StringBuilder();
 
 		int i = 0;
-		int j, k;
+		int j;
+		int k;
 
 		while (true) {
 			j = val.indexOf(DELIM_START, i);

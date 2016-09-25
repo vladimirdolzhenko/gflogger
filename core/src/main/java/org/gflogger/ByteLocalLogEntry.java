@@ -11,12 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gflogger;
 
-import org.gflogger.formatter.Bytes;
+package org.gflogger;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+
+import org.gflogger.formatter.Bytes;
 
 /**
  * ByteLocalLogEntry
@@ -48,7 +49,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	public ByteLocalLogEntry(
 		final Thread owner,
-		 final int maxMessageSize,
+		final int maxMessageSize,
 		final ObjectFormatterFactory formatterFactory,
 		final LoggerService loggerService, String logErrorsMsg,
 		final FormattingStrategy strategy
@@ -77,7 +78,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	public GFLogEntry append(char c) {
 		try {
 			bytes.put(c);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(char c)", e);
 		}
 		return this;
@@ -85,9 +86,9 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(CharSequence csq) {
-		try{
+		try {
 			bytes.put(csq);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq)", e);
 		}
 		return this;
@@ -97,7 +98,7 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	public GFLogEntry append(CharSequence csq, int start, int end) {
 		try {
 			bytes.put(csq, start, end);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(CharSequence csq, int start, int end)", e);
 		}
 		return this;
@@ -105,9 +106,9 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(boolean b) {
-		try{
+		try {
 			bytes.put(b);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(boolean b)", e);
 		}
 		return this;
@@ -115,9 +116,9 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(int i) {
-		try{
+		try {
 			bytes.put(i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(int i)", e);
 		}
 		return this;
@@ -125,9 +126,9 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(long i) {
-		try{
+		try {
 			bytes.put(i);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(long i)", e);
 		}
 		return this;
@@ -135,9 +136,9 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 
 	@Override
 	public GFLogEntry append(double i, int precision) {
-		try{
+		try {
 			bytes.put(i, precision);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 			error("append(double i, int precision)", e);
 		}
 		return this;
@@ -147,12 +148,12 @@ public final class ByteLocalLogEntry extends AbstractLocalLogEntry {
 	protected void moveAndAppendSilent(String message) {
 		final int length = message.length();
 		final int remaining = bytes.remaining();
-		if (remaining < length){
+		if (remaining < length) {
 			bytes.position(bytes.position() - (length - remaining));
 		}
 		try {
 			bytes.put(message);
-		} catch (Throwable e){
+		} catch (Throwable e) {
 		}
 	}
 

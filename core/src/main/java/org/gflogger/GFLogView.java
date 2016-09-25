@@ -35,7 +35,7 @@ public class GFLogView implements GFLog {
 		this.name = name;
 	}
 
-	void invalidate(){
+	void invalidate() {
 		this.loggerService = null;
 		this.level = null;
 		this.valid = false;
@@ -45,7 +45,7 @@ public class GFLogView implements GFLog {
 		this.loggerService = loggerService;
 
 		final GFLogger[] loggers = loggerService != null ? loggerService.lookupLoggers(name) : GFLogger.EMPTY;
-		for(int i = 0; i < LogLevel.values.length; i++){
+		for (int i = 0; i < LogLevel.values.length; i++) {
 			final LogLevel level = LogLevel.values[i];
 			final int ordinal = level.ordinal();
 			appenderMask[ordinal] = 0;
@@ -55,7 +55,9 @@ public class GFLogView implements GFLog {
 				if (!loggerLevel.greaterThan(level)) {
 					final long m = gfLogger.getAppenderMask(level);
 					appenderMask[ordinal] |= m;
-					if (!gfLogger.hasAdditivity()) break;
+					if (!gfLogger.hasAdditivity()) {
+						break;
+					}
 				}
 			}
 		}
@@ -69,27 +71,30 @@ public class GFLogView implements GFLog {
 		this.valid = loggerService != null;
 		return this.loggerService;
 	}
+
 	private boolean hasNecessaryLevel(LogLevel level) {
 		return loggerService() != null && !this.level.greaterThan(level);
 	}
 
 	private LoggerService loggerService() {
-		if (valid) return loggerService;
+		if (valid) {
+			return loggerService;
+		}
 
 		// lazy reinit
 		return setLoggerService(GFLogFactory.lookupService(name));
- 	}
+	}
 
 	private GFLogEntry logEntry(final LogLevel logLevel) {
-		return hasNecessaryLevel(logLevel) ?
-			loggerService.log(logLevel, name, appenderMask[logLevel.ordinal()]) :
-			mockLogEntry;
+		return hasNecessaryLevel(logLevel)
+			? loggerService.log(logLevel, name, appenderMask[logLevel.ordinal()])
+			: mockLogEntry;
 	}
 
 	private FormattedGFLogEntry formattedLogEntry(final LogLevel logLevel, String pattern) {
-		return hasNecessaryLevel(logLevel) ?
-				loggerService.formattedLog(logLevel, name, pattern,  appenderMask[logLevel.ordinal()]) :
-					mockLogEntry;
+		return hasNecessaryLevel(logLevel)
+			? loggerService.formattedLog(logLevel, name, pattern,  appenderMask[logLevel.ordinal()])
+			: mockLogEntry;
 	}
 
 	@Override

@@ -11,13 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger;
-
-
-import org.gflogger.appender.AppenderFactory;
-import org.gflogger.disruptor.LoggerServiceImpl;
-import org.gflogger.helpers.LogLog;
-import org.gflogger.util.NamedThreadFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -27,6 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.gflogger.appender.AppenderFactory;
+import org.gflogger.disruptor.LoggerServiceImpl;
+import org.gflogger.helpers.LogLog;
+import org.gflogger.util.NamedThreadFactory;
 
 import static org.gflogger.formatter.BufferFormatter.allocate;
 import static org.gflogger.helpers.OptionConverter.getBooleanProperty;
@@ -63,7 +63,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		final GFLogger[] loggers,
 		final Appender ... appenders
 	) {
-		if (appenders.length <= 0){
+		if (appenders.length <= 0) {
 			throw new IllegalArgumentException("Expected at least one appender");
 		}
 		this.loggers = loggers;
@@ -74,9 +74,9 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
 
 		final ObjectFormatterFactory formatterFactory =
-			objectFormatterFactory != null ?
-				objectFormatterFactory :
-				new DefaultObjectFormatterFactory();
+			objectFormatterFactory != null
+				? objectFormatterFactory
+				: new DefaultObjectFormatterFactory();
 
 		this.level = initLogLevel(loggers);
 
@@ -84,23 +84,23 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 		final boolean typeOfByteBuffer = getBooleanProperty("gflogger.bytebuffer", true);
 
-		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>(){
+		this.logEntryThreadLocal = new ThreadLocal<LocalLogEntry>() {
 			@Override
 			protected LocalLogEntry initialValue() {
 				final LocalLogEntry logEntry =
-					multibyte ?
-					new CharBufferLocalLogEntry(Thread.currentThread(),
+					multibyte
+					? new CharBufferLocalLogEntry(Thread.currentThread(),
 						maxMessageSize0,
 						formatterFactory,
 						service,
-						getFormattingStrategy()) :
-					typeOfByteBuffer ?
-						new ByteBufferLocalLogEntry(Thread.currentThread(),
+						getFormattingStrategy())
+					: typeOfByteBuffer
+						? new ByteBufferLocalLogEntry(Thread.currentThread(),
 							maxMessageSize0,
 							formatterFactory,
 							service,
-							getFormattingStrategy()):
-						new ByteLocalLogEntry(Thread.currentThread(),
+							getFormattingStrategy())
+						: new ByteLocalLogEntry(Thread.currentThread(),
 							maxMessageSize0,
 							formatterFactory,
 							service,
@@ -144,10 +144,10 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	protected final boolean multibyte(final Appender ... appenders) {
 		boolean multibyte = appenders[0].isMultibyte();
 		for (int i = 1; i < appenders.length; i++) {
-			if (appenders[i].isMultibyte() != multibyte){
+			if (appenders[i].isMultibyte() != multibyte) {
 				throw new IllegalArgumentException(
-					"Expected " + (multibyte ? "multibyte" : "single byte") +
-					" mode for appender #" + i);
+					"Expected " + (multibyte ? "multibyte" : "single byte")
+					+ " mode for appender #" + i);
 			}
 		}
 		return multibyte;
@@ -157,7 +157,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected abstract FormattingStrategy getFormattingStrategy();
 
-	protected ExecutorService initExecutorService(){
+	protected ExecutorService initExecutorService() {
 		return Executors.newFixedThreadPool(1, new NamedThreadFactory(name()));
 	}
 
@@ -178,7 +178,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 	protected void start() {
 		for (int i = 0; i < appenders.length; i++) {
-			if (appenders[i].isEnabled()){
+			if (appenders[i].isEnabled()) {
 				appenders[i].start();
 			}
 		}
@@ -187,12 +187,12 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask){
+	public GFLogEntry log(final LogLevel level, final String categoryName, final long appenderMask) {
 		if (state == State.STOPPED) throw new IllegalStateException("Logger was stopped.");
 
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
-		if (!entry.isCommited()){
+		if (!entry.isCommited()) {
 			LogLog.error("ERROR! log message '" + entry.stringValue()
 					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
 			entry.commit();
@@ -213,7 +213,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 
 		final LocalLogEntry entry = logEntryThreadLocal.get();
 
-		if (!entry.isCommited()){
+		if (!entry.isCommited()) {
 			LogLog.error("ERROR! log message '" + entry.stringValue()
 					+ "' at thread '" + entry.getThreadName() + "' has not been commited properly.");
 			entry.commit();
@@ -231,9 +231,9 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	@Override
 	public final GFLogger[] lookupLoggers(String name) {
 		final List<GFLogger> candidates = new ArrayList<GFLogger>();
-		for(final GFLogger logger : this.loggers){
+		for (final GFLogger logger : this.loggers) {
 			final String category = logger.getCategory();
-			if (category == null || name.startsWith(category)){
+			if (category == null || name.startsWith(category)) {
 				candidates.add(logger);
 			}
 		}
@@ -252,7 +252,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 		if (candidates.isEmpty()) return GFLogger.EMPTY;
 
 		int matchedCount = 0;
-		for(final Iterator<GFLogger> it = candidates.iterator(); it.hasNext();){
+		for (final Iterator<GFLogger> it = candidates.iterator(); it.hasNext();) {
 			matchedCount++;
 			final GFLogger candidate = it.next();
 			if (!candidate.hasAdditivity()) {
@@ -274,7 +274,7 @@ public abstract class AbstractLoggerServiceImpl implements LoggerService {
 	}
 
 	@Override
-	public void stop(){
+	public void stop() {
 		state = State.STOPPED;
 		logEntryThreadLocal.remove();
 	}

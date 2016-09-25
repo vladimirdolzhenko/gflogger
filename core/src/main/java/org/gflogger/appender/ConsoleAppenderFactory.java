@@ -43,8 +43,8 @@ public class ConsoleAppenderFactory extends AbstractAppenderFactory<ConsoleAppen
 		return new ConsoleAppender(
 				bufferSize,
 				multibyte,
-		        logLevel, enabled,
-		        outputStream
+				logLevel, enabled,
+				outputStream
 		);
 	}
 

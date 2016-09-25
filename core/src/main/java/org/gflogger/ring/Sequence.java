@@ -28,9 +28,21 @@ public class Sequence {
 	private static final AtomicLongFieldUpdater<Sequence> updater = 
 		AtomicLongFieldUpdater.newUpdater(Sequence.class, "value");
 
-	private volatile long p1 = 7L, p2 = 7L, p3 = 7L, p4 = 7L, p5 = 7L, p6 = 7L, p7 = 7L,
-						  value = RingBuffer.INITIAL_CURSOR_VALUE,
-						  q1 = 7L, q2 = 7L, q3 = 7L, q4 = 7L, q5 = 7L, q6 = 7L, q7 = 7L;
+	private volatile long p1 = 7L;
+	private volatile long p2 = 7L;
+	private volatile long p3 = 7L;
+	private volatile long p4 = 7L;
+	private volatile long p5 = 7L;
+	private volatile long p6 = 7L;
+	private volatile long p7 = 7L;
+	private volatile long value = RingBuffer.INITIAL_CURSOR_VALUE;
+	private volatile long q1 = 7L;
+	private volatile long q2 = 7L;
+	private volatile long q3 = 7L;
+	private volatile long q4 = 7L;
+	private volatile long q5 = 7L;
+	private volatile long q6 = 7L;
+	private volatile long q7 = 7L;
 
 	/**
 	 * Default Constructor that uses an initial value of

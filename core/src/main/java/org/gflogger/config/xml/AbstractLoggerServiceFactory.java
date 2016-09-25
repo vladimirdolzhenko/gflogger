@@ -11,8 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gflogger.config.xml;
 
+package org.gflogger.config.xml;
 
 import java.util.ArrayList;
 import java.util.List;

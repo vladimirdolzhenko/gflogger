@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger;
 
 import java.util.ArrayList;
@@ -91,37 +92,37 @@ public final class GFLoggerBuilder {
 		this.additivity = additivity;
 	}
 
-	public void setAppenderFactory(final AppenderFactory appender){
+	public void setAppenderFactory(final AppenderFactory appender) {
 		this.factories.clear();
 		if (appender != null) {
 			this.factories.add(appender);
 		}
 	}
 
-	public void setAppenderFactories(final Collection<AppenderFactory> appenders){
+	public void setAppenderFactories(final Collection<AppenderFactory> appenders) {
 		this.factories.clear();
 		if (appenders != null) {
 			this.factories.addAll(appenders);
 		}
 	}
 
-	public void addAppenderFactory(final AppenderFactory appender){
+	public void addAppenderFactory(final AppenderFactory appender) {
 		this.factories.add(appender);
 	}
 
-	public void removeAppenderFactory(final AppenderFactory appender){
+	public void removeAppenderFactory(final AppenderFactory appender) {
 		this.factories.remove(appender);
 	}
 
-	public GFLogger build(){
+	public GFLogger build() {
 		return new GFLoggerFinal(logLevel, name, additivity,
 			factories.toArray(new AppenderFactory[factories.size()]));
 	}
 
 	@Override
 	public String toString() {
-		return "GFLoggerBuilder [logLevel:" + logLevel + ", category:" + name +
-			", additivity=" + additivity + "]";
+		return "GFLoggerBuilder [logLevel:" + logLevel + ", category:" + name
+			+ ", additivity=" + additivity + "]";
 	}
 
 	private static final class GFLoggerFinal implements GFLogger {
@@ -144,26 +145,26 @@ public final class GFLoggerBuilder {
 			String category,
 			boolean additivity,
 			long mask
-		){
+		) {
 			this.logLevel = logLevel;
 			this.category = category;
 			this.additivity = additivity;
 			this.mask = mask;
 		}
 
-		private static long mask(AppenderFactory ... appenderFactories){
+		private static long mask(AppenderFactory ... appenderFactories) {
 			long mask = 0;
 			for (final AppenderFactory appenderFactory : appenderFactories) {
 				final int idx = appenderFactory.getIndex();
-				if (idx < 0){
+				if (idx < 0) {
 					throw new IllegalArgumentException("Negative indeces are not supported.");
 				}
-				if (idx >= Long.SIZE){
-					throw new IllegalArgumentException("Index " + idx +
-							" is too large. Max value:" + (Long.SIZE - 1));
+				if (idx >= Long.SIZE) {
+					throw new IllegalArgumentException("Index " + idx
+						+ " is too large. Max value:" + (Long.SIZE - 1));
 				}
 				final int appenderMask = 1 << idx;
-				if ((mask & appenderMask) != 0){
+				if ((mask & appenderMask) != 0) {
 					throw new IllegalArgumentException("Duplicate index " + idx);
 				}
 				mask |= appenderMask;
@@ -193,8 +194,8 @@ public final class GFLoggerBuilder {
 
 		@Override
 		public String toString() {
-			return "GFLoggerImpl [logLevel:" + logLevel + ", category:" + category +
-				", additivity=" + additivity + "]";
+			return "GFLoggerImpl [logLevel:" + logLevel + ", category:" + category
+				+ ", additivity=" + additivity + "]";
 		}
 	}
 

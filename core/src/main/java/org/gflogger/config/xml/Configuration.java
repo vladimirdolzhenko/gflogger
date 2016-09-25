@@ -60,11 +60,11 @@ public class Configuration extends DefaultHandler {
 	}
 
 	public LoggerService getLoggerService() {
-		if (loggerService == null){
-			for(final AppenderFactory appenderFactory: appenderFactories.values()){
+		if (loggerService == null) {
+			for (final AppenderFactory appenderFactory: appenderFactories.values()) {
 				loggerServiceFactory.addAppenderFactory(appenderFactory);
 			}
-			for(final GFLoggerBuilder loggerBuilder: loggerBuilders){
+			for (final GFLoggerBuilder loggerBuilder: loggerBuilders) {
 				loggerServiceFactory.addGFLoggerBuilder(loggerBuilder);
 			}
 
@@ -94,12 +94,12 @@ public class Configuration extends DefaultHandler {
 		final Class factoryClazz = Class.forName( factoryClassName );
 		final AppenderFactory appenderFactory = (AppenderFactory) factoryClazz.newInstance();
 
-		for( final PropertyDescriptor property : BeanUtils.classProperties( factoryClazz ) ) {
-			if( property.getWriteMethod() != null ){
+		for ( final PropertyDescriptor property : BeanUtils.classProperties( factoryClazz ) ) {
+			if ( property.getWriteMethod() != null ) {
 				final String propertyName = property.getName();
 				//TODO RC: skip 'name' and 'class' properties?
 				final String attributeValue = getAttribute( attributes, propertyName );
-				if( attributeValue != null ){ //property is writeable
+				if ( attributeValue != null ) { //property is writeable
 					BeanUtils.setPropertyStringValue( appenderFactory, property, attributeValue );
 				}
 			}
@@ -112,7 +112,7 @@ public class Configuration extends DefaultHandler {
 		debug("Created AppenderFactory '" + name + "'");
 	}
 
-	private void startLayout(Attributes attributes) throws Exception{
+	private void startLayout(Attributes attributes) throws Exception {
 		final String className = getAttribute(attributes, "class");
 		final String pattern  = getAttribute(attributes, "pattern");
 		final String timeZoneId = getAttribute(attributes, "timeZoneId");
@@ -126,13 +126,13 @@ public class Configuration extends DefaultHandler {
 
 	private void startLoggerService(Attributes attributes) throws Exception {
 		final String className = getAttribute(attributes, "class");
-		final Class clazz = className != null ?
-				Class.forName(className) :
-				DLoggerServiceFactory.class;
+		final Class clazz = className != null
+			? Class.forName(className)
+			: DLoggerServiceFactory.class;
 		loggerServiceFactory = (LoggerServiceFactory)clazz.newInstance();
-		for( final PropertyDescriptor property : BeanUtils.classProperties( clazz ) ) {
+		for ( final PropertyDescriptor property : BeanUtils.classProperties( clazz ) ) {
 			final String propertyName = property.getName();
-			if( property.getWriteMethod() != null ){
+			if ( property.getWriteMethod() != null ) {
 				BeanUtils.setPropertyStringValue(
 						loggerServiceFactory,
 						property,
@@ -168,9 +168,9 @@ public class Configuration extends DefaultHandler {
 	private void startLogger(Attributes attributes) throws Exception {
 		final GFLoggerBuilder builder = new GFLoggerBuilder();
 
-		for( final PropertyDescriptor property : BeanUtils.classProperties( builder.getClass() ) ) {
+		for ( final PropertyDescriptor property : BeanUtils.classProperties( builder.getClass() ) ) {
 			final String propertyName = property.getName();
-			if( property.getWriteMethod() != null ){
+			if ( property.getWriteMethod() != null ) {
 				BeanUtils.setPropertyStringValue(
 						builder,
 						property,

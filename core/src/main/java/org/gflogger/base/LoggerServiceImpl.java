@@ -14,6 +14,8 @@
 
 package org.gflogger.base;
 
+import java.util.concurrent.TimeUnit;
+
 import org.gflogger.AbstractLoggerServiceImpl;
 import org.gflogger.Appender;
 import org.gflogger.FormattingStrategy;
@@ -27,8 +29,6 @@ import org.gflogger.State;
 import org.gflogger.appender.AppenderFactory;
 import org.gflogger.formatting.StringFormattingStrategy;
 import org.gflogger.ring.RingBuffer;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.gflogger.formatter.BufferFormatter.roundUpNextPower2;
 
@@ -100,12 +100,11 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 		// unicode char has 2 bytes
 		final int maxMessageSize0 = multibyte ? maxMessageSize << 1 : maxMessageSize;
 
-		final int c = (count & (count - 1)) != 0 ?
-			roundUpNextPower2(count) : count;
+		final int c = (count & (count - 1)) != 0
+			? roundUpNextPower2(count) : count;
 
 		entryHandler = new EntryHandler(this, appenders);
-		this.ringBuffer =
-				new RingBuffer<>(initEnties(c, maxMessageSize0), entryHandler);
+		this.ringBuffer = new RingBuffer<>(initEnties(c, maxMessageSize0), entryHandler);
 		entryHandler.start();
 		executorService.execute(entryHandler);
 
@@ -114,7 +113,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 
 
 	@Override
-	public void entryFlushed(final LocalLogEntry localEntry){
+	public void entryFlushed(final LocalLogEntry localEntry) {
 		final String categoryName = localEntry.getCategoryName();
 		final LogLevel logLevel = localEntry.getLogLevel();
 		final String threadName = localEntry.getThreadName();
@@ -153,7 +152,7 @@ public class LoggerServiceImpl extends AbstractLoggerServiceImpl {
 	}
 
 	@Override
-	public void stop(){
+	public void stop() {
 		ringBuffer.stop();
 		state = State.STOPPED;
 		executorService.shutdown();

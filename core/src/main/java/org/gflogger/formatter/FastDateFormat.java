@@ -21,7 +21,15 @@ import java.nio.CharBuffer;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * <p>FastDateFormat is a fast char buffer implementation similar to
@@ -55,14 +63,17 @@ public class FastDateFormat {
 	 * FULL locale dependent date or time style.
 	 */
 	public static final int FULL = DateFormat.FULL;
+
 	/**
 	 * LONG locale dependent date or time style.
 	 */
 	public static final int LONG = DateFormat.LONG;
+
 	/**
 	 * MEDIUM locale dependent date or time style.
 	 */
 	public static final int MEDIUM = DateFormat.MEDIUM;
+
 	/**
 	 * SHORT locale dependent date or time style.
 	 */
@@ -70,11 +81,11 @@ public class FastDateFormat {
 	
 	private static String cDefaultPattern;
 
-	private static final Map<FastDateFormat, FastDateFormat> cInstanceCache = new HashMap<FastDateFormat, FastDateFormat>(7);
-	private static final Map<Object, FastDateFormat> cDateInstanceCache = new HashMap<Object, FastDateFormat>(7);
-	private static final Map<Object, FastDateFormat> cTimeInstanceCache = new HashMap<Object, FastDateFormat>(7);
-	private static final Map<Object, FastDateFormat> cDateTimeInstanceCache = new HashMap<Object, FastDateFormat>(7);
-	private static final Map<Object, String> cTimeZoneDisplayCache = new HashMap<Object, String>(7);
+	private static final Map<FastDateFormat, FastDateFormat> cInstanceCache = new HashMap<>(7);
+	private static final Map<Object, FastDateFormat> cDateInstanceCache = new HashMap<>(7);
+	private static final Map<Object, FastDateFormat> cTimeInstanceCache = new HashMap<>(7);
+	private static final Map<Object, FastDateFormat> cDateTimeInstanceCache = new HashMap<>(7);
+	private static final Map<Object, String> cTimeZoneDisplayCache = new HashMap<>(7);
 	
 	private final Calendar mCalendar;
 
@@ -229,6 +240,7 @@ public class FastDateFormat {
 	public static FastDateFormat getDateInstance(int style, TimeZone timeZone) {
 		return getDateInstance(style, timeZone, null);
 	}
+
 	/**
 	 * <p>Gets a date formatter instance using the specified style, time
 	 * zone and locale.</p>
@@ -404,7 +416,8 @@ public class FastDateFormat {
 	public static FastDateFormat getDateTimeInstance(
 			int dateStyle, int timeStyle, TimeZone timeZone) {
 		return getDateTimeInstance(dateStyle, timeStyle, timeZone, null);
-	}	
+	}
+
 	/**
 	 * <p>Gets a date/time formatter instance using the specified style,
 	 * time zone and locale.</p>
@@ -530,7 +543,7 @@ public class FastDateFormat {
 		mRules = rulesList.toArray(new Rule[rulesList.size()]);
 
 		int len = 0;
-		for (int i=mRules.length; --i >= 0; ) {
+		for (int i = mRules.length; --i >= 0; ) {
 			len += mRules[i].estimateLength();
 		}
 
@@ -547,7 +560,7 @@ public class FastDateFormat {
 	 */
 	protected List<Rule> parsePattern() {
 		DateFormatSymbols symbols = new DateFormatSymbols(mLocale);
-		List<Rule> rules = new ArrayList<Rule>();
+		List<Rule> rules = new ArrayList<>();
 
 		String[] ERAs = symbols.getEras();
 		String[] months = symbols.getMonths();
@@ -713,8 +726,8 @@ public class FastDateFormat {
 					} else {
 						inLiteral = !inLiteral;
 					}
-				} else if (!inLiteral &&
-						 (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z')) {
+				} else if (!inLiteral
+						&& (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z')) {
 					i--;
 					break;
 				} else {
@@ -875,11 +888,11 @@ public class FastDateFormat {
 		}
 		FastDateFormat other = (FastDateFormat) obj;
 		if (
-			(mPattern == other.mPattern || mPattern.equals(other.mPattern)) &&
-			(mTimeZone == other.mTimeZone || mTimeZone.equals(other.mTimeZone)) &&
-			(mLocale == other.mLocale || mLocale.equals(other.mLocale)) &&
-			(mTimeZoneForced == other.mTimeZoneForced) &&
-			(mLocaleForced == other.mLocaleForced)
+			(mPattern == other.mPattern || mPattern.equals(other.mPattern))
+				&& (mTimeZone == other.mTimeZone || mTimeZone.equals(other.mTimeZone))
+				&& (mLocale == other.mLocale || mLocale.equals(other.mLocale))
+				&& (mTimeZoneForced == other.mTimeZoneForced)
+				&& (mLocaleForced == other.mLocaleForced)
 			) {
 			return true;
 		}
@@ -962,6 +975,7 @@ public class FastDateFormat {
 		 * @param value the value to be appended
 		 */
 		void appendTo(CharBuffer buffer, int value);
+
 		void appendTo(ByteBuffer buffer, int value);
 	}
 
@@ -1072,7 +1086,7 @@ public class FastDateFormat {
 		@Override
 		public int estimateLength() {
 			int max = 0;
-			for (int i=mValues.length; --i >= 0; ) {
+			for (int i = mValues.length; --i >= 0; ) {
 				int len = mValues[i].length();
 				if (len > max) {
 					max = len;
@@ -1783,7 +1797,8 @@ public class FastDateFormat {
 		 * @param locale the timezone locale
 		 */
 		TimeZoneDisplayKey(TimeZone timeZone,
-						   boolean daylight, int style, Locale locale) {
+			boolean daylight, int style, Locale locale
+		) {
 			mTimeZone = timeZone;
 			if (daylight) {
 				style |= 0x80000000;
@@ -1810,10 +1825,9 @@ public class FastDateFormat {
 			}
 			if (obj instanceof TimeZoneDisplayKey) {
 				TimeZoneDisplayKey other = (TimeZoneDisplayKey)obj;
-				return
-					mTimeZone.equals(other.mTimeZone) &&
-					mStyle == other.mStyle &&
-					mLocale.equals(other.mLocale);
+				return mTimeZone.equals(other.mTimeZone)
+					&& mStyle == other.mStyle
+					&& mLocale.equals(other.mLocale);
 			}
 			return false;
 		}
@@ -1856,10 +1870,10 @@ public class FastDateFormat {
 			Pair key = (Pair)obj;
 
 			return
-				(mObj1 == null ?
-				 key.mObj1 == null : mObj1.equals(key.mObj1)) &&
-				(mObj2 == null ?
-				 key.mObj2 == null : mObj2.equals(key.mObj2));
+				(mObj1 == null
+					? key.mObj1 == null : mObj1.equals(key.mObj1))
+				&& (mObj2 == null
+					? key.mObj2 == null : mObj2.equals(key.mObj2));
 		}
 
 		/**
@@ -1867,9 +1881,8 @@ public class FastDateFormat {
 		 */
 		@Override
 		public int hashCode() {
-			return
-				(mObj1 == null ? 0 : mObj1.hashCode()) +
-				(mObj2 == null ? 0 : mObj2.hashCode());
+			return (mObj1 == null ? 0 : mObj1.hashCode())
+				+ (mObj2 == null ? 0 : mObj2.hashCode());
 		}
 
 		/**

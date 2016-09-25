@@ -14,10 +14,10 @@
 
 package org.gflogger.ring;
 
-import static org.gflogger.ring.AlertException.ALERT_EXCEPTION;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.gflogger.ring.AlertException.ALERT_EXCEPTION;
 
 /**
  * RingBuffer in-place implementation of disruptor.
@@ -52,14 +52,15 @@ public final class RingBuffer<T extends Publishable> {
 
 	public RingBuffer(final T[] entries, final EntryProcessor ... entryProcessors) {
 		// quick check is count = 2^k ?
-		if ((entries.length & entries.length - 1) != 0)
+		if ((entries.length & entries.length - 1) != 0) {
 			throw new IllegalArgumentException("number of entries should be power of 2");
+		}
 		this.entries = entries;
 		this.mask = entries.length - 1;
 
 		this.entryProcessors = entryProcessors;
 		for (int i = 0; i < entryProcessors.length; i++) {
-			if (entryProcessors[i] instanceof RingBufferAware){
+			if (entryProcessors[i] instanceof RingBufferAware) {
 				RingBufferAware bufferAware = (RingBufferAware) entryProcessors[i];
 				bufferAware.setRingBuffer(this);
 			}
@@ -69,7 +70,7 @@ public final class RingBuffer<T extends Publishable> {
 
 	private long getMinSeqNum() {
 		long minimum = entryProcessors[0].getSequence();
-		if (entryProcessors.length > 1){
+		if (entryProcessors.length > 1) {
 			for (int i = 1; i < entryProcessors.length; i++) {
 				minimum = Math.min(minimum, entryProcessors[i].getSequence());
 			}
@@ -104,7 +105,7 @@ public final class RingBuffer<T extends Publishable> {
 		final int idx = (int) (seqNum & mask);
 		boolean published = entries[idx].isPublished();
 		long availableSequence = published ? seqNum : seqNum - 1;
-		if (!published){
+		if (!published) {
 
 			synchronized (lock) {
 				signalled = false;
@@ -122,10 +123,10 @@ public final class RingBuffer<T extends Publishable> {
 				}
 			}
 		}
-		if (published){
+		if (published) {
 			availableSequence = seqNum;
-			for(long i = seqNum, e = seqNum + entries.length; i < e; i++){
-				if (!entries[(int) (i & mask)].isPublished()){
+			for (long i = seqNum, e = seqNum + entries.length; i < e; i++) {
+				if (!entries[(int) (i & mask)].isPublished()) {
 					availableSequence = i - 1;
 					break;
 				}
@@ -138,7 +139,7 @@ public final class RingBuffer<T extends Publishable> {
 		final int idx = (int) (seqNum & mask);
 		boolean published = entries[idx].isPublished();
 		long availableSequence = published ? seqNum : seqNum - 1;
-		if (!published){
+		if (!published) {
 			final long timeoutMs = unit.toMillis(timeout);
 			final long startTime = System.currentTimeMillis() ;
 
@@ -158,10 +159,10 @@ public final class RingBuffer<T extends Publishable> {
 				}
 			}
 		}
-		if (published){
+		if (published) {
 			availableSequence = seqNum;
-			for(long i = seqNum, e = seqNum + entries.length; i < e; i++){
-				if (!entries[(int) (i & mask)].isPublished()){
+			for (long i = seqNum, e = seqNum + entries.length; i < e; i++) {
+				if (!entries[(int) (i & mask)].isPublished()) {
 					availableSequence = i - 1;
 					break;
 				}
@@ -170,16 +171,16 @@ public final class RingBuffer<T extends Publishable> {
 		return availableSequence;
 	}
 
-	public T get(final long index){
+	public T get(final long index) {
 		return entries[(int) (index & mask)];
 	}
 
-	public int size(){
+	public int size() {
 		return entries.length;
 	}
 
-	public void stop(){
-		if (running.getAndSet(false)){
+	public void stop() {
+		if (running.getAndSet(false)) {
 			signallAll();
 		}
 	}

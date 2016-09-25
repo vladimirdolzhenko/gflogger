@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +41,7 @@ public final class TypeEntityRegistry<T> {
 
 	public T forType( final Class<?> type ) {
 		T entity = entities.get( type );
-		if( entity != null ) {
+		if ( entity != null ) {
 			return entity;
 		}
 
@@ -55,7 +56,7 @@ public final class TypeEntityRegistry<T> {
 				ifaceResult
 		);
 
-		if( bestResult.isFound() ) {
+		if ( bestResult.isFound() ) {
 			entity = bestResult.entity();
 		} else {
 			entity = defaultEntity;
@@ -72,12 +73,12 @@ public final class TypeEntityRegistry<T> {
 		Class matchedType = null;
 
 		int depth = 0;
-		for( Class clazz = startingWith;
-			 clazz != null;
-			 clazz = clazz.getSuperclass() ) {
+		for ( Class clazz = startingWith;
+			clazz != null;
+			clazz = clazz.getSuperclass() ) {
 
 			final T entity = entities.get( clazz );
-			if( entity != null ) {
+			if ( entity != null ) {
 				return LookupResult.byClass(
 						clazz,
 						entity,
@@ -85,7 +86,7 @@ public final class TypeEntityRegistry<T> {
 				);
 			} else {
 				final LookupResult<T> ifaceResult = lookupInterfacesChain( clazz, depth );
-				if( ifaceResult.isFound() && ifaceResult.weight() < minWeight ) {
+				if ( ifaceResult.isFound() && ifaceResult.weight() < minWeight ) {
 					matchedType = ifaceResult.actualTypeMatched();
 					minWeight = ifaceResult.weight();
 					matchedEntity = ifaceResult.entity();
@@ -93,21 +94,23 @@ public final class TypeEntityRegistry<T> {
 			}
 			depth++;
 		}
-		if( matchedEntity == null ) {
+		if ( matchedEntity == null ) {
 			return LookupResult.NOT_FOUND;
 		}
 		return LookupResult.byClass( matchedType, matchedEntity, minWeight );
 	}
 
-	private LookupResult<T> lookupInterfacesChain( final Class<?> startingWith,
-												   final int depth ) {
+	private LookupResult<T> lookupInterfacesChain(
+			final Class<?> startingWith,
+			final int depth
+	) {
 		double minWeight = Integer.MAX_VALUE;
 		T matchedEntity = null;
 		Class matchedIface = null;
 
-		for( final Class<?> iface : startingWith.getInterfaces() ) {
+		for ( final Class<?> iface : startingWith.getInterfaces() ) {
 			final T entity = entities.get( iface );
-			if( entity != null ) {
+			if ( entity != null ) {
 				return LookupResult.byInterface(
 						iface,
 						entity,
@@ -115,13 +118,13 @@ public final class TypeEntityRegistry<T> {
 				);
 			}
 			final LookupResult<T> result = lookupInterfacesChain( iface, depth + 1 );
-			if( result.isFound() && result.weight() < minWeight ) {
+			if ( result.isFound() && result.weight() < minWeight ) {
 				minWeight = result.weight();
 				matchedEntity = result.entity();
 				matchedIface = result.actualTypeMatched();
 			}
 		}
-		if( matchedEntity == null ) {
+		if ( matchedEntity == null ) {
 			return LookupResult.NOT_FOUND;
 		}
 		return LookupResult.<T>byInterface(
@@ -141,9 +144,11 @@ public final class TypeEntityRegistry<T> {
 		private LookupResult() {
 		}
 
-		public static <T> LookupResult byClass( final Class actualTypeMatched,
-												final T entity,
-												final double weight ) {
+		public static <T> LookupResult byClass(
+			final Class actualTypeMatched,
+			final T entity,
+			final double weight
+		) {
 			return new LookupResult<T>(
 					actualTypeMatched,
 					entity,
@@ -151,9 +156,11 @@ public final class TypeEntityRegistry<T> {
 			);
 		}
 
-		public static <T> LookupResult byInterface( final Class actualTypeMatched,
-													final T entity,
-													final double weight ) {
+		public static <T> LookupResult byInterface(
+			final Class actualTypeMatched,
+			final T entity,
+			final double weight
+		) {
 			return new LookupResult<T>(
 					actualTypeMatched,
 					entity,
@@ -161,15 +168,19 @@ public final class TypeEntityRegistry<T> {
 			);
 		}
 
-		private LookupResult( final Class actualTypeMatched,
-							  final T entity,
-							  final double weight ) {
+		private LookupResult(
+			final Class actualTypeMatched,
+			final T entity,
+			final double weight
+		) {
 			setup( actualTypeMatched, entity, weight );
 		}
 
-		private void setup( final Class actualTypeMatched,
-							final T entity,
-							final double weight ) {
+		private void setup(
+			final Class actualTypeMatched,
+			final T entity,
+			final double weight
+		) {
 			this.actualTypeMatched = actualTypeMatched;
 			this.entity = entity;
 			this.weight = weight;

@@ -14,7 +14,7 @@ XmlLogFactoryConfigurator.configure();
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://bitbucket.org/vladimir.dolzhenko/gflogger 
-        https://bitbucket.org/vladimir.dolzhenko/gflogger/raw/0.1.0/src/gflogger.xsd">
+        https://raw.githubusercontent.com/vladimirdolzhenko/gflogger/master/core/src/main/resources/gflogger.xsd">
 
     <appender name="fileAppender"
         class="org.gflogger.appender.DailyRollingFileAppenderFactory"

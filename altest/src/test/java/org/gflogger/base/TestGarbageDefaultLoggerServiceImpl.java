@@ -67,7 +67,10 @@ public class TestGarbageDefaultLoggerServiceImpl {
 
 			@Override
 			public void sampleAllocation(int count, String desc, Object newObj, long size) {
-			  if (!objectCounting.get()) return;
+			  if (!objectCounting.get() ||
+					  // bypass for gradle workers thread
+					  threadName.get().contains("0.0.0.0:"))
+			  	return;
 
 			  objectCount.incrementAndGet();
 			  objectSize.addAndGet(size);
@@ -107,6 +110,7 @@ public class TestGarbageDefaultLoggerServiceImpl {
 
 	@AfterClass
 	public static void shutdown(){
+		resetObjectCounting();
 	}
 
 	@Before

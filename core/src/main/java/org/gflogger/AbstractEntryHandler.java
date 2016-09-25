@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.gflogger.helpers.LogLog;
-
 
 /**
  * AbstractEntryHandler
@@ -41,7 +41,7 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 	}
 
 	protected void flushBuffer(boolean force) {
-		for(int i = 0; i < appenders.length; i++){
+		for (int i = 0; i < appenders.length; i++) {
 			appenders[i].flush(force);
 		}
 	}
@@ -51,11 +51,11 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 
 		long mask = entry.getAppenderMask();
 		int idx = 0;
-		while(mask != 0L){
-			if ((mask & 1L) != 0L){
+		while (mask != 0L) {
+			if ((mask & 1L) != 0L) {
 				try {
 					appenders[idx].process(entry);
-				} catch (Throwable e){
+				} catch (Throwable e) {
 					appenders[idx].onUncatchException(e);
 				}
 			}
@@ -67,18 +67,20 @@ public abstract class AbstractEntryHandler<T extends AbstractLoggerServiceImpl> 
 	public void start() {
 		if (running.getAndSet(true)) throw new IllegalStateException();
 
-		for(int i = 0; i < appenders.length; i++){
+
+		for (int i = 0; i < appenders.length; i++) {
 			LogLog.debug("going to start appender " + appenders[i].getName());
 			appenders[i].start();
 		}
 	}
 
-	public void stop(){
+	public void stop() {
 		if (!running.getAndSet(false)) return;
+
 
 		service.state = State.STOPPED;
 
-		for(int i = 0; i < appenders.length; i++){
+		for (int i = 0; i < appenders.length; i++) {
 			LogLog.debug("going to stop appender " + appenders[i].getName());
 			appenders[i].stop();
 		}

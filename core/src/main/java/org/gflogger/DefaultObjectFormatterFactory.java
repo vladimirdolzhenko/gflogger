@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gflogger;
 
 import java.util.Map;
@@ -32,14 +33,14 @@ public final class DefaultObjectFormatterFactory implements ObjectFormatterFacto
 	}
 
 	public void setExtraObjectFormatters( final Map<Class, ObjectFormatter> formatters ) {
-		for( final Map.Entry<Class, ObjectFormatter> entry : formatters.entrySet() ) {
+		for ( final Map.Entry<Class, ObjectFormatter> entry : formatters.entrySet() ) {
 			registerObjectFormatter( entry.getKey(), entry.getValue() );
 		}
 	}
 
 	@Override
 	public ObjectFormatter getObjectFormatter( final Object obj ) {
-		if( obj == null ) return DEFAULT_OBJECT_FORMATTER;
+		if ( obj == null ) return DEFAULT_OBJECT_FORMATTER;
 
 		final Class type = obj.getClass();
 		return formatters.forType( type );

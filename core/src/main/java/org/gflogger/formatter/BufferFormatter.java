@@ -14,7 +14,10 @@
 
 package org.gflogger.formatter;
 
-import java.nio.*;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 
 import org.gflogger.util.DirectBufferUtils;
 import sun.misc.FloatingDecimal;
@@ -29,13 +32,13 @@ public class BufferFormatter {
 	private static final boolean USE_DIRECT_BUFFER =
 			Boolean.parseBoolean( System.getProperty( "gflogger.direct", "true" ) );
 
-	public static ByteBuffer allocate(final int capacity){
-		return USE_DIRECT_BUFFER ?
-			ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder()) :
-			ByteBuffer.allocate(capacity);
+	public static ByteBuffer allocate(final int capacity) {
+		return USE_DIRECT_BUFFER
+			? ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder())
+			: ByteBuffer.allocate(capacity);
 	}
 
-	public static void purge(Buffer buffer){
+	public static void purge(Buffer buffer) {
 		//TODO RC: move .allocate() to DirectBufferUtils also?
 		DirectBufferUtils.releaseBuffer( buffer );
 	}
@@ -47,35 +50,35 @@ public class BufferFormatter {
 		x = x | (x >> 2);
 		x = x | (x >> 4);
 		x = x | (x >> 8);
-		x = x | (x >>16);
+		x = x | (x >> 16);
 		return x + 1;
 	}
 
-	public static ByteBuffer append1(final ByteBuffer buffer, CharSequence s){
+	public static ByteBuffer append1(final ByteBuffer buffer, CharSequence s) {
 		final int length = s != null ? s.length() : 0;
 		buffer.put((byte) length);
 		if (length == 0) return buffer;
 		return append(buffer, s, 0, length);
 	}
 
-	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s){
+	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s) {
 		return append(buffer, s, 0, s != null ? s.length() : 0);
 	}
 
-	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s, int start, int end){
-		if (s == null){
+	public static ByteBuffer append(final ByteBuffer buffer, CharSequence s, int start, int end) {
+		if (s == null) {
 			assert !(buffer.remaining() < 4);
 			return buffer.put((byte) 'n').put((byte) 'u').put((byte) 'l').put((byte) 'l');
 		}
 		assert !(buffer.remaining() < (end - start));
-		for(int i = start; i < end; i++){
+		for (int i = start; i < end; i++) {
 			buffer.put((byte) s.charAt(i));
 		}
 		return buffer;
 	}
 
-	public static ByteBuffer append(final ByteBuffer buffer, boolean b){
-		if (b){
+	public static ByteBuffer append(final ByteBuffer buffer, boolean b) {
+		if (b) {
 			assert !(buffer.remaining() < 4);
 			return buffer.put((byte) 't').put((byte) 'r').put((byte) 'u').put((byte) 'e');
 		}
@@ -83,8 +86,8 @@ public class BufferFormatter {
 		return buffer.put((byte) 'f').put((byte) 'a').put((byte) 'l').put((byte) 's').put((byte) 'e');
 	}
 
-	public static CharBuffer append(final CharBuffer buffer, boolean b){
-		if (b){
+	public static CharBuffer append(final CharBuffer buffer, boolean b) {
+		if (b) {
 			assert !(buffer.remaining() < 4);
 			return buffer.put('t').put('r').put('u').put('e');
 		}
@@ -92,14 +95,14 @@ public class BufferFormatter {
 		return buffer.put('f').put('a').put('l').put('s').put('e');
 	}
 
-	public static CharBuffer append(final CharBuffer buffer, CharSequence s){
+	public static CharBuffer append(final CharBuffer buffer, CharSequence s) {
 		return append(buffer, s, 0, s != null ? s.length() : 0);
 	}
 
-	public static CharBuffer append(final CharBuffer buffer, CharSequence s, int start, int end){
-		if (s != null){
+	public static CharBuffer append(final CharBuffer buffer, CharSequence s, int start, int end) {
+		if (s != null) {
 			assert !(buffer.remaining() < (end - start));
-			for(int i = start; i < end; i++){
+			for (int i = start; i < end; i++) {
 				buffer.put(s.charAt(i));
 			}
 			return buffer;
@@ -120,16 +123,16 @@ public class BufferFormatter {
 		size += i > 100 ? 3 : i > 10 ? 2 : 1;
 		assert !(buffer.remaining() < size);
 		int j = i;
-		if (sign != 0){
+		if (sign != 0) {
 			buffer.put(sign);
 		}
 		// positive byte values is in 0 .. 128
-		if (i >= 100){
+		if (i >= 100) {
 			buffer.put(DIGIT_ONES[1]);
 			i -= 100;
 		}
 
-		if (i >= 10 || j >= 100){
+		if (i >= 10 || j >= 100) {
 			buffer.put(DIGIT_TENS[i]);
 		}
 
@@ -140,7 +143,7 @@ public class BufferFormatter {
 
 	public static CharBuffer append(final CharBuffer buffer, int i) {
 		if (i == Integer.MIN_VALUE) {
-		 // uses java.lang.Integer string constant of MIN_VALUE
+			// uses java.lang.Integer string constant of MIN_VALUE
 			return append(buffer, Integer.toString(i));
 		}
 
@@ -155,7 +158,7 @@ public class BufferFormatter {
 
 	public static ByteBuffer append(final ByteBuffer buffer, int i) {
 		if (i == Integer.MIN_VALUE) {
-		 // uses java.lang.Integer string constant of MIN_VALUE
+			// uses java.lang.Integer string constant of MIN_VALUE
 			return append(buffer, Integer.toString(i));
 		}
 
@@ -164,7 +167,7 @@ public class BufferFormatter {
 	}
 
 	public static ByteBuffer append(final ByteBuffer buffer, long i) {
-		if (i == Long.MIN_VALUE){
+		if (i == Long.MIN_VALUE) {
 			// uses java.lang.Long string constant of MIN_VALUE
 			return append(buffer, Long.toString(i));
 		}
@@ -173,7 +176,7 @@ public class BufferFormatter {
 	}
 
 	public static CharBuffer append(final CharBuffer buffer, long i) {
-		if (i == Long.MIN_VALUE){
+		if (i == Long.MIN_VALUE) {
 			// uses java.lang.Long string constant of MIN_VALUE
 			return append(buffer, Long.toString(i));
 		}
@@ -202,7 +205,7 @@ public class BufferFormatter {
 		return buffer;
 	}
 
-	public final static long[] LONG_SIZE_TABLE = {
+	public static final long[] LONG_SIZE_TABLE = {
 		10L,
 		100L,
 		1000L,
@@ -223,7 +226,7 @@ public class BufferFormatter {
 		1000000000000000000L,
 		Long.MAX_VALUE};
 
-	public final static char [] DIGIT_TENS = {
+	public static final char [] DIGIT_TENS = {
 		'0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
 		'1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
 		'2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
@@ -236,7 +239,7 @@ public class BufferFormatter {
 		'9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
 	} ;
 
-	public final static char [] DIGIT_ONES = {
+	public static final char [] DIGIT_ONES = {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -249,7 +252,7 @@ public class BufferFormatter {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	} ;
 
-	public final static byte[] BDIGIT_TENS = {
+	public static final byte[] BDIGIT_TENS = {
 		'0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
 		'1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
 		'2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
@@ -262,7 +265,7 @@ public class BufferFormatter {
 		'9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
 	} ;
 
-	public final static byte[] BDIGIT_ONES = {
+	public static final byte[] BDIGIT_ONES = {
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -278,7 +281,7 @@ public class BufferFormatter {
 	/**
 	 * All possible chars for representing a number as a String
 	 */
-	public final static char[] DIGITS = {
+	public static final char[] DIGITS = {
 		'0' , '1' , '2' , '3' , '4' , '5' ,
 		'6' , '7' , '8' , '9' , 'a' , 'b' ,
 		'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
@@ -287,7 +290,7 @@ public class BufferFormatter {
 		'u' , 'v' , 'w' , 'x' , 'y' , 'z'
 	};
 
-	public final static byte[] BDIGITS = {
+	public static final byte[] BDIGITS = {
 		'0' , '1' , '2' , '3' , '4' , '5' ,
 		'6' , '7' , '8' , '9' , 'a' , 'b' ,
 		'c' , 'd' , 'e' , 'f' , 'g' , 'h' ,
@@ -327,7 +330,8 @@ public class BufferFormatter {
 			i = -i;
 		}
 
-		int q, r;
+		int q;
+		int r;
 		int charPos = size;
 
 		int oldPos = buffer.position();
@@ -345,13 +349,7 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
-			/*/
-			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
-			/*/
-			q = (i * 52429) >>> (16+3);
-			//*/
+			q = (i * 52429) >>> (16 + 3);
 			r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
 			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
 			i = q;
@@ -367,7 +365,8 @@ public class BufferFormatter {
 
 		assert !(buffer.remaining() < size);
 
-		int q, r;
+		int q;
+		int r;
 		int charPos = size;
 
 		int oldPos = buffer.position();
@@ -392,13 +391,7 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			// 52429 = 32768 + 16384 + 2048 + 1024 + 128 + 64 + 8 + 4 + 1
-			/*/
-			q = ((i << 15) + (i << 14) + (i << 11) + (i << 10) + (i << 7) + (i << 6) + (i << 3) + (i << 2) + i) >> (16 + 3);
-			/*/
-			q = (i * 52429) >>> (16+3);
-			//*/
+			q = (i * 52429) >>> (16 + 3);
 			r = i - ((q << 3) + (q << 1));  // r = i-(q*10) ...
 			buffer.put( oldPos + (--charPos), (byte)DIGITS[r]);
 			i = q;
@@ -412,7 +405,7 @@ public class BufferFormatter {
 		buffer.position(oldPos + size);
 	}
 
-	private final static long[] LONG_POWERS_OF_TEN = {
+	private static final long[] LONG_POWERS_OF_TEN = {
 			1L,
 			10L,
 			100L,
@@ -433,29 +426,30 @@ public class BufferFormatter {
 			100000000000000000L,
 			1000000000000000000L
 	};
+
 	/**
 	 * @return for given positive long x, returns the number of decimal digits required
 	 *         to represent value of x.
 	 */
 	public static int numberOfDigits(final long x) {
-		if( x < 0 ) {
-			if( x == Long.MIN_VALUE ) {
+		if ( x < 0 ) {
+			if ( x == Long.MIN_VALUE ) {
 				// Life is hard: -Long.MIN_VALUE == Long.MIN_VALUE
 				return 1 + LONG_POWERS_OF_TEN.length;
 			} else {
 				return 1 + numberOfDigits( -x );
 			}
 		}
-		for( int pow = 0; pow < LONG_POWERS_OF_TEN.length; pow++ ) {
+		for ( int pow = 0; pow < LONG_POWERS_OF_TEN.length; pow++ ) {
 			final long tenPower = LONG_POWERS_OF_TEN[pow];
-			if( x < tenPower ) {
+			if ( x < tenPower ) {
 				return Math.max( pow, 1 );
 			}
 		}
 		return LONG_POWERS_OF_TEN.length;
 	}
 
-	public final static int[] INT_POWERS_OF_TEN = {
+	public static final int[] INT_POWERS_OF_TEN = {
 			1,
 			10,
 			100,
@@ -473,17 +467,17 @@ public class BufferFormatter {
 	 *         to represent value of x.
 	 */
 	public static int numberOfDigits(final int x) {
-		if( x < 0 ) {
-			if( x == Integer.MIN_VALUE ) {
+		if ( x < 0 ) {
+			if ( x == Integer.MIN_VALUE ) {
 				// Life is hard: -Long.MIN_VALUE == Long.MIN_VALUE
 				return 1 + INT_POWERS_OF_TEN.length;
 			} else {
 				return 1 + numberOfDigits( -x );
 			}
 		}
-		for( int pow = 0; pow < INT_POWERS_OF_TEN.length; pow++ ) {
+		for ( int pow = 0; pow < INT_POWERS_OF_TEN.length; pow++ ) {
 			final long tenPower = INT_POWERS_OF_TEN[pow];
-			if( x < tenPower ) {
+			if ( x < tenPower ) {
 				return Math.max( pow, 1 );
 			}
 		}
@@ -533,12 +527,7 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			/*/
-			q2 = ((i2 << 15) + (i2 << 14) + (i2 << 11) + (i2 << 10) + (i2 << 7) + (i2 << 6) + (i2 << 3) + (i2 << 2) + i2) >> (16 + 3);
-			/*/
-			q2 = (i2 * 52429) >>> (16+3);
-			//*/
+			q2 = (i2 * 52429) >>> (16 + 3);
 			r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
 			putAt(buffer, oldPos + (--charPos), DIGITS[r]);
 			i2 = q2;
@@ -593,12 +582,7 @@ public class BufferFormatter {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
-			// 52429 = (1 << 15) + (1 << 14) + (1 << 11) + (1 << 10) + (1 << 7) + (1 << 6) + (1 << 3) + (1 << 2) + 1
-			/*/
-			q2 = ((i2 << 15) + (i2 << 14) + (i2 << 11) + (i2 << 10) + (i2 << 7) + (i2 << 6) + (i2 << 3) + (i2 << 2) + i2) >> (16 + 3);
-			/*/
-			q2 = (i2 * 52429) >>> (16+3);
-			//*/
+			q2 = (i2 * 52429) >>> (16 + 3);
 			r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
 			buffer.put(oldPos + (--charPos), (byte)DIGITS[r]);
 			i2 = q2;
@@ -610,7 +594,7 @@ public class BufferFormatter {
 		buffer.position(oldPos + size);
 	}
 
-	private static void putAt(final CharBuffer buffer, int pos, char b){
+	private static void putAt(final CharBuffer buffer, int pos, char b) {
 		buffer.position(pos);
 		buffer.append(b);
 	}
@@ -620,14 +604,14 @@ public class BufferFormatter {
 	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long	SIGN_MASK		= 0x8000000000000000L;
+	public static final long	SIGN_MASK		= 0x8000000000000000L;
 
 	/**
 	 * Bits 62-52 represent the exponent.
 	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long	EXP_MASK		= 0x7ff0000000000000L;
+	public static final long	EXP_MASK		= 0x7ff0000000000000L;
 
 	/**
 	 * Bits 51-0 represent the significant (sometimes called the mantissa) of
@@ -635,7 +619,7 @@ public class BufferFormatter {
 	 *
 	 * @see java.lang.Double#doubleToLongBits(double)
 	 */
-	public final static long    MANTISSA_MASK = 0x000fffffffffffffL;
+	public static final long    MANTISSA_MASK = 0x000fffffffffffffL;
 
 	public static final long	EXP_BIAS		= 1023;
 
@@ -661,24 +645,24 @@ public class BufferFormatter {
 	public static final int		DOUBLE_DIGITS	= 15;
 
 	private static void put(final ByteBuffer buffer, double v) {
-		if (Double.isNaN(v)){
+		if (Double.isNaN(v)) {
 			append(buffer, NAN);
 			return;
 		}
 		long bits = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (bits & SIGN_MASK) != 0;
-		if (isNegative){
+		if (isNegative) {
 			// reset sign bit
 			bits = bits & ~SIGN_MASK;
 			v = Double.longBitsToDouble(bits);
 			buffer.put((byte) '-');
 		}
-		if (v == Double.POSITIVE_INFINITY){
+		if (v == Double.POSITIVE_INFINITY) {
 			append(buffer, INFINITY);
 			return;
 		}
-		if (bits == 0){
+		if (bits == 0) {
 			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
@@ -699,18 +683,20 @@ public class BufferFormatter {
 		final long mantissa = (1L << (EXP_SHIFT + 1)) | significant;
 
 		long fractBits = mantissa;
-		double d2 = Double.longBitsToDouble( EXP_ONE | ( fractBits &~ FRACT_HOB ) );
-		int decExp = (int)Math.floor((d2-1.5D)*0.289529654D + 0.176091259 + exponent * 0.301029995663981 );
+		double d2 = Double.longBitsToDouble( EXP_ONE | ( fractBits & ~ FRACT_HOB ) );
+		int decExp = (int)Math.floor((d2 - 1.5D) * 0.289529654D + 0.176091259 + exponent * 0.301029995663981);
 
 		// do not handle negative dec exp
 		return DOUBLE_DIGITS - ( decExp > 0 ? decExp : 0 );
 	}
 
-	private static void put(final ByteBuffer buffer,
-	                        double v,
-	                        final int digits,
-	                        final boolean forceTailZeros) {
-		if (Double.isNaN(v)){
+	private static void put(
+		final ByteBuffer buffer,
+		double v,
+		final int digits,
+		final boolean forceTailZeros
+	) {
+		if (Double.isNaN(v)) {
 			append(buffer, NAN);
 			return;
 		}
@@ -718,24 +704,25 @@ public class BufferFormatter {
 		long bits = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (bits & SIGN_MASK) != 0;
-		if (isNegative){
+		if (isNegative) {
 			// reset sign bit
 			bits = bits & ~SIGN_MASK;
 			v = Double.longBitsToDouble(bits);
 			buffer.put((byte) '-');
 		}
-		if (v == Double.POSITIVE_INFINITY){
+		if (v == Double.POSITIVE_INFINITY) {
 			append(buffer, INFINITY);
 			return;
 		}
-		if (bits == 0){
+		if (bits == 0) {
 			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
 
 		//scientific notation required -> fallback to JDK
-		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
-				(v < 0 && (v < -1e18 || v > -1e-18))){
+		if ((v > 0 && (v > 1e18 || v < 1e-18))
+			|| (v < 0 && (v < -1e18 || v > -1e-18))
+		) {
 			append(buffer, toString(v));
 			return;
 		}
@@ -747,8 +734,8 @@ public class BufferFormatter {
 
 		//wrap digits to [0, LONG_POWERS_OF_TEN.length-1] inclusive
 		final int realDigits = Math.min(
-				Math.max( 0, digits ),
-				LONG_POWERS_OF_TEN.length-1
+			Math.max( 0, digits ),
+			LONG_POWERS_OF_TEN.length - 1
 		);
 		final long multiplier = LONG_POWERS_OF_TEN[realDigits];
 
@@ -758,25 +745,25 @@ public class BufferFormatter {
 
 		// add leading zeros
 
-		if (remainderAsLong != 0){
+		if (remainderAsLong != 0) {
 			final int remainderDigits = numberOfDigits(remainderAsLong);
 
-			final int leadingZeros = realDigits-remainderDigits;
-			for(int i = 0; i < leadingZeros; i++){
+			final int leadingZeros = realDigits - remainderDigits;
+			for (int i = 0; i < leadingZeros; i++) {
 				buffer.put((byte) '0');
 			}
 		}
 
 		put(buffer, remainderAsLong);
 
-		if (remainderAsLong !=0 || forceTailZeros){
+		if (remainderAsLong != 0 || forceTailZeros) {
 			final int pos = buffer.position();
 			final int limit = buffer.limit();
 
-			if (pos - oldPos < digits && pos < limit){
+			if (pos - oldPos < digits && pos < limit) {
 				int j = digits - (pos - oldPos);
 				j = j < limit - pos ? j : limit - pos;
-				for(int i = 0; i < j; i++){
+				for (int i = 0; i < j; i++) {
 					buffer.put((byte) '0');
 				}
 			}
@@ -784,25 +771,25 @@ public class BufferFormatter {
 	}
 
 	private static void put(final CharBuffer buffer, double v) {
-		if (Double.isNaN(v)){
+		if (Double.isNaN(v)) {
 			append(buffer, NAN);
 			return;
 		}
 		long d = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (d & SIGN_MASK) != 0;
-		if (isNegative){
+		if (isNegative) {
 			// reset sign bit
 			d = d & ~SIGN_MASK;
 			v = Double.longBitsToDouble(d);
 			buffer.put('-');
 		}
-		if (v == Double.POSITIVE_INFINITY){
+		if (v == Double.POSITIVE_INFINITY) {
 			append(buffer, INFINITY);
 			return;
 		}
 
-		if (d == 0){
+		if (d == 0) {
 			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
@@ -819,11 +806,13 @@ public class BufferFormatter {
 		return javaFormatString;
 	}
 
-	private static void put(final CharBuffer buffer,
-	                        double v,
-	                        final int digits,
-	                        final boolean forceTailZeros) {
-		if (Double.isNaN(v)){
+	private static void put(
+		final CharBuffer buffer,
+		double v,
+		final int digits,
+		final boolean forceTailZeros
+	) {
+		if (Double.isNaN(v)) {
 			append(buffer, NAN);
 			return;
 		}
@@ -831,23 +820,24 @@ public class BufferFormatter {
 		long bits = Double.doubleToRawLongBits(v);
 
 		boolean isNegative = (bits & SIGN_MASK) != 0;
-		if (isNegative){
+		if (isNegative) {
 			// reset sign bit
 			bits = bits & ~SIGN_MASK;
 			v = Double.longBitsToDouble(bits);
 			buffer.put('-');
 		}
-		if (v == Double.POSITIVE_INFINITY){
+		if (v == Double.POSITIVE_INFINITY) {
 			append(buffer, INFINITY);
 			return;
 		}
-		if (bits == 0){
+		if (bits == 0) {
 			append(buffer, ZERO_DOT_ZERO);
 			return;
 		}
 
-		if ((v > 0 && (v > 1e18 || v < 1e-18)) ||
-				(v < 0 && (v < -1e18 || v > -1e-18))){
+		if ((v > 0 && (v > 1e18 || v < 1e-18))
+			|| (v < 0 && (v < -1e18 || v > -1e-18))
+		) {
 			append(buffer, toString(v));
 			return;
 		}
@@ -859,7 +849,7 @@ public class BufferFormatter {
 		//wrap digits to [0, LONG_POWERS_OF_TEN.length-1] inclusive
 		final int realDigits = Math.min(
 				Math.max( 0, digits ),
-				LONG_POWERS_OF_TEN.length-1
+				LONG_POWERS_OF_TEN.length - 1
 		);
 		final long multiplier = LONG_POWERS_OF_TEN[realDigits];
 
@@ -870,25 +860,25 @@ public class BufferFormatter {
 		int oldPos = buffer.position();
 
 		// add leading zeros
-		if (remainderAsLong != 0){
+		if (remainderAsLong != 0) {
 			final int remainderDigits = numberOfDigits(remainderAsLong);
 
-			final int leadingZeros = realDigits-remainderDigits;
-			for(int i = 0; i < leadingZeros; i++){
+			final int leadingZeros = realDigits - remainderDigits;
+			for (int i = 0; i < leadingZeros; i++) {
 				buffer.put('0');
 			}
 		}
 
 		put(buffer, remainderAsLong);
 
-		if (remainderAsLong !=0 || forceTailZeros){
+		if (remainderAsLong != 0 || forceTailZeros) {
 			final int pos = buffer.position();
 			final int limit = buffer.limit();
 
-			if (pos - oldPos < digits && pos < limit){
+			if (pos - oldPos < digits && pos < limit) {
 				int j = digits - (pos - oldPos);
 				j = j < limit - pos ? j : limit - pos;
-				for(int i = 0; i < j; i++){
+				for (int i = 0; i < j; i++) {
 					buffer.put('0');
 				}
 			}

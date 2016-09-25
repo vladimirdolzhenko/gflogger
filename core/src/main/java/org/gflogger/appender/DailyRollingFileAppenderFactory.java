@@ -14,10 +14,9 @@
 
 package org.gflogger.appender;
 
-import static org.gflogger.helpers.OptionConverter.getStringProperty;
-
 import org.gflogger.LoggerService;
 
+import static org.gflogger.helpers.OptionConverter.getStringProperty;
 
 /**
  * DailyRollingFileAppenderFactory

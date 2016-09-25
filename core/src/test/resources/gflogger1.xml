@@ -21,7 +21,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
 		http://bitbucket.org/vladimir.dolzhenko/org.gflogger
-		https://bitbucket.org/vladimir.dolzhenko/gflogger/raw/default/core/src/main/resources/gflogger.xsd">
+		https://raw.githubusercontent.com/vladimirdolzhenko/gflogger/master/core/src/main/resources/gflogger.xsd">
 
 	<appender name="consoleAppender" enabled="true" class="org.gflogger.config.xml.StreamAppenderFactory">
 		<layout class="org.gflogger.PatternLayout"

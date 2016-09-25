@@ -14,13 +14,6 @@
 
 package org.gflogger.appender;
 
-
-import org.gflogger.Layout;
-import org.gflogger.LogEntryItemImpl;
-import org.gflogger.LogLevel;
-import org.gflogger.PatternLayout;
-import org.gflogger.helpers.LogLog;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -28,7 +21,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import org.gflogger.Layout;
+import org.gflogger.LogEntryItemImpl;
+import org.gflogger.LogLevel;
+import org.gflogger.PatternLayout;
+import org.gflogger.helpers.LogLog;
 
 /**
  * DailyRollingFileAppender extends {@link FileAppender} so that the underlying
@@ -299,12 +302,12 @@ public class DailyRollingFileAppender extends FileAppender {
 		// set sate to 1970-01-01 00:00:00 GMT
 		Date epoch = new Date(0);
 		if (datePattern != null) {
-			for(int i = 0, l = Troubles.values.length; i < l; i++) {
+			for (int i = 0, l = Troubles.values.length; i < l; i++) {
 				Troubles troubles = Troubles.values[i];
 				if (troubles.getCode() < 0) continue;
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 				simpleDateFormat.setTimeZone(utcTimeZone); // do all date
-														   // formatting in GMT
+				// formatting in GMT
 				String r0 = simpleDateFormat.format(epoch);
 				rollingCalendar.setType(troubles);
 				Date next = new Date(rollingCalendar.getNextCheckMillis(epoch));
@@ -340,10 +343,10 @@ public class DailyRollingFileAppender extends FileAppender {
 		// close current file, and rename it to datedFilename
 		closeFile();
 
-		try{
+		try {
 			Files.move(Paths.get(fileName), Paths.get(scheduledFilename), StandardCopyOption.REPLACE_EXISTING);
 			LogLog.info("Renamed [" + fileName + "] to [" + scheduledFilename + "]");
-		} catch (Exception e){
+		} catch (Exception e) {
 			LogLog.error("Failed to rename [" + fileName + "] to [" + scheduledFilename + "]: ", e);
 		}
 
@@ -393,7 +396,7 @@ public class DailyRollingFileAppender extends FileAppender {
 		printPeriodicity(type);
 
 		TimeZone timeZone = null;
-		if (layout instanceof PatternLayout){
+		if (layout instanceof PatternLayout) {
 			final PatternLayout patternLayout = (PatternLayout) layout;
 			timeZone = patternLayout.getTimeZone();
 		}

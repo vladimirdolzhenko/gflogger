@@ -83,9 +83,10 @@ public class XmlConfiguration {
 		GFLogFactory.stop();
 
 		final String output = buffer.toString();
+		//Sep 24 11:18:22,140 GMT ERROR - error [xml.XmlConfiguration] [Test worker]
 		assertTrue(
 				"Output='"+output+"'",
-				output.matches( "\\w+ \\d+ \\d{2}:\\d{2}:\\d{2},\\d{3} GMT ERROR - error \\[xml.XmlConfiguration\\] \\[main\\]"
+				output.matches( "\\w+ \\d+ \\d{2}:\\d{2}:\\d{2},\\d{3} GMT ERROR - error \\[xml.XmlConfiguration\\] \\[[\\w\\- ]+\\]"
 						                + System.getProperty( "line.separator" ) )
 		);
 	}

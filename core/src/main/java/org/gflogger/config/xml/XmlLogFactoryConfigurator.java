@@ -34,14 +34,14 @@ public final class XmlLogFactoryConfigurator {
 	private static final String FILE_PREFIX = "file:/";
 
 	public static void configure(InputStream in) throws Exception {
-		if (in == null){
+		if (in == null) {
 			throw new IllegalArgumentException("Non null input stream is expected");
 		}
 		new XmlLogFactoryConfigurator(in);
 	}
 
 	public static void configure(final String xmlFileName) throws Exception {
-		if (xmlFileName == null){
+		if (xmlFileName == null) {
 			throw new IllegalArgumentException("Non null xml file is expected");
 		}
 		final InputStream is;
@@ -49,11 +49,12 @@ public final class XmlLogFactoryConfigurator {
 		if (file.exists()) {
 			// loading from a real file
 			is = new FileInputStream(file);
-		} else if (xmlFileName.startsWith(CLASSPATH_PREFIX)){
+		} else if (xmlFileName.startsWith(CLASSPATH_PREFIX)) {
 			final String f = xmlFileName.substring(CLASSPATH_PREFIX.length());
 			is = XmlLogFactoryConfigurator.class.getClassLoader().getResourceAsStream(f);
 		} else {
-			final String f = xmlFileName.startsWith(FILE_PREFIX) ? xmlFileName.substring(FILE_PREFIX.length()) : xmlFileName;
+			final String f = xmlFileName.startsWith(FILE_PREFIX)
+				? xmlFileName.substring(FILE_PREFIX.length()) : xmlFileName;
 			is = XmlLogFactoryConfigurator.class.getClassLoader().getResourceAsStream(f);
 		}
 		configure(is);
@@ -71,7 +72,7 @@ public final class XmlLogFactoryConfigurator {
 
 			final InputStream is = getClass().getClassLoader().getResourceAsStream("gflogger.xsd");
 
-			if (is != null){
+			if (is != null) {
 				factory.setNamespaceAware(true);
 				factory.setValidating(true);
 

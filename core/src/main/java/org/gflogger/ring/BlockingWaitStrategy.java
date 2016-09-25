@@ -61,9 +61,12 @@ public class BlockingWaitStrategy implements WaitStrategy {
 	}
 
 	@Override
-	public long waitFor(final Sequence cursor, final long seqNum,
-		final long timeout, final TimeUnit unit)
-	throws InterruptedException {
+	public long waitFor(
+		final Sequence cursor,
+		final long seqNum,
+		final long timeout,
+		final TimeUnit unit
+	) throws InterruptedException {
 		long availableSequence;
 		if ((availableSequence = cursor.get()) < seqNum) {
 			final long timeoutMs = unit.toMillis(timeout);
