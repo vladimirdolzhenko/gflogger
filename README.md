@@ -1,3 +1,5 @@
+## Garbage Free Logger [![Build Status](https://travis-ci.org/vladimirdolzhenko/gflogger.svg?branch=master)](https://travis-ci.org/vladimirdolzhenko/gflogger)
+
 # What is it ?
 
 The **g**arbage-**f**ree **logger** IS **NOT** a general purpose logger as log4j, logback or similar. 
